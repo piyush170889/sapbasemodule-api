@@ -33,11 +33,11 @@ public class CustomersController {
 		return customersService.doGetCustomersSearchList(searchTerm);
 	}
 	
-	@GetMapping(value="/{user-dtls-id}/aging-report")
-	public Object getCustomersAgingReport(@PathVariable("user-dtls-id") String userDtlsId, @RequestParam(value="from-date", required=true) String fromDate, 
+	@GetMapping(value="/{cust-code}/aging-report")
+	public Object getCustomersAgingReport(@PathVariable("cust-code") String custCode, @RequestParam(value="from-date", required=true) String fromDate, 
 			@RequestParam(value="no-of-days", required=true) String noOfDays) {
 		
-		System.out.println("UserDtlsId = " + userDtlsId + ", fromDate = " + fromDate + ", noOfDays=" + noOfDays);
+		System.out.println("Cust Code = " + custCode + ", fromDate = " + fromDate + ", noOfDays=" + noOfDays);
 		return new BaseWrapper();
 	}
 	
