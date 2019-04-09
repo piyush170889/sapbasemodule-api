@@ -61,12 +61,19 @@ public class Customers {
 	@Column(name = "DocEntry")
 	private Integer docEntry;
 
+	@Column(name = "Cellular")
+	private String cellular;
+
+	@Column(name = "E_Mail")
+	private String eMail;
+
 	public Customers() {
 	}
 
-	public Customers(String cardCode, String cardName, String cardType, Integer groupCode, String cmpPrivate, String phone1,
-			String phone2, String fax, String cntctPrsn, String notes, Float balance, Float checksBal, Float dNotesBal,
-			Float ordersBal, Integer groupNum, String deleted, Integer docEntry) {
+	public Customers(String cardCode, String cardName, String cardType, Integer groupCode, String cmpPrivate,
+			String phone1, String phone2, String fax, String cntctPrsn, String notes, Float balance, Float checksBal,
+			Float dNotesBal, Float ordersBal, Integer groupNum, String deleted, Integer docEntry, String cellular,
+			String eMail) {
 		this.cardCode = cardCode;
 		this.cardName = cardName;
 		this.cardType = cardType;
@@ -84,6 +91,24 @@ public class Customers {
 		this.groupNum = groupNum;
 		this.deleted = deleted;
 		this.docEntry = docEntry;
+		this.cellular = cellular;
+		this.eMail = eMail;
+	}
+
+	public String getCellular() {
+		return cellular;
+	}
+
+	public void setCellular(String cellular) {
+		this.cellular = cellular;
+	}
+
+	public String geteMail() {
+		return eMail;
+	}
+
+	public void seteMail(String eMail) {
+		this.eMail = eMail;
 	}
 
 	public String getDeleted() {

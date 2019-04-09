@@ -4,10 +4,12 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sapbasemodule.model.BaseWrapper;
 import com.sapbasemodule.service.CustomersService;
 
 @RestController
@@ -29,6 +31,14 @@ public class CustomersController {
 	public Object getCustomersSearchList(@RequestParam(value="search-term", required=true) String searchTerm) {
 		
 		return customersService.doGetCustomersSearchList(searchTerm);
+	}
+	
+	@GetMapping(value="/{user-dtls-id}/aging-report")
+	public Object getCustomersAgingReport(@PathVariable("user-dtls-id") String userDtlsId, @RequestParam(value="from-date", required=true) String fromDate, 
+			@RequestParam(value="no-of-days", required=true) String noOfDays) {
+		
+		System.out.println("UserDtlsId = " + userDtlsId + ", fromDate = " + fromDate + ", noOfDays=" + noOfDays);
+		return new BaseWrapper();
 	}
 	
 }
