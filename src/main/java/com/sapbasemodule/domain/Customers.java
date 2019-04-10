@@ -5,6 +5,20 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+/*@SqlResultSetMapping(
+	    name="getAgingDetails", columns = {
+	    		@ColumnResult(name="ShortName"),
+	    		@ColumnResult(name="CardName"),
+	    		@ColumnResult(name="BalanceDue"),
+	    		@ColumnResult(name="FirstQ"),
+	    		@ColumnResult(name="SecondQ"),
+	    		@ColumnResult(name="ThirdQ"),
+	    		@ColumnResult(name="FourthQ"),
+	    		@ColumnResult(name="OtherQ")
+	    })
+
+@NamedNativeQuery(name = "getAgingDetails", query = "", resultSetMapping="getAgingDetails")
+*/
 @Entity
 @Table(name = "OCRD")
 public class Customers {

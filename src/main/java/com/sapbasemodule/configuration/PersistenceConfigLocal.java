@@ -55,11 +55,15 @@ public class PersistenceConfigLocal {
 		
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
 	    
-	    dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-	    
-  		dataSource.setUrl("jdbc:mysql://localhost:3306/jagtap_solutions_db");
-  	    dataSource.setUsername("root");
-  		dataSource.setPassword("root");
+		dataSource.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+		dataSource.setUrl("jdbc:sqlserver://localhost:1433;databaseName=Adit_Infra_Final");
+		dataSource.setUsername("sa");
+		dataSource.setPassword("replete@123");
+
+//	    	dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+//  		dataSource.setUrl("jdbc:mysql://localhost:3306/jagtap_solutions_db");
+//  	    dataSource.setUsername("root");
+//  		dataSource.setPassword("root");
   		
 		return dataSource;
 	}
@@ -93,7 +97,8 @@ public class PersistenceConfigLocal {
 	Properties additionalProperties() {
 		Properties properties = new Properties();
 		
-		properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
+//		properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
+		properties.setProperty("hibernate.dialect", "org.hibernate.dialect.SQLServerDialect");
 		properties.put("hibernate.show_sql", false);
 	    properties.put("hibernate.format_sql", false);
 	    
