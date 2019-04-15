@@ -4,9 +4,6 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Optional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sapbasemodule.model.BaseWrapper;
 import com.sapbasemodule.service.CustomersService;
 
 @RestController
@@ -45,17 +41,21 @@ public class CustomersController {
 		return customersService.doGetCustomerAgingReport(custCode, fromDate);
 	}
 
-	/*
-	@PersistenceContext
-	private EntityManager em;
+	@GetMapping(value = "/{cust-code}/invoices")
+	public Object getCustomersInvoices(@PathVariable("cust-code") String custCode,
+			@RequestParam(value = "due-date", required = true) String dueDate, 
+			@RequestParam(value = "no-of-days", required = true) int noOfDays) {
 
-	@GetMapping("/ext/text")
-	public Object testNative() {
+		System.out.println("Cust Code = " + custCode + ", noOfDays = " + noOfDays);
+		return customersService.doGetCustomerInvoices(custCode, noOfDays);
+	}
+	
+	@GetMapping(value = "/{cust-code}/orders")
+	public Object getCustomersOrders(@PathVariable("cust-code") String custCode,
+			@RequestParam(value = "pageNo", required = true) Optional<Integer> pageNo, 
+			@RequestParam(value = "limit", required = true) Optional<Integer> limit) {
 
-		Object emReturn = em.createNativeQuery("select CardCode, CardName from OCRD where CardCode='WCT001'")
-				.getSingleResult();
-		System.out.println("EmRteurn = " + emReturn.toString());
-
-		return new BaseWrapper();
-	}*/
+		System.out.println("Cust Code = " + custCode);
+		return customersService.doGetCustomerOrders(custCode, pageNo, limit);
+	}
 }

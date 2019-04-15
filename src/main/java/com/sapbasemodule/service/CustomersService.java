@@ -14,4 +14,8 @@ public interface CustomersService {
 
 	BaseWrapper doGetCustomerAgingReport(String custCode, String fromDate) throws ClassNotFoundException, SQLException, ParseException;
 
+	BaseWrapper doGetCustomerInvoices(String custCode, int noOfDays);
+
+	BaseWrapper doGetCustomerOrders(String custCode, Optional<Integer> pageNo, Optional<Integer> limit);
+
 }
