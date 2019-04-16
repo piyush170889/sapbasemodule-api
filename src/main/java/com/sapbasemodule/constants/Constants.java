@@ -39,4 +39,8 @@ public class Constants {
 
 	public static final String URL_ADD_NODE = FIREBASE_DB_URL + FIREBASE_DB_NODE_NAME + JSON_EXT;
 
+	public static final String IST_TIMEZONE = "Asia/Kolkata";
+
+	public static final String UTC_TIMEZONE = "UTC";
+
 }

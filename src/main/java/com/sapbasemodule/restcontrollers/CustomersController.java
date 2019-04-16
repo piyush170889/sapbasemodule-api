@@ -46,8 +46,8 @@ public class CustomersController {
 			@RequestParam(value = "due-date", required = true) String dueDate, 
 			@RequestParam(value = "no-of-days", required = true) int noOfDays) {
 
-		System.out.println("Cust Code = " + custCode + ", noOfDays = " + noOfDays);
-		return customersService.doGetCustomerInvoices(custCode, noOfDays);
+		System.out.println("Cust Code = " + custCode + ", noOfDays = " + noOfDays + ", dueDate = " + dueDate);
+		return customersService.doGetCustomerInvoices(custCode, noOfDays, dueDate);
 	}
 	
 	@GetMapping(value = "/{cust-code}/orders")

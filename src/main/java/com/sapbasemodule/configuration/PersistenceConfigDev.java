@@ -56,8 +56,14 @@ public class PersistenceConfigDev {
 		System.out.println("Intializing DB Connection");
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
 	    
-	    dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-	    
+		// SQL Server
+		/*dataSource.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+		dataSource.setUrl("jdbc:sqlserver://JBSERVER:1433;databaseName=New Demo");
+		dataSource.setUsername("sa");
+		dataSource.setPassword("");*/
+
+		// MySQL
+		dataSource.setDriverClassName("com.mysql.jdbc.Driver");
   		dataSource.setUrl("jdbc:mysql://67.211.220.180:3306/jagtap_solutions_db");
   	    dataSource.setUsername("root");
   		dataSource.setPassword("Replete@123");
@@ -96,6 +102,7 @@ public class PersistenceConfigDev {
 		Properties properties = new Properties();
 		
 		properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
+//		properties.setProperty("hibernate.dialect", "org.hibernate.dialect.SQLServerDialect");
 		properties.put("hibernate.show_sql", false);
 	    properties.put("hibernate.format_sql", false);
 	    

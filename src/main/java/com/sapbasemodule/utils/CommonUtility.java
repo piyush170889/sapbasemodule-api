@@ -2,6 +2,9 @@ package com.sapbasemodule.utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -44,6 +47,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.sapbasemodule.configuration.CustomUserDetails;
+import com.sapbasemodule.constants.Constants;
 import com.sapbasemodule.domain.NormalPacketDescDtls;
 import com.sapbasemodule.domain.OtpDtl;
 import com.sapbasemodule.domain.RoleMasterDtl;
@@ -72,10 +76,6 @@ public class CommonUtility {
 
 	@Autowired
 	private OtpDtlRepository otpDtlRepository;
-
-	private static final String IST_TIMEZONE = "Asia/Kolkata";
-
-	private static final String UTC_TIMEZONE = "UTC";
 
 	// FOR PDF CREATIOn
 	/*
@@ -736,10 +736,10 @@ public class CommonUtility {
 		String dateStringToConvert = utcDt + utcTm;
 
 		DateFormat dfDdMmYyHhMmSs = new SimpleDateFormat("ddMMyyHHmmss");
-		dfDdMmYyHhMmSs.setTimeZone(TimeZone.getTimeZone(UTC_TIMEZONE));
+		dfDdMmYyHhMmSs.setTimeZone(TimeZone.getTimeZone(Constants.UTC_TIMEZONE));
 
 		DateFormat dfYyyyMmDdHhMmSs = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		dfYyyyMmDdHhMmSs.setTimeZone(TimeZone.getTimeZone(IST_TIMEZONE));
+		dfYyyyMmDdHhMmSs.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
 
 		Date convertedDate = dfYyyyMmDdHhMmSs.parse(dfYyyyMmDdHhMmSs.format(dfDdMmYyHhMmSs.parse(dateStringToConvert)));
 		return convertedDate;
@@ -748,7 +748,7 @@ public class CommonUtility {
 	public String getISTDateStringFromISTDate(Date istDate) throws ParseException {
 
 		DateFormat dfYyyyMmDdHhMmSs = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		dfYyyyMmDdHhMmSs.setTimeZone(TimeZone.getTimeZone(IST_TIMEZONE));
+		dfYyyyMmDdHhMmSs.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
 
 		String convertedISTDateString = dfYyyyMmDdHhMmSs.format(istDate);
 		return convertedISTDateString;
@@ -757,7 +757,7 @@ public class CommonUtility {
 	public boolean checkIfISTDateIsOfToday(Date istDateToCompare) {
 
 		DateFormat dfIST = new SimpleDateFormat("yyyy-MM-dd");
-		dfIST.setTimeZone(TimeZone.getTimeZone(IST_TIMEZONE));
+		dfIST.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
 
 		String currentDate = dfIST.format(new Date());
 		String istDateStringToCompare = dfIST.format(istDateToCompare);
@@ -768,4 +768,14 @@ public class CommonUtility {
 		else
 			return false;
 	}
+	
+	public Connection getDbConnection() throws ClassNotFoundException, SQLException {
+
+		Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+		Connection conn = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;databaseName=Adit_Infra_Final",
+				"sa", "replete@123");
+
+		return conn;
+	}
+
 }

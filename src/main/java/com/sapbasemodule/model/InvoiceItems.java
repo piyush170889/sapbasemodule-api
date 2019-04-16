@@ -22,12 +22,46 @@ public class InvoiceItems {
 
 	private String igst;
 
+	private int docNum;
+
+	private String payTo;
+
+	private String shipTo;
+
+	private String roundDif;
+
+	private String paymentTerms;
+
+	private String partyCity;
+
+	private String partyGstinNo;
+
+	private String stateCode;
+
+	private String stateName;
+
+	private String cgstTax;
+
+	private String sgstTax;
+
+	private String igstTax;
+
+	private String frieghtName;
+
+	private String frieghtAmt;
+
+	private String sacCode;
+
 	public InvoiceItems() {
 	}
-	
-	public InvoiceItems(int docEntry, String itemCode, String itemName, float qty, float ratePerBag, float total,
-			String hsnSac, String cgst, String sgst, String igst) {
+
+	public InvoiceItems(int docEntry, int docNum, String itemCode, String itemName, float qty, float ratePerBag,
+			float total, String hsnSac, String cgst, String sgst, String igst, String payTo, String shipTo,
+			String roundDif, String paymentTerms, String partyCity, String partyGstinNo, String stateCode,
+			String stateName, String cgstTax, String sgstTax, String igstTax, String frieghtName, String frieghtAmt,
+			String sacCode) {
 		this.docEntry = docEntry;
+		this.docNum = docNum;
 		this.itemCode = itemCode;
 		this.itemName = itemName;
 		this.qty = qty;
@@ -37,8 +71,141 @@ public class InvoiceItems {
 		this.cgst = cgst;
 		this.sgst = sgst;
 		this.igst = igst;
+		this.payTo = payTo;
+		this.shipTo = shipTo;
+		this.roundDif = roundDif;
+		this.paymentTerms = paymentTerms;
+		this.partyCity = partyCity;
+		this.partyGstinNo = partyGstinNo;
+		this.stateCode = stateCode;
+		this.stateName = stateName;
+		this.cgstTax = cgstTax;
+		this.sgstTax = sgstTax;
+		this.igstTax = igstTax;
+		this.frieghtName = frieghtName;
+		this.frieghtAmt = frieghtAmt;
+		this.sacCode = sacCode;
 	}
 
+	public String getPayTo() {
+		return payTo;
+	}
+
+	public void setPayTo(String payTo) {
+		this.payTo = payTo;
+	}
+
+	public String getShipTo() {
+		return shipTo;
+	}
+
+	public void setShipTo(String shipTo) {
+		this.shipTo = shipTo;
+	}
+
+	public String getRoundDif() {
+		return roundDif;
+	}
+
+	public void setRoundDif(String roundDif) {
+		this.roundDif = roundDif;
+	}
+
+	public String getPaymentTerms() {
+		return paymentTerms;
+	}
+
+	public void setPaymentTerms(String paymentTerms) {
+		this.paymentTerms = paymentTerms;
+	}
+
+	public String getPartyCity() {
+		return partyCity;
+	}
+
+	public void setPartyCity(String partyCity) {
+		this.partyCity = partyCity;
+	}
+
+	public String getPartyGstinNo() {
+		return partyGstinNo;
+	}
+
+	public void setPartyGstinNo(String partyGstinNo) {
+		this.partyGstinNo = partyGstinNo;
+	}
+
+	public String getStateCode() {
+		return stateCode;
+	}
+
+	public void setStateCode(String stateCode) {
+		this.stateCode = stateCode;
+	}
+
+	public String getStateName() {
+		return stateName;
+	}
+
+	public void setStateName(String stateName) {
+		this.stateName = stateName;
+	}
+
+	public String getCgstTax() {
+		return cgstTax;
+	}
+
+	public void setCgstTax(String cgstTax) {
+		this.cgstTax = cgstTax;
+	}
+
+	public String getSgstTax() {
+		return sgstTax;
+	}
+
+	public void setSgstTax(String sgstTax) {
+		this.sgstTax = sgstTax;
+	}
+
+	public String getIgstTax() {
+		return igstTax;
+	}
+
+	public void setIgstTax(String igstTax) {
+		this.igstTax = igstTax;
+	}
+
+	public String getFrieghtName() {
+		return frieghtName;
+	}
+
+	public void setFrieghtName(String frieghtName) {
+		this.frieghtName = frieghtName;
+	}
+
+	public String getFrieghtAmt() {
+		return frieghtAmt;
+	}
+
+	public void setFrieghtAmt(String frieghtAmt) {
+		this.frieghtAmt = frieghtAmt;
+	}
+
+	public String getSacCode() {
+		return sacCode;
+	}
+
+	public void setSacCode(String sacCode) {
+		this.sacCode = sacCode;
+	}
+
+	public int getDocNum() {
+		return docNum;
+	}
+
+	public void setDocNum(int docNum) {
+		this.docNum = docNum;
+	}
 
 	public int getDocEntry() {
 		return docEntry;

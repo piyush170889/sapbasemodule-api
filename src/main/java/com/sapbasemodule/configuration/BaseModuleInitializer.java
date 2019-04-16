@@ -37,6 +37,6 @@ public class BaseModuleInitializer extends AbstractAnnotationConfigDispatcherSer
 		corsFilter.setAsyncSupported(true);
 
 		// SET PROFILES : "local", "dev", "staging", "prod"
-		servletContext.setInitParameter("spring.profiles.active", "dev");
+		servletContext.setInitParameter("spring.profiles.active", "local");
 	}
 }

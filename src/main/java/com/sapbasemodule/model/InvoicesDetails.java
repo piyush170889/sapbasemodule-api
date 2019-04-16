@@ -32,6 +32,14 @@ public class InvoicesDetails {
 
 	private float sgst;
 
+	private float igst;
+	
+	private float cgstTax;
+
+	private float sgstTax;
+
+	private float igstTax;
+
 	private float roundOff;
 
 	private float grossTotal;
@@ -47,7 +55,7 @@ public class InvoicesDetails {
 	public InvoicesDetails(int invoiceDtlsId, String invoiceNo, String invoiceDate, String dueDate, int paymentDueDays,
 			int isPaid, float amountDue, String cardCode, String cardName, String type,
 			List<InvoiceItems> invoiceItemsList, float netAmount, float cgst, float sgst, float roundOff,
-			float grossTotal, String narration, String dueDateInDays) {
+			float grossTotal, String narration, String dueDateInDays, float igst, float igstTax, float cgstTax, float sgstTax) {
 		this.invoiceDtlsId = invoiceDtlsId;
 		this.invoiceNo = invoiceNo;
 		this.invoiceDate = invoiceDate;
@@ -66,6 +74,50 @@ public class InvoicesDetails {
 		this.grossTotal = grossTotal;
 		this.narration = narration;
 		this.dueDateInDays = dueDateInDays;
+		this.igst = igst;
+		this.igstTax = igstTax;
+		this.cgstTax = cgstTax;
+		this.sgstTax = sgstTax;
+	}
+
+
+	public float getIgst() {
+		return igst;
+	}
+
+
+	public void setIgst(float igst) {
+		this.igst = igst;
+	}
+
+
+	public float getCgstTax() {
+		return cgstTax;
+	}
+
+
+	public void setCgstTax(float cgstTax) {
+		this.cgstTax = cgstTax;
+	}
+
+
+	public float getSgstTax() {
+		return sgstTax;
+	}
+
+
+	public void setSgstTax(float sgstTax) {
+		this.sgstTax = sgstTax;
+	}
+
+
+	public float getIgstTax() {
+		return igstTax;
+	}
+
+
+	public void setIgstTax(float igstTax) {
+		this.igstTax = igstTax;
 	}
 
 
