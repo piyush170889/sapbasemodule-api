@@ -1,7 +1,6 @@
 package com.sapbasemodule.domain;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -49,15 +48,15 @@ public class UserDtl implements Serializable {
 	@Column(name = "LAST_NAME")
 	private String lastName;
 
-	@Column(name = "CREATED_TS", insertable = false, updatable = false)
+/*	@Column(name = "CREATED_TS", insertable = false, updatable = false)
 	private Timestamp createdTs;
-
+*/
 	@Column(name = "CREATED_BY", insertable = true, updatable = false)
 	private String createdBy;
 
-	@Column(name = "MODIFIED_TS", insertable = false, updatable = false)
+/*	@Column(name = "MODIFIED_TS", insertable = false, updatable = false)
 	private Timestamp modifiedTs;
-
+*/
 	@Column(name = "MODIFIED_BY", insertable = true, updatable = true)
 	private String modifiedBy;
 
@@ -160,13 +159,13 @@ public class UserDtl implements Serializable {
 		this.lastName = lastName;
 	}
 
-	public Timestamp getCreatedTs() {
+/*	public Timestamp getCreatedTs() {
 		return createdTs;
 	}
 
 	public void setCreatedTs(Timestamp createdTs) {
 		this.createdTs = createdTs;
-	}
+	}*/
 
 	public String getCreatedBy() {
 		return createdBy;
@@ -175,7 +174,7 @@ public class UserDtl implements Serializable {
 	public void setCreatedBy(String createdBy) {
 		this.createdBy = createdBy;
 	}
-
+/*
 	public Timestamp getModifiedTs() {
 		return modifiedTs;
 	}
@@ -183,7 +182,7 @@ public class UserDtl implements Serializable {
 	public void setModifiedTs(Timestamp modifiedTs) {
 		this.modifiedTs = modifiedTs;
 	}
-
+*/
 	public String getModifiedBy() {
 		return modifiedBy;
 	}
@@ -212,11 +211,11 @@ public class UserDtl implements Serializable {
 		builder.append(", lastName=");
 		builder.append(lastName);
 		builder.append(", createdTs=");
-		builder.append(createdTs);
+//		builder.append(createdTs);
 		builder.append(", createdBy=");
 		builder.append(createdBy);
 		builder.append(", modifiedTs=");
-		builder.append(modifiedTs);
+//		builder.append(modifiedTs);
 		builder.append(", modifiedBy=");
 		builder.append(modifiedBy);
 		builder.append("]");

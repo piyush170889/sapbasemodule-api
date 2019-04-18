@@ -69,10 +69,10 @@ public class CustomerAddresses {
 
 	@Column(name = "GSTType")
 	private String gstType;
-
+/*
 	@Column(name = "U_SitDis")
 	private String uSitDis;
-	
+*/	
 	public CustomerAddresses() {}
 
 	public String getAddress() {
@@ -218,14 +218,14 @@ public class CustomerAddresses {
 	public void setGstType(String gstType) {
 		this.gstType = gstType;
 	}
-
+/*
 	public String getuSitDis() {
 		return uSitDis;
 	}
 
 	public void setuSitDis(String uSitDis) {
 		this.uSitDis = uSitDis;
-	}
+	}*/
 	
 	
 }

@@ -40,6 +40,9 @@ public class OINV {
 	private String docStatus;
 
 	@Transient
+	private String type;
+
+	@Transient
 	private List<InvoiceItems> invoiceItemsList;
 
 	public OINV() {
@@ -55,6 +58,27 @@ public class OINV {
 		this.cardName = cardName;
 		this.docTotal = docTotal;
 		this.docStatus = docStatus;
+	}
+
+	public OINV(int docEntry, int docNum, String docDate, String docDueDate, String cardCode, String cardName,
+			Float docTotal, String docStatus, String type) {
+		this.docEntry = docEntry;
+		this.docNum = docNum;
+		this.docDate = docDate;
+		this.docDueDate = docDueDate;
+		this.cardCode = cardCode;
+		this.cardName = cardName;
+		this.docTotal = docTotal;
+		this.docStatus = docStatus;
+		this.type = type;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 
 	public List<InvoiceItems> getInvoiceItemsList() {
@@ -148,6 +172,10 @@ public class OINV {
 		builder.append(docTotal);
 		builder.append(", docStatus=");
 		builder.append(docStatus);
+		builder.append(", type=");
+		builder.append(type);
+		builder.append(", invoiceItemsList=");
+		builder.append(invoiceItemsList);
 		builder.append("]");
 		return builder.toString();
 	}

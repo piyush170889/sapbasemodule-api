@@ -1,19 +1,23 @@
 package com.sapbasemodule.utils;
 
 import java.text.ParseException;
+import java.util.Calendar;
+import java.util.Date;
 
 public class Test {
 
 	public static void main(String[] args) throws ParseException {
 
-		/*
-		 * DateFormat dfIst = new SimpleDateFormat("dd MMM yyyy hh:mm a");
-		 * dfIst.setTimeZone(TimeZone.getTimeZone("IST"));
-		 * 
-		 * String currentTs = dfIst.format(new Date());
-		 */
-
-		System.out.println(new CommonUtility().getUtcTsFromIst("2019-02-10 13:37:00"));
+		Calendar cal = Calendar.getInstance();
+		
+		Date firstDate = cal.getTime();
+		
+		cal.add(Calendar.DATE, -4);
+		Date secondDate = cal.getTime();
+		
+		long diff = firstDate.getTime() - secondDate.getTime();
+        System.out.println ("Days: " + diff / 1000 / 60 / 60 / 24);
+        
 	}
 
 }

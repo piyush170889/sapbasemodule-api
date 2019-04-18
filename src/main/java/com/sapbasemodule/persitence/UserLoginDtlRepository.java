@@ -45,7 +45,7 @@ public interface UserLoginDtlRepository extends JpaRepository<UserLoginDtl, Inte
 	@Query("select u.password from UserLoginDtl u where u.userDtl.userDtlsId=?1")
 	String selectUserPassByUserDtlsId(String loggedInUserId);
 
-	@Query("select u from UserLoginDtl u where u.userLoginDtlsId IN (?1) order by u.createdTs desc")
+	@Query("select u from UserLoginDtl u where u.userLoginDtlsId IN (?1)")
 	List<UserLoginDtl> findByLoginDtlsIdList(List<String> adminUserLoginIds);
 
 }

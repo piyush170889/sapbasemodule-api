@@ -75,14 +75,14 @@ public class UserLoginDtl implements Serializable {
 					@JoinColumn(name = "ROLES_MASTER_DTLS_ID", referencedColumnName = "ROLES_MASTER_DTLS_ID") })
 	private Set<RoleMasterDtl> roles;
 
-	@Column(name = "CREATED_TS", insertable = false, updatable = false)
-	private Timestamp createdTs;
+/*	@Column(name = "CREATED_TS", insertable = false, updatable = false)
+	private Timestamp createdTs;*/
 
 	@Column(name = "CREATED_BY", insertable = true, updatable = false)
 	private String createdBy;
 
-	@Column(name = "MODIFIED_TS", insertable = false, updatable = false)
-	private Timestamp modifiedTs;
+/*	@Column(name = "MODIFIED_TS", insertable = false, updatable = false)
+	private Timestamp modifiedTs;*/
 
 	@Column(name = "MODIFIED_BY", insertable = true, updatable = true)
 	private String modifiedBy;

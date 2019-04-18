@@ -29,18 +29,17 @@ import org.springframework.util.Log4jConfigurer;
 @Profile("prod")
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages={"com.sapbasemodule.persitence"})
-@PropertySources({
-	@PropertySource("classpath:config-prod.properties")
-//	@PropertySource("classpath:log4j-dev.properties")
+@EnableJpaRepositories(basePackages = { "com.sapbasemodule.persitence" })
+@PropertySources({ @PropertySource("classpath:config-prod.properties")
+		// @PropertySource("classpath:log4j-dev.properties")
 })
 public class PersistenceConfigProduction {
-	
+
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
 		em.setDataSource(dataSource());
-		em.setPackagesToScan(new String[] {"com.sapbasemodule.domain"});
+		em.setPackagesToScan(new String[] { "com.sapbasemodule.domain" });
 
 		JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 		em.setJpaVendorAdapter(vendorAdapter);
@@ -49,29 +48,26 @@ public class PersistenceConfigProduction {
 		return em;
 	}
 
-
 	@Bean
 	public DataSource dataSource() {
-		
+
 		System.out.println("Intializing DB Connection");
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
-	    
-	    dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-	    
-//  		dataSource.setUrl("jdbc:mysql://67.211.220.180:3306/lounge_db");
-	    dataSource.setUrl("jdbc:mysql://localhost:3306/jagtap_solutions_db");
-  	    dataSource.setUsername("root");
-  		dataSource.setPassword("Replete@789");
-  		
+
+		dataSource.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
+		dataSource.setUrl("jdbc:sqlserver://116.75.129.27:1433;databaseName=New Demo");
+		dataSource.setUsername("sa");
+		dataSource.setPassword("jbsadmin@123");
+
 		return dataSource;
 	}
 
 	@Bean
-	public PlatformTransactionManager transactionManager(
-			EntityManagerFactory emf) {
+	public PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
 		JpaTransactionManager transactionManager = new JpaTransactionManager();
 		transactionManager.setEntityManagerFactory(emf);
-		
+
 		return transactionManager;
 	}
 
@@ -84,22 +80,22 @@ public class PersistenceConfigProduction {
 	public PersistenceAnnotationBeanPostProcessor paPostProcessor() {
 		return new PersistenceAnnotationBeanPostProcessor();
 	}
-	
-	@Bean(name="configProperties")
+
+	@Bean(name = "configProperties")
 	public Properties getConfigPropertiesFile() throws IOException {
-		//REVIEW: 
+		// REVIEW:
 		Log4jConfigurer.initLogging("classpath:log4j-prod.properties");
 		Resource resource = new ClassPathResource("config-prod.properties");
 		return PropertiesLoaderUtils.loadProperties(resource);
 	}
-	
+
 	Properties additionalProperties() {
 		Properties properties = new Properties();
-		
-		properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
+
+		properties.setProperty("hibernate.dialect", "org.hibernate.dialect.SQLServerDialect");
 		properties.put("hibernate.show_sql", false);
-	    properties.put("hibernate.format_sql", false);
-	    
+		properties.put("hibernate.format_sql", false);
+
 		return properties;
 	}
 }

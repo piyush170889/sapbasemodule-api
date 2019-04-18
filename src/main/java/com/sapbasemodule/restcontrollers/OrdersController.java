@@ -13,7 +13,7 @@ import com.sapbasemodule.exception.ServicesException;
 import com.sapbasemodule.service.OrdersService;
 
 @RestController
-@RequestMapping(value = "/orders")
+@RequestMapping(value = "orders")
 public class OrdersController {
 
 	@Autowired

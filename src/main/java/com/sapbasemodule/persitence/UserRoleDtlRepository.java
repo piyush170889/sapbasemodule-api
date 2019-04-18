@@ -16,22 +16,29 @@ public interface UserRoleDtlRepository extends JpaRepository<UserRoleDtl, Intege
 
 	Set<RoleMasterDtl> findByUserLoginDtl(String userLoginDtlsId);	//Required for security
 
-	@Query("select new UserRoleDtl(urd.userLoginDtl.userDtl.userDtlsId,urd.userLoginDtl.userDtl.firstName,urd.userLoginDtl.userDtl.lastName,"
+	/*@Query("select new UserRoleDtl(urd.userLoginDtl.userDtl.userDtlsId,urd.userLoginDtl.userDtl.firstName,urd.userLoginDtl.userDtl.lastName,"
 			+ "urd.userLoginDtl.contactNum,urd.userLoginDtl.userDtl.emailId,urd.userLoginDtl.roles) from UserRoleDtl urd where "
 			+ "urd.id.rolesMasterDtlsId IN (?1) and urd.userLoginDtl.isActive=1 order by "
-			+ "urd.userLoginDtl.userDtl.createdTs desc")
+			+ "urd.userLoginDtl.userDtl.createdTs desc")*/
+	@Query("select new UserRoleDtl(urd.userLoginDtl.userDtl.userDtlsId,urd.userLoginDtl.userDtl.firstName,urd.userLoginDtl.userDtl.lastName,"
+			+ "urd.userLoginDtl.contactNum,urd.userLoginDtl.userDtl.emailId,urd.userLoginDtl.roles) from UserRoleDtl urd where "
+			+ "urd.id.rolesMasterDtlsId IN (?1) and urd.userLoginDtl.isActive=1")
 	List<UserRoleDtl> selectAllActiveUsersByRoles(List<String> roles, Pageable pageRequest);
 
-	@Query("select urd.userLoginDtl.userLoginDtlsId from UserRoleDtl urd where "
+	/*@Query("select urd.userLoginDtl.userLoginDtlsId from UserRoleDtl urd where "
 			+ "urd.id.rolesMasterDtlsId IN (?1) and urd.userLoginDtl.isActive=1 order by "
-			+ "urd.userLoginDtl.createdTs desc")
+			+ "urd.userLoginDtl.createdTs desc")*/
+	@Query("select urd.userLoginDtl.userLoginDtlsId from UserRoleDtl urd where "
+			+ "urd.id.rolesMasterDtlsId IN (?1) and urd.userLoginDtl.isActive=1")
 	List<String> selectUserLoginDtlsIdByRoles(List<String> roles, Pageable pageRequest);
 
 	@Query("select urd from UserRoleDtl urd where urd.id.rolesMasterDtlsId=?1")
 	List<UserRoleDtl> selectAllActiveUsersByRole(String role, Pageable pageRequest);
 
+	/*@Query("select count(distinct urd.userLoginDtl.userLoginDtlsId) from UserRoleDtl urd where urd.id.rolesMasterDtlsId IN (?1) "
+			+ "and urd.userLoginDtl.isActive=1 order by urd.userLoginDtl.userDtl.createdTs desc")*/
 	@Query("select count(distinct urd.userLoginDtl.userLoginDtlsId) from UserRoleDtl urd where urd.id.rolesMasterDtlsId IN (?1) "
-			+ "and urd.userLoginDtl.isActive=1 order by urd.userLoginDtl.userDtl.createdTs desc")
+			+ "and urd.userLoginDtl.isActive=1")
 	double selectCountOfAllActiveUsersByRoles(List<String> roles);
 
 	@Query("select urd.id.rolesMasterDtlsId from UserRoleDtl urd where urd.userLoginDtl.userDtl.userDtlsId=?1")

@@ -12,9 +12,9 @@ public class InvoicesDetails {
 
 	private String dueDate;
 
-	private int paymentDueDays;
+	private long paymentDueDays;
 
-	private int isPaid;
+	private String isPaid;
 
 	private float amountDue;
 
@@ -46,16 +46,16 @@ public class InvoicesDetails {
 
 	private String narration;
 
-	private String dueDateInDays;
+	private long dueDateInDays;
 
 	public InvoicesDetails() {
 	}
 
 	
-	public InvoicesDetails(int invoiceDtlsId, String invoiceNo, String invoiceDate, String dueDate, int paymentDueDays,
-			int isPaid, float amountDue, String cardCode, String cardName, String type,
+	public InvoicesDetails(int invoiceDtlsId, String invoiceNo, String invoiceDate, String dueDate, long paymentDueDays,
+			String isPaid, float amountDue, String cardCode, String cardName, String type,
 			List<InvoiceItems> invoiceItemsList, float netAmount, float cgst, float sgst, float roundOff,
-			float grossTotal, String narration, String dueDateInDays, float igst, float igstTax, float cgstTax, float sgstTax) {
+			float grossTotal, String narration, long dueDateInDays, float igst, float igstTax, float cgstTax, float sgstTax) {
 		this.invoiceDtlsId = invoiceDtlsId;
 		this.invoiceNo = invoiceNo;
 		this.invoiceDate = invoiceDate;
@@ -153,19 +153,19 @@ public class InvoicesDetails {
 		this.dueDate = dueDate;
 	}
 
-	public int getPaymentDueDays() {
+	public long getPaymentDueDays() {
 		return paymentDueDays;
 	}
 
-	public void setPaymentDueDays(int paymentDueDays) {
+	public void setPaymentDueDays(long paymentDueDays) {
 		this.paymentDueDays = paymentDueDays;
 	}
 
-	public int getIsPaid() {
+	public String getIsPaid() {
 		return isPaid;
 	}
 
-	public void setIsPaid(int isPaid) {
+	public void setIsPaid(String isPaid) {
 		this.isPaid = isPaid;
 	}
 
@@ -257,11 +257,11 @@ public class InvoicesDetails {
 		this.narration = narration;
 	}
 
-	public String getDueDateInDays() {
+	public long getDueDateInDays() {
 		return dueDateInDays;
 	}
 
-	public void setDueDateInDays(String dueDateInDays) {
+	public void setDueDateInDays(long dueDateInDays) {
 		this.dueDateInDays = dueDateInDays;
 	}
 

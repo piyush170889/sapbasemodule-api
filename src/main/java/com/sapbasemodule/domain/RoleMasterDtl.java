@@ -29,15 +29,15 @@ public class RoleMasterDtl implements Serializable {
 
 	@Column(name="ROLE_DESCRIPTION")
 	private String roleDescription;
-
+/*
 	@Column(name="CREATED_TS",insertable=false, updatable=false)
 	private Timestamp createdTs;
-
+*/
 	@Column(name="CREATED_BY", insertable=true, updatable=false)
 	private String createdBy;
 
-	@Column(name="MODIFIED_TS",insertable=false, updatable=false)
-	private Timestamp modifiedTs;
+/*	@Column(name="MODIFIED_TS",insertable=false, updatable=false)
+	private Timestamp modifiedTs;*/
 
 	@Column(name="MODIFIED_BY", insertable=true, updatable=true)
 	private String modifiedBy;

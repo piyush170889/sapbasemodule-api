@@ -768,14 +768,29 @@ public class CommonUtility {
 		else
 			return false;
 	}
-	
+
 	public Connection getDbConnection() throws ClassNotFoundException, SQLException {
 
 		Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-		Connection conn = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;databaseName=Adit_Infra_Final",
-				"sa", "replete@123");
+		Connection conn = DriverManager.getConnection("jdbc:sqlserver://" + Constants.DB_SERVER_IP + ":1433;databaseName=" + Constants.DB_NAME,
+				Constants.DB_USERNM, Constants.DB_PASS);
 
 		return conn;
+	}
+
+	public long getDaysDiffBetweenDates(String startDate, String endDate) throws ParseException {
+
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		df.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+
+		Date firstDate = df.parse(startDate);
+		Date secondDate = df.parse(endDate);
+
+		long diff = secondDate.getTime() - firstDate.getTime();
+		long diffOfDays = diff / 1000 / 60 / 60 / 24;
+		System.out.println("Days: " + diffOfDays);
+
+		return diffOfDays;
 	}
 
 }

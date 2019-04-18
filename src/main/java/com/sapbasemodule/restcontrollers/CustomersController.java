@@ -43,19 +43,27 @@ public class CustomersController {
 
 	@GetMapping(value = "/{cust-code}/invoices")
 	public Object getCustomersInvoices(@PathVariable("cust-code") String custCode,
-			@RequestParam(value = "due-date", required = true) String dueDate, 
-			@RequestParam(value = "no-of-days", required = true) int noOfDays) {
+			@RequestParam(value = "due-date", required = true) String dueDate,
+			@RequestParam(value = "no-of-days", required = true) int noOfDays)
+					throws ClassNotFoundException, ParseException, SQLException {
 
 		System.out.println("Cust Code = " + custCode + ", noOfDays = " + noOfDays + ", dueDate = " + dueDate);
 		return customersService.doGetCustomerInvoices(custCode, noOfDays, dueDate);
 	}
-	
+
 	@GetMapping(value = "/{cust-code}/orders")
 	public Object getCustomersOrders(@PathVariable("cust-code") String custCode,
-			@RequestParam(value = "pageNo", required = true) Optional<Integer> pageNo, 
+			@RequestParam(value = "pageNo", required = true) Optional<Integer> pageNo,
 			@RequestParam(value = "limit", required = true) Optional<Integer> limit) {
 
 		System.out.println("Cust Code = " + custCode);
 		return customersService.doGetCustomerOrders(custCode, pageNo, limit);
+	}
+	
+	@GetMapping(value = "/{cust-code}/ledger-report")
+	public Object getCustomersOrders(@PathVariable("cust-code") String custCode) throws ClassNotFoundException, SQLException, ParseException {
+
+		System.out.println("Cust Code = " + custCode);
+		return customersService.doGetCustomerLedgerReport(custCode);
 	}
 }
