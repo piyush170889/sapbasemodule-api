@@ -279,7 +279,7 @@ public class CustomersServiceImpl implements CustomersService {
 		// Working Code
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		df.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
-
+		
 		Date toDate = df.parse(dueDate);
 
 		Calendar cal = Calendar.getInstance();
@@ -341,7 +341,7 @@ public class CustomersServiceImpl implements CustomersService {
 
 				InvoicesDetails invoicesDetails = new InvoicesDetails(invoiceDocEntry,
 						Integer.toString(oinv.getDocNum()), invoiceDate, invoiceDueDate, paymentDueDays,
-						oinv.getDocStatus(), 0F, custCode, "", "", invoiceItems, 0F, 0F, 0F, 0F, oinv.getDocTotal(), "",
+						oinv.getDocStatus(), 0F, custCode, "", oinv.getType(), invoiceItems, 0F, 0F, 0F, 0F, oinv.getDocTotal(), "",
 						dueDateInDays, 0F, 0F, 0F, 0F);
 
 				invoiceDetailsList.add(invoicesDetails);
@@ -388,7 +388,8 @@ public class CustomersServiceImpl implements CustomersService {
 				+ "case when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then -BALDUECRED end end '120+ days' "
 				+ "from dbo.JDT1 T0 " + "INNER JOIN dbo.OCRD T1 ON T0.shortname = T1.cardcode "
 				+ "and T1.cardtype = 'C' where T0.intrnmatch = '0' and  T0.BALDUEDEB != T0.BALDUECRED and  T1.CardCode= '"
-				+ custCode + "' and T0.RefDate >='" + fromDateFormatted + "' and T0.RefDate  <='" + toDateFormatted
+//				+ custCode + "' and T0.RefDate >='" + fromDateFormatted + "' and T0.RefDate  <='" + toDateFormatted
+				+ custCode + "' and T0.DueDate >='" + fromDateFormatted + "' and T0.DueDate <='" + toDateFormatted
 				+ "')"
 				+ " sub group by [BP Code],[BP Name],[t],[Posting date], [Due date],[Doc Date],[Ref1],Trans order by [BP Code]";
 
@@ -405,6 +406,8 @@ public class CustomersServiceImpl implements CustomersService {
 			DateFormat dfSlash = new SimpleDateFormat("dd/MM/yyyy");
 
 			int ref1 = Integer.parseInt(null == rs.getString("Ref1") || rs.getString("Ref1").isEmpty() ? "0" : rs.getString("Ref1"));
+			
+			System.out.println("type = " + rs.getString("Type"));
 			OINV oinv = new OINV(ref1, ref1, dfDash.format(dfSlash.parse(rs.getString("Posting date"))),
 					dfDash.format(dfSlash.parse(rs.getString("Due date"))), custCode, rs.getString("BP Name"),
 					rs.getFloat("Balance"), "O", rs.getString("Type"));
@@ -554,6 +557,29 @@ public class CustomersServiceImpl implements CustomersService {
 		 List<OINV> invoicesList = getInvoicesList(custCode, endDate,
 		 startDate);
 
+
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		df.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+		String currentDate = df.format(new Date());
+		
+		 List<InvoicesDetails> invoiceDetailsList = new ArrayList<InvoicesDetails>();
+		 for (OINV oinv : invoicesList) {
+
+			int invoiceDocEntry = oinv.getDocEntry();
+			String invoiceDate = oinv.getDocDate();
+			String invoiceDueDate = oinv.getDocDueDate();
+			long paymentDueDays = commonUtility.getDaysDiffBetweenDates(invoiceDate, invoiceDueDate);
+			long dueDateInDays = commonUtility.getDaysDiffBetweenDates(currentDate, invoiceDueDate);
+/*			List<InvoiceItems> invoiceItems = invoiceItemsMap.get(invoiceDocEntry);*/
+
+			InvoicesDetails invoicesDetails = new InvoicesDetails(invoiceDocEntry,
+					Integer.toString(oinv.getDocNum()), invoiceDate, invoiceDueDate, paymentDueDays,
+					oinv.getDocStatus(), 0F, custCode, "", oinv.getType(), null, 0F, 0F, 0F, 0F, oinv.getDocTotal(), "",
+					dueDateInDays, 0F, 0F, 0F, 0F);
+
+			invoiceDetailsList.add(invoicesDetails);
+		}
+
 //		List<OINV> invoicesList = new ArrayList<OINV>();
 
 //		OINV oinv = new OINV(1, 1, "2 Apr 19", "3 May 19", "", "", 36000F, "O", "OB");
@@ -565,6 +591,6 @@ public class CustomersServiceImpl implements CustomersService {
 //			invoicesList.add(oinvNext);
 //		}
 
-		return new BaseWrapper(invoicesList);
+		return new BaseWrapper(invoiceDetailsList);
 	}
 }

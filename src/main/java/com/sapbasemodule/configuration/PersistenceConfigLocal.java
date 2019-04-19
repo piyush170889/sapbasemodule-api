@@ -56,7 +56,7 @@ public class PersistenceConfigLocal {
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
 	    
 		dataSource.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-		dataSource.setUrl("jdbc:sqlserver://localhost:1433;databaseName=Adit_Infra_Final");
+		dataSource.setUrl("jdbc:sqlserver://localhost:1433;databaseName=Jagtap");
 		dataSource.setUsername("sa");
 		dataSource.setPassword("replete@123");
 
