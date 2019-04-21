@@ -33,7 +33,7 @@ public class InvoicesDetails {
 	private float sgst;
 
 	private float igst;
-	
+
 	private float cgstTax;
 
 	private float sgstTax;
@@ -48,14 +48,18 @@ public class InvoicesDetails {
 
 	private long dueDateInDays;
 
+	private String amountInWords;
+
+	private String taxAmountInWords;
+
 	public InvoicesDetails() {
 	}
 
-	
 	public InvoicesDetails(int invoiceDtlsId, String invoiceNo, String invoiceDate, String dueDate, long paymentDueDays,
 			String isPaid, float amountDue, String cardCode, String cardName, String type,
 			List<InvoiceItems> invoiceItemsList, float netAmount, float cgst, float sgst, float roundOff,
-			float grossTotal, String narration, long dueDateInDays, float igst, float igstTax, float cgstTax, float sgstTax) {
+			float grossTotal, String narration, long dueDateInDays, float igst, float igstTax, float cgstTax,
+			float sgstTax, String amountInWords, String taxAmountInWords) {
 		this.invoiceDtlsId = invoiceDtlsId;
 		this.invoiceNo = invoiceNo;
 		this.invoiceDate = invoiceDate;
@@ -78,48 +82,57 @@ public class InvoicesDetails {
 		this.igstTax = igstTax;
 		this.cgstTax = cgstTax;
 		this.sgstTax = sgstTax;
+		this.amountInWords = amountInWords;
+		this.taxAmountInWords = taxAmountInWords;
 	}
 
+	public String getAmountInWords() {
+		return amountInWords;
+	}
+
+	public void setAmountInWords(String amountInWords) {
+		this.amountInWords = amountInWords;
+	}
+
+	public String getTaxAmountInWords() {
+		return taxAmountInWords;
+	}
+
+	public void setTaxAmountInWords(String taxAmountInWords) {
+		this.taxAmountInWords = taxAmountInWords;
+	}
 
 	public float getIgst() {
 		return igst;
 	}
 
-
 	public void setIgst(float igst) {
 		this.igst = igst;
 	}
-
 
 	public float getCgstTax() {
 		return cgstTax;
 	}
 
-
 	public void setCgstTax(float cgstTax) {
 		this.cgstTax = cgstTax;
 	}
-
 
 	public float getSgstTax() {
 		return sgstTax;
 	}
 
-
 	public void setSgstTax(float sgstTax) {
 		this.sgstTax = sgstTax;
 	}
-
 
 	public float getIgstTax() {
 		return igstTax;
 	}
 
-
 	public void setIgstTax(float igstTax) {
 		this.igstTax = igstTax;
 	}
-
 
 	public int getInvoiceDtlsId() {
 		return invoiceDtlsId;

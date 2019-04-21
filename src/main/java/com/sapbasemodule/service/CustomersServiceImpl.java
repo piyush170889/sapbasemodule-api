@@ -41,6 +41,7 @@ import com.sapbasemodule.persitence.OINVRepository;
 import com.sapbasemodule.persitence.OrderItemsRepository;
 import com.sapbasemodule.persitence.OrdersRepository;
 import com.sapbasemodule.utils.CommonUtility;
+import com.sapbasemodule.utils.NumberToWord;
 
 @Service
 @Transactional(rollbackFor = Throwable.class)
@@ -130,9 +131,8 @@ public class CustomersServiceImpl implements CustomersService {
 		// TODO: Uncomment Below Section
 		AgingDetails agingDetails = getAgingDetails(custCode, fromDate);
 
-		
-//		 AgingDetails agingDetails = new AgingDetails(custCode, "Piyush", "60000", "20000", "30000", "40000", "50000", "60000");
-		 
+		// AgingDetails agingDetails = new AgingDetails(custCode, "Piyush",
+		// "60000", "20000", "30000", "40000", "50000", "60000");
 
 		return new BaseWrapper(agingDetails);
 	}
@@ -260,26 +260,30 @@ public class CustomersServiceImpl implements CustomersService {
 			throws ParseException, ClassNotFoundException, SQLException {
 
 		// TODO: Remove Test Code
-		/*List<InvoicesDetails> invoiceDetailsList = new ArrayList<InvoicesDetails>();
-
-		List<InvoiceItems> invoiceItemsList = new ArrayList<>();
-		InvoiceItems invoiceItems = new InvoiceItems(1, 1, "ITM001", "Birla Super", 100F, 270F, 25000F, "32456", "14",
-				"14", "0", "Test Pay To Address", "Test Ship To Address", "-0.01", "30 Days", "Pune", "27GDJKKADS9K",
-				"27", "Maharashtra", "1600", "1600", "0", "Test Freight Name", "0", null);
-
-		invoiceItemsList.add(invoiceItems);
-
-		for (int i = 0; i < 10; i++) {
-			InvoicesDetails invoiceDetails = new InvoicesDetails((i + 1), Integer.toString(i*2), "1 Apr", "14 Apr", 1, "O", 31000F,
-					custCode, "Piyush", "Sales GST", invoiceItemsList, 25781.25F, 14F, 14F, -0.01F, 33000F,
-					"Dispatch Report As On 28.2.19", 30L, 0F, 0F, 1600F, 1600F);
-			invoiceDetailsList.add(invoiceDetails);
-		}*/
+		/*
+		 * List<InvoicesDetails> invoiceDetailsList = new
+		 * ArrayList<InvoicesDetails>();
+		 * 
+		 * List<InvoiceItems> invoiceItemsList = new ArrayList<>(); InvoiceItems
+		 * invoiceItems = new InvoiceItems(1, 1, "ITM001", "Birla Super", 100F,
+		 * 270F, 25000F, "32456", "14", "14", "0", "Test Pay To Address",
+		 * "Test Ship To Address", "-0.01", "30 Days", "Pune", "27GDJKKADS9K",
+		 * "27", "Maharashtra", "1600", "1600", "0", "Test Freight Name", "0",
+		 * null);
+		 * 
+		 * invoiceItemsList.add(invoiceItems);
+		 * 
+		 * for (int i = 0; i < 10; i++) { InvoicesDetails invoiceDetails = new
+		 * InvoicesDetails((i + 1), Integer.toString(i*2), "1 Apr", "14 Apr", 1,
+		 * "O", 31000F, custCode, "Piyush", "Sales GST", invoiceItemsList,
+		 * 25781.25F, 14F, 14F, -0.01F, 33000F, "Dispatch Report As On 28.2.19",
+		 * 30L, 0F, 0F, 1600F, 1600F); invoiceDetailsList.add(invoiceDetails); }
+		 */
 
 		// Working Code
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		df.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
-		
+
 		Date toDate = df.parse(dueDate);
 
 		Calendar cal = Calendar.getInstance();
@@ -330,6 +334,7 @@ public class CustomersServiceImpl implements CustomersService {
 			}
 
 			String currentDate = df.format(new Date());
+			NumberToWord numberToWord = new NumberToWord();
 			for (OINV oinv : invoicesList) {
 
 				int invoiceDocEntry = oinv.getDocEntry();
@@ -337,12 +342,22 @@ public class CustomersServiceImpl implements CustomersService {
 				String invoiceDueDate = oinv.getDocDueDate();
 				long paymentDueDays = commonUtility.getDaysDiffBetweenDates(invoiceDate, invoiceDueDate);
 				long dueDateInDays = commonUtility.getDaysDiffBetweenDates(currentDate, invoiceDueDate);
-				List<InvoiceItems> invoiceItems = invoiceItemsMap.get(invoiceDocEntry);
+				List<InvoiceItems> invoiceItemsListFromMap = invoiceItemsMap.get(invoiceDocEntry);
+
+				String invoiceAmountInWords = numberToWord
+						.convert(Math.round(oinv.getDocTotal()));
+
+				float finalTaxAmount = 0F;
+				for (InvoiceItems invoiceItems : invoiceItemsListFromMap) {
+					finalTaxAmount = finalTaxAmount + Float.parseFloat(invoiceItems.getCgstTax())
+							+ Float.parseFloat(invoiceItems.getSgstTax());
+				}
+				String taxAmountInWords = numberToWord.convert((int)Math.floor(finalTaxAmount));
 
 				InvoicesDetails invoicesDetails = new InvoicesDetails(invoiceDocEntry,
 						Integer.toString(oinv.getDocNum()), invoiceDate, invoiceDueDate, paymentDueDays,
-						oinv.getDocStatus(), 0F, custCode, "", oinv.getType(), invoiceItems, 0F, 0F, 0F, 0F, oinv.getDocTotal(), "",
-						dueDateInDays, 0F, 0F, 0F, 0F);
+						oinv.getDocStatus(), 0F, custCode, "", oinv.getType(), invoiceItemsListFromMap, 0F, 0F, 0F, 0F,
+						oinv.getDocTotal(), "", dueDateInDays, 0F, 0F, 0F, 0F, invoiceAmountInWords, taxAmountInWords);
 
 				invoiceDetailsList.add(invoicesDetails);
 			}
@@ -388,7 +403,8 @@ public class CustomersServiceImpl implements CustomersService {
 				+ "case when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then -BALDUECRED end end '120+ days' "
 				+ "from dbo.JDT1 T0 " + "INNER JOIN dbo.OCRD T1 ON T0.shortname = T1.cardcode "
 				+ "and T1.cardtype = 'C' where T0.intrnmatch = '0' and  T0.BALDUEDEB != T0.BALDUECRED and  T1.CardCode= '"
-//				+ custCode + "' and T0.RefDate >='" + fromDateFormatted + "' and T0.RefDate  <='" + toDateFormatted
+				// + custCode + "' and T0.RefDate >='" + fromDateFormatted + "'
+				// and T0.RefDate <='" + toDateFormatted
 				+ custCode + "' and T0.DueDate >='" + fromDateFormatted + "' and T0.DueDate <='" + toDateFormatted
 				+ "')"
 				+ " sub group by [BP Code],[BP Name],[t],[Posting date], [Due date],[Doc Date],[Ref1],Trans order by [BP Code]";
@@ -405,8 +421,9 @@ public class CustomersServiceImpl implements CustomersService {
 			DateFormat dfDash = new SimpleDateFormat("yyyy-MM-dd");
 			DateFormat dfSlash = new SimpleDateFormat("dd/MM/yyyy");
 
-			int ref1 = Integer.parseInt(null == rs.getString("Ref1") || rs.getString("Ref1").isEmpty() ? "0" : rs.getString("Ref1"));
-			
+			int ref1 = Integer.parseInt(
+					null == rs.getString("Ref1") || rs.getString("Ref1").isEmpty() ? "0" : rs.getString("Ref1"));
+
 			System.out.println("type = " + rs.getString("Type"));
 			OINV oinv = new OINV(ref1, ref1, dfDash.format(dfSlash.parse(rs.getString("Posting date"))),
 					dfDash.format(dfSlash.parse(rs.getString("Due date"))), custCode, rs.getString("BP Name"),
@@ -554,42 +571,49 @@ public class CustomersServiceImpl implements CustomersService {
 		String endDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 
 		// TODO: Get Ledger Report Dynamically
-		 List<OINV> invoicesList = getInvoicesList(custCode, endDate,
-		 startDate);
-
+		List<OINV> invoicesList = getInvoicesList(custCode, endDate, startDate);
 
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		df.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
 		String currentDate = df.format(new Date());
+
+		List<InvoicesDetails> invoiceDetailsList = new ArrayList<InvoicesDetails>();
+		NumberToWord numberToWord = new NumberToWord();
 		
-		 List<InvoicesDetails> invoiceDetailsList = new ArrayList<InvoicesDetails>();
-		 for (OINV oinv : invoicesList) {
+		for (OINV oinv : invoicesList) {
 
 			int invoiceDocEntry = oinv.getDocEntry();
 			String invoiceDate = oinv.getDocDate();
 			String invoiceDueDate = oinv.getDocDueDate();
 			long paymentDueDays = commonUtility.getDaysDiffBetweenDates(invoiceDate, invoiceDueDate);
 			long dueDateInDays = commonUtility.getDaysDiffBetweenDates(currentDate, invoiceDueDate);
-/*			List<InvoiceItems> invoiceItems = invoiceItemsMap.get(invoiceDocEntry);*/
+			/*
+			 * List<InvoiceItems> invoiceItems =
+			 * invoiceItemsMap.get(invoiceDocEntry);
+			 */
+			
+			String invoiceAmountInWords = numberToWord
+					.convert(Math.round(oinv.getDocTotal()));
 
-			InvoicesDetails invoicesDetails = new InvoicesDetails(invoiceDocEntry,
-					Integer.toString(oinv.getDocNum()), invoiceDate, invoiceDueDate, paymentDueDays,
-					oinv.getDocStatus(), 0F, custCode, "", oinv.getType(), null, 0F, 0F, 0F, 0F, oinv.getDocTotal(), "",
-					dueDateInDays, 0F, 0F, 0F, 0F);
+			InvoicesDetails invoicesDetails = new InvoicesDetails(invoiceDocEntry, Integer.toString(oinv.getDocNum()),
+					invoiceDate, invoiceDueDate, paymentDueDays, oinv.getDocStatus(), 0F, custCode, "", oinv.getType(),
+					null, 0F, 0F, 0F, 0F, oinv.getDocTotal(), "", dueDateInDays, 0F, 0F, 0F, 0F, invoiceAmountInWords, "");
 
 			invoiceDetailsList.add(invoicesDetails);
 		}
 
-//		List<OINV> invoicesList = new ArrayList<OINV>();
+		// List<OINV> invoicesList = new ArrayList<OINV>();
 
-//		OINV oinv = new OINV(1, 1, "2 Apr 19", "3 May 19", "", "", 36000F, "O", "OB");
-//		invoicesList.add(oinv);
-//
-//		for (int i = 1; i <= 3; i++) {
-//			OINV oinvNext = new OINV((i + 2), (i + 2), (i + 2) + " Apr 19", (i + 2) + " May 19", "", "", i * 36000F,
-//					"O", "AR IN");
-//			invoicesList.add(oinvNext);
-//		}
+		// OINV oinv = new OINV(1, 1, "2 Apr 19", "3 May 19", "", "", 36000F,
+		// "O", "OB");
+		// invoicesList.add(oinv);
+		//
+		// for (int i = 1; i <= 3; i++) {
+		// OINV oinvNext = new OINV((i + 2), (i + 2), (i + 2) + " Apr 19", (i +
+		// 2) + " May 19", "", "", i * 36000F,
+		// "O", "AR IN");
+		// invoicesList.add(oinvNext);
+		// }
 
 		return new BaseWrapper(invoiceDetailsList);
 	}
