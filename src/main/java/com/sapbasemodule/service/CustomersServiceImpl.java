@@ -349,8 +349,10 @@ public class CustomersServiceImpl implements CustomersService {
 
 				float finalTaxAmount = 0F;
 				for (InvoiceItems invoiceItems : invoiceItemsListFromMap) {
-					finalTaxAmount = finalTaxAmount + Float.parseFloat(invoiceItems.getCgstTax())
-							+ Float.parseFloat(invoiceItems.getSgstTax());
+//					finalTaxAmount = finalTaxAmount + Float.parseFloat(invoiceItems.getCgstTax())
+//							+ Float.parseFloat(invoiceItems.getSgstTax());
+					finalTaxAmount = finalTaxAmount + invoiceItems.getCgstTax()
+					+ invoiceItems.getSgstTax();
 				}
 				String taxAmountInWords = numberToWord.convert((int)Math.floor(finalTaxAmount));
 
@@ -487,12 +489,12 @@ public class CustomersServiceImpl implements CustomersService {
 		while (rs.next()) {
 			InvoiceItems invoiceItems = new InvoiceItems(rs.getInt("DocEntry"), rs.getInt("DocNum"),
 					rs.getString("ItemCode"), rs.getString("Dscription"), rs.getFloat("Quantity"), rs.getFloat("Price"),
-					rs.getFloat("LineTotal"), rs.getString("Chap_Id"), rs.getString("CGST Rate"),
-					rs.getString("SGST Rate"), rs.getString("IGST Rate"), rs.getString("Pay_To"),
-					rs.getString("Ship_To"), rs.getString("RoundDif"), rs.getString("Payment Terms"),
+					rs.getFloat("LineTotal"), rs.getString("Chap_Id"), rs.getFloat("CGST Rate"),
+					rs.getFloat("SGST Rate"), rs.getFloat("IGST Rate"), rs.getString("Pay_To"),
+					rs.getString("Ship_To"), rs.getFloat("RoundDif"), rs.getString("Payment Terms"),
 					rs.getString("Party City"), rs.getString("Party GSTIN No"), rs.getString("StateCode"),
-					rs.getString("StateName"), rs.getString("CGST TAX"), rs.getString("SGST TAX"),
-					rs.getString("IGST TAX"), rs.getString("Frieght Name"), rs.getString("Frieght Amt"),
+					rs.getString("StateName"), rs.getFloat("CGST TAX"), rs.getFloat("SGST TAX"),
+					rs.getFloat("IGST TAX"), rs.getString("Frieght Name"), rs.getString("Frieght Amt"),
 					rs.getString("Sac_Code"));
 
 			invoicesItemsDetailsList.add(invoiceItems);

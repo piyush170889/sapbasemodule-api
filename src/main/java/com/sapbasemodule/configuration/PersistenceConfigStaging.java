@@ -55,13 +55,13 @@ public class PersistenceConfigStaging {
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
 	    
 		dataSource.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-//		dataSource.setUrl("jdbc:sqlserver://116.75.129.27:1433;databaseName=New Demo");
-//		dataSource.setUsername("sa");
-//		dataSource.setPassword("jbsadmin@123");
+		dataSource.setUrl("jdbc:sqlserver://116.75.129.27:1433;databaseName=New Demo");
+		dataSource.setUsername("sa");
+		dataSource.setPassword("jbsadmin@123");
 	
-		dataSource.setUrl("jdbc:sqlserver://116.75.129.27:1433;databaseName=SBODemoIn");
-		dataSource.setUsername("manager");
-		dataSource.setPassword("manager");
+//		dataSource.setUrl("jdbc:sqlserver://116.75.129.27:1433;databaseName=SBODemoIn");
+//		dataSource.setUsername("manager");
+//		dataSource.setPassword("manager");
 
 		return dataSource;
 	}

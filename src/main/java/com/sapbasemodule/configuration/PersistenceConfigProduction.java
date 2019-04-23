@@ -56,7 +56,7 @@ public class PersistenceConfigProduction {
 
 		dataSource.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 
-		dataSource.setUrl("jdbc:sqlserver://116.75.129.27:1433;databaseName=New Demo");
+		dataSource.setUrl("jdbc:sqlserver://116.75.129.27:1433;databaseName=Jagtap");
 		dataSource.setUsername("sa");
 		dataSource.setPassword("jbsadmin@123");
 

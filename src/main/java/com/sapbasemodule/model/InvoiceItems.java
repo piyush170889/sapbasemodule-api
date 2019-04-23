@@ -16,11 +16,11 @@ public class InvoiceItems {
 
 	private String hsnSac;
 
-	private String cgst;
+	private Float cgst;
 
-	private String sgst;
+	private Float sgst;
 
-	private String igst;
+	private Float igst;
 
 	private int docNum;
 
@@ -28,7 +28,7 @@ public class InvoiceItems {
 
 	private String shipTo;
 
-	private String roundDif;
+	private Float roundDif;
 
 	private String paymentTerms;
 
@@ -40,11 +40,11 @@ public class InvoiceItems {
 
 	private String stateName;
 
-	private String cgstTax;
+	private Float cgstTax;
 
-	private String sgstTax;
+	private Float sgstTax;
 
-	private String igstTax;
+	private Float igstTax;
 
 	private String frieghtName;
 
@@ -56,10 +56,9 @@ public class InvoiceItems {
 	}
 
 	public InvoiceItems(int docEntry, int docNum, String itemCode, String itemName, float qty, float ratePerBag,
-			float total, String hsnSac, String cgst, String sgst, String igst, String payTo, String shipTo,
-			String roundDif, String paymentTerms, String partyCity, String partyGstinNo, String stateCode,
-			String stateName, String cgstTax, String sgstTax, String igstTax, String frieghtName, String frieghtAmt,
-			String sacCode) {
+			float total, String hsnSac, Float cgst, Float sgst, Float igst, String payTo, String shipTo, Float roundDif,
+			String paymentTerms, String partyCity, String partyGstinNo, String stateCode, String stateName,
+			Float cgstTax, Float sgstTax, Float igstTax, String frieghtName, String frieghtAmt, String sacCode) {
 		this.docEntry = docEntry;
 		this.docNum = docNum;
 		this.itemCode = itemCode;
@@ -103,11 +102,11 @@ public class InvoiceItems {
 		this.shipTo = shipTo;
 	}
 
-	public String getRoundDif() {
+	public Float getRoundDif() {
 		return roundDif;
 	}
 
-	public void setRoundDif(String roundDif) {
+	public void setRoundDif(Float roundDif) {
 		this.roundDif = roundDif;
 	}
 
@@ -151,27 +150,27 @@ public class InvoiceItems {
 		this.stateName = stateName;
 	}
 
-	public String getCgstTax() {
+	public Float getCgstTax() {
 		return cgstTax;
 	}
 
-	public void setCgstTax(String cgstTax) {
+	public void setCgstTax(Float cgstTax) {
 		this.cgstTax = cgstTax;
 	}
 
-	public String getSgstTax() {
+	public Float getSgstTax() {
 		return sgstTax;
 	}
 
-	public void setSgstTax(String sgstTax) {
+	public void setSgstTax(Float sgstTax) {
 		this.sgstTax = sgstTax;
 	}
 
-	public String getIgstTax() {
+	public Float getIgstTax() {
 		return igstTax;
 	}
 
-	public void setIgstTax(String igstTax) {
+	public void setIgstTax(Float igstTax) {
 		this.igstTax = igstTax;
 	}
 
@@ -263,27 +262,27 @@ public class InvoiceItems {
 		this.hsnSac = hsnSac;
 	}
 
-	public String getCgst() {
+	public Float getCgst() {
 		return cgst;
 	}
 
-	public void setCgst(String cgst) {
+	public void setCgst(Float cgst) {
 		this.cgst = cgst;
 	}
 
-	public String getSgst() {
+	public Float getSgst() {
 		return sgst;
 	}
 
-	public void setSgst(String sgst) {
+	public void setSgst(Float sgst) {
 		this.sgst = sgst;
 	}
 
-	public String getIgst() {
+	public Float getIgst() {
 		return igst;
 	}
 
-	public void setIgst(String igst) {
+	public void setIgst(Float igst) {
 		this.igst = igst;
 	}
 
