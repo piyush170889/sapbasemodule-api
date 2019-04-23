@@ -311,6 +311,8 @@ public class CustomersServiceImpl implements CustomersService {
 		for (OINV oinv : invoicesList)
 			invoiceDocEntriesList.add(oinv.getDocEntry());
 
+		System.out.println(invoiceDocEntriesList.toString());
+		
 		List<InvoiceItems> invoiceItemsList;
 		Map<Integer, List<InvoiceItems>> invoiceItemsMap;
 		List<InvoicesDetails> invoiceDetailsList = new ArrayList<InvoicesDetails>();
@@ -332,27 +334,35 @@ public class CustomersServiceImpl implements CustomersService {
 
 				invoiceItemsMap.put(invoiceDocEntry, invoiceItemMapList);
 			}
+			
+			System.out.println("Invoice Doc Entry Keys In Map = " + invoiceItemsMap.keySet().toString());
 
 			String currentDate = df.format(new Date());
 			NumberToWord numberToWord = new NumberToWord();
 			for (OINV oinv : invoicesList) {
 
 				int invoiceDocEntry = oinv.getDocEntry();
+				System.out.println("Invoice Doc Entry In Iteration : " + invoiceDocEntry);
+				
 				String invoiceDate = oinv.getDocDate();
 				String invoiceDueDate = oinv.getDocDueDate();
 				long paymentDueDays = commonUtility.getDaysDiffBetweenDates(invoiceDate, invoiceDueDate);
 				long dueDateInDays = commonUtility.getDaysDiffBetweenDates(currentDate, invoiceDueDate);
 				List<InvoiceItems> invoiceItemsListFromMap = invoiceItemsMap.get(invoiceDocEntry);
-
+				System.out.println("invoiceItemsListFromMap = " + invoiceItemsListFromMap);
+				
 				String invoiceAmountInWords = numberToWord
 						.convert(Math.round(oinv.getDocTotal()));
 
 				float finalTaxAmount = 0F;
-				for (InvoiceItems invoiceItems : invoiceItemsListFromMap) {
-//					finalTaxAmount = finalTaxAmount + Float.parseFloat(invoiceItems.getCgstTax())
-//							+ Float.parseFloat(invoiceItems.getSgstTax());
-					finalTaxAmount = finalTaxAmount + invoiceItems.getCgstTax()
-					+ invoiceItems.getSgstTax();
+				
+				if (null != invoiceItemsListFromMap) {
+					for (InvoiceItems invoiceItems : invoiceItemsListFromMap) {
+	//					finalTaxAmount = finalTaxAmount + Float.parseFloat(invoiceItems.getCgstTax())
+	//							+ Float.parseFloat(invoiceItems.getSgstTax());
+						finalTaxAmount = finalTaxAmount + invoiceItems.getCgstTax()
+						+ invoiceItems.getSgstTax();
+					}
 				}
 				String taxAmountInWords = numberToWord.convert((int)Math.floor(finalTaxAmount));
 
