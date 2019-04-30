@@ -1,7 +1,5 @@
 package com.sapbasemodule.utils;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -31,11 +29,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import org.apache.commons.lang3.time.DateUtils;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -44,7 +37,6 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import com.sapbasemodule.configuration.CustomUserDetails;
 import com.sapbasemodule.constants.Constants;
@@ -52,9 +44,6 @@ import com.sapbasemodule.domain.NormalPacketDescDtls;
 import com.sapbasemodule.domain.OtpDtl;
 import com.sapbasemodule.domain.RoleMasterDtl;
 import com.sapbasemodule.exception.ServicesException;
-import com.sapbasemodule.model.ExcelSheet;
-import com.sapbasemodule.model.ExcelSheetTable1;
-import com.sapbasemodule.model.ExcellSheetWrapper;
 import com.sapbasemodule.model.PaginationDetails;
 import com.sapbasemodule.persitence.ConfigurationRepository;
 import com.sapbasemodule.persitence.OtpDtlRepository;
@@ -507,156 +496,9 @@ public class CommonUtility {
 		return dfYyyyMmDdHhMmSs.format(new Date());
 	}
 
-	public void generateExcel(@RequestBody ExcellSheetWrapper excellSheetWrapper, String lastCloseDayTs,
-			String currentCloseDayTs) throws Exception {
-
-		HSSFWorkbook workbook = new HSSFWorkbook();
-
-		List<ExcelSheet> excelSheetTable2 = excellSheetWrapper.getExcelSheetTable2();
-		ExcelSheetTable1 excelSheetTable1 = excellSheetWrapper.getExcelSheetTable1();
-		HSSFSheet sheet = workbook.createSheet("Report");
-
-		// CREATE FIRST TABLE
-		HSSFRow reportDate = sheet.createRow(1);
-		HSSFRow fromDate = sheet.createRow(2);
-		HSSFRow toDate = sheet.createRow(3);
-		HSSFRow cashLoadedRow = sheet.createRow(4);
-		HSSFRow creditIssuedRow = sheet.createRow(5);
-		HSSFRow withdrawnRow = sheet.createRow(6);
-		HSSFRow unusedRow = sheet.createRow(7);
-		HSSFRow totalSaleRow = sheet.createRow(8);
-
-		// Report Overview Table
-		DateFormat dfIst = new SimpleDateFormat("dd MMM yyyy hh:mm a");
-		dfIst.setTimeZone(TimeZone.getTimeZone("IST"));
-
-		String currentTs = dfIst.format(new Date());
-
-		cellWithBorder(1, 2, reportDate, workbook).setCellValue("Report Date");
-		cellWithBorder(1, 3, reportDate, workbook).setCellValue(currentTs);
-
-		cellWithBorder(2, 2, fromDate, workbook).setCellValue("From");
-		cellWithBorder(2, 3, fromDate, workbook).setCellValue(lastCloseDayTs);
-
-		cellWithBorder(3, 2, toDate, workbook).setCellValue("To");
-		cellWithBorder(3, 3, toDate, workbook).setCellValue(currentCloseDayTs);
-
-		cellWithBorder(4, 2, cashLoadedRow, workbook).setCellValue("Cash Loaded");
-		cellWithBorder(4, 3, cashLoadedRow, workbook).setCellValue(excelSheetTable1.getCl());
-
-		cellWithBorder(5, 2, creditIssuedRow, workbook).setCellValue("Credit Issued");
-		cellWithBorder(5, 3, creditIssuedRow, workbook).setCellValue(excelSheetTable1.getCreditIssued());
-
-		cellWithBorder(6, 2, withdrawnRow, workbook).setCellValue("Cash Withdrawn");
-		cellWithBorder(6, 3, withdrawnRow, workbook).setCellValue(excelSheetTable1.getWd());
-
-		cellWithBorder(7, 2, unusedRow, workbook).setCellValue("Unused Cash");
-		cellWithBorder(7, 3, unusedRow, workbook).setCellValue(excelSheetTable1.getUu());
-
-		cellWithBorder(8, 2, totalSaleRow, workbook).setCellValue("Total Sale");
-		cellWithBorder(8, 3, totalSaleRow, workbook).setCellValue(excelSheetTable1.getTs());
-
-		// Stock Used Details Summary Table
-		HSSFRow header = sheet.createRow(10);
-
-		// Header Row
-		cellWithBorder(10, 1, header, workbook).setCellValue("SR NO.");
-		cellWithBorder(10, 2, header, workbook).setCellValue("DATE");
-		cellWithBorder(10, 3, header, workbook).setCellValue("PRODUCT");
-		cellWithBorder(10, 4, header, workbook).setCellValue("QTY");
-		cellWithBorder(10, 5, header, workbook).setCellValue("INFINITY PRICE");
-		cellWithBorder(10, 6, header, workbook).setCellValue("MRP");
-		// cellWithBorder(10, 7, header, workbook).setCellValue("CARD TYPE");
-		cellWithBorder(10, 7, header, workbook).setCellValue("SUBTOTAL");
-		cellWithBorder(10, 8, header, workbook).setCellValue("DISCOUNT");
-		cellWithBorder(10, 9, header, workbook).setCellValue("TOTAL");
-
-		// Data Rows
-		// Counter To Increment SR NO in table
-		int counter = 1;
-		/*
-		 * int startRow = 8; // START INDEX OF ROW TO CHECK AND INSERT LAST ROW
-		 * OF // 2ND TABLE NOT INCREMENTED
-		 */ int rowCounter = 10; // START NEW ROW FROM THIS INDEX ITS INCREMENTED
-		int excelSheetTable2Length = excelSheetTable2.size();
-		float grandTotal = 0F;
-		float subTotal = 0F;
-		float discount = 0F;
-
-		for (ExcelSheet e : excelSheetTable2) {
-			HSSFRow row = sheet.createRow(++rowCounter);
-			cellWithBorder(rowCounter, 1, row, workbook).setCellValue(counter);
-			cellWithBorder(rowCounter, 2, row, workbook).setCellValue(e.getDt());
-			// cellWithBorder(rowCounter, 3, row,
-			// workbook).setCellValue(e.getTm());
-			cellWithBorder(rowCounter, 3, row, workbook).setCellValue(e.getPn());
-			cellWithBorder(rowCounter, 4, row, workbook).setCellValue(e.getQt());
-			cellWithBorder(rowCounter, 5, row, workbook).setCellValue(e.getIp());
-			cellWithBorder(rowCounter, 6, row, workbook).setCellValue(e.getMrp());
-			// cellWithBorder(rowCounter, 7, row,
-			// workbook).setCellValue(e.getTy());
-			cellWithBorder(rowCounter, 7, row, workbook).setCellValue(e.getSubTotal());
-			cellWithBorder(rowCounter, 8, row, workbook).setCellValue(e.getDiscount());
-			cellWithBorder(rowCounter, 9, row, workbook).setCellValue(e.getT());
-
-			subTotal = subTotal + Float.parseFloat(e.getSubTotal());
-			discount = discount + Float.parseFloat(e.getDiscount());
-			grandTotal = grandTotal + Float.parseFloat(e.getT());
-
-			System.out.println("excelSheetTable2Length : " + excelSheetTable2Length + " Counter :" + counter);
-			if (excelSheetTable2Length == counter) {
-				HSSFRow row1 = sheet.createRow(++rowCounter);
-				cellWithBorder(rowCounter, 1, row1, workbook).setCellValue("");
-				cellWithBorder(rowCounter, 2, row1, workbook).setCellValue("");
-				cellWithBorder(rowCounter, 3, row1, workbook).setCellValue("");
-				cellWithBorder(rowCounter, 4, row1, workbook).setCellValue("");
-				cellWithBorder(rowCounter, 5, row1, workbook).setCellValue("");
-				cellWithBorder(rowCounter, 6, row1, workbook).setCellValue("Total");
-				// cellWithBorder(rowCounter, 7, row1,
-				// workbook).setCellValue("Total");
-				cellWithBorder(rowCounter, 7, row1, workbook).setCellValue(subTotal);
-				cellWithBorder(rowCounter, 8, row1, workbook).setCellValue(discount);
-				cellWithBorder(rowCounter, 9, row1, workbook).setCellValue(grandTotal);
-			}
-			counter++;
-		}
-
-		// Create Report Xcel and Email
-		String fileName = "Report_" + currentTs.replace(" ", "_") + ".xls";
-		String filePath = configProperties.getProperty("reports.file.path") + fileName;
-
-		File file = new File(filePath);
-		FileOutputStream fileOut = new FileOutputStream(file);
-		workbook.write(fileOut);
-		fileOut.close();
-
-		// SEND AN EMAIL
-		String emails = configProperties.getProperty("email.admin.list");
-		String message = "Please Find Attachment";
-		String subject = "Close Day Report for " + currentTs;
-		String attachmentFilePath = filePath;
-		emailUtility.sendEmail(emails, message, subject, attachmentFilePath, fileName);
-
-		// DELETE FILE FROM LOCAL STORAGE
-		file.delete();
-	}
 
 	@Autowired
 	private EmailUtility emailUtility;
-
-	// CREATE CELLS WITH BORDER
-	public Cell cellWithBorder(int rowCounter, int cellNo, HSSFRow row, HSSFWorkbook workbook) {
-		HSSFCellStyle style = workbook.createCellStyle();
-		style.setBorderBottom(HSSFCellStyle.BORDER_THIN);
-		style.setBorderTop(HSSFCellStyle.BORDER_THIN);
-		style.setBorderRight(HSSFCellStyle.BORDER_THIN);
-		style.setBorderLeft(HSSFCellStyle.BORDER_THIN);
-
-		Cell cell = row.createCell(cellNo);
-		cell.setCellStyle(style);
-		return cell;
-
-	}
 
 	public String getUtcTsFromIst(String tsToCompare) throws ParseException {
 

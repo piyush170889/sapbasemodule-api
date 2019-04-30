@@ -11,9 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sapbasemodule.domain.ConfigurationDtls;
 import com.sapbasemodule.domain.Master;
+import com.sapbasemodule.domain.OITM;
 import com.sapbasemodule.domain.RoleMasterDtl;
+import com.sapbasemodule.model.BaseWrapper;
 import com.sapbasemodule.persitence.ConfigurationDtlsRepository;
 import com.sapbasemodule.persitence.MasterRepository;
+import com.sapbasemodule.persitence.OITMRepository;
 import com.sapbasemodule.persitence.RoleMasterDtlRepository;
 import com.sapbasemodule.utils.RoleType;
 
@@ -96,5 +99,16 @@ public class MasterServiceImpl implements MasterService {
 
 		return finalMasterHashmap;
 	}
+
+	@Autowired
+	private OITMRepository oitmRepository;
 	
+	
+	@Override
+	public BaseWrapper doGetItems() {
+
+		List<OITM> itemMasterList = oitmRepository.findByDeleted("N");
+		
+		return new BaseWrapper(itemMasterList);
+	}
 }

@@ -154,7 +154,7 @@ public class UsersServiceImpl implements UsersService {
 
 		// Store UserDtls
 		UserDtl userDtl = new UserDtl(userDtlsId, request.getFirstName().trim(), request.getLastName().trim(),
-				request.getEmailId().trim(), (byte) 1, loggedInUserId, loggedInUserId);
+				null == request.getEmailId() ? "" : request.getEmailId().trim(), (byte) 1, loggedInUserId, loggedInUserId);
 		userDtlRepository.save(userDtl);
 
 		// Store User Login Details

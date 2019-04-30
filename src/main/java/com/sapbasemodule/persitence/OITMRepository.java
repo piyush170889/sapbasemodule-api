@@ -16,4 +16,6 @@ public interface OITMRepository extends JpaRepository<OITM, String> {
 
 	List<OITM> findByItemCodeIn(Set<String> itemCodesSet);
 
+	List<OITM> findByDeleted(String isDeleted);
+
 }

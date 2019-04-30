@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 
 @Embeddable
 public class UserRolePK implements Serializable {
@@ -13,7 +15,8 @@ public class UserRolePK implements Serializable {
 	 */
 	private static final long serialVersionUID = -6096490448311594012L;
 
-	@Column(name="USER_ROLE_DTLS_ID")
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	@Column(name="USER_ROLE_DTLS_ID", insertable=false)
 	private int userRoleDtlsId;
 
 	@Column(name="USER_LOGIN_DTLS_ID")

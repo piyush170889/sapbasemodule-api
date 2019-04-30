@@ -1,10 +1,15 @@
 package com.sapbasemodule.service;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TimeZone;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +19,15 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sapbasemodule.constants.Constants;
+import com.sapbasemodule.domain.AppOrderItem;
+import com.sapbasemodule.domain.AppOrders;
 import com.sapbasemodule.domain.OrderItems;
 import com.sapbasemodule.domain.Orders;
 import com.sapbasemodule.model.BaseWrapper;
 import com.sapbasemodule.model.OrderDetailsWrapper;
+import com.sapbasemodule.persitence.AppOrderItemRepository;
+import com.sapbasemodule.persitence.AppOrdersRepository;
 import com.sapbasemodule.persitence.OrderItemsRepository;
 import com.sapbasemodule.persitence.OrdersRepository;
 import com.sapbasemodule.utils.CommonUtility;
@@ -250,4 +260,46 @@ public class OrdersServiceImpl implements OrdersService {
 	}*/
 	
 
+	@Autowired
+	private AppOrdersRepository appOrdersRepository;
+	
+	@Autowired
+	private AppOrderItemRepository appOrderItemRepository;
+	
+	
+	@Override
+	public BaseWrapper doPlaceOrder(AppOrders request) throws ParseException {
+		
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		df.setTimeZone(TimeZone.getTimeZone(Constants.UTC_TIMEZONE));
+		
+		Date currentTsInUtc = df.parse(df.format(new Date()));
+		request.setCreatedTs(currentTsInUtc);
+		request.setUpdatedTs(currentTsInUtc);
+	
+		String loggedInUserId = commonUtility.getLoggedUserId();
+		request.setCreatedBy(loggedInUserId);
+		request.setModifiedBy(loggedInUserId);
+		
+		request = appOrdersRepository.save(request);
+
+		int appOrderId = request.getAppOrdrId();
+		
+		List<AppOrderItem> appOrderItemsList = request.getItemsList();
+		List<AppOrderItem> finalAppOrderItemsList = new ArrayList<AppOrderItem>();
+		
+		for (AppOrderItem appOrderItem: appOrderItemsList) {
+			appOrderItem.setAppOrdrId(appOrderId);
+			appOrderItem.setCreatedBy(loggedInUserId);
+			appOrderItem.setCreatedTs(currentTsInUtc);
+			appOrderItem.setModifiedBy(loggedInUserId);
+			appOrderItem.setUpdatedTs(currentTsInUtc);
+			
+			finalAppOrderItemsList.add(appOrderItem);
+		}
+		
+		appOrderItemRepository.save(finalAppOrderItemsList);
+		
+		return new BaseWrapper(request);
+	}
 }

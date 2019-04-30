@@ -65,6 +65,7 @@ public class PersistenceConfigDev {
 		// MySQL
 		dataSource.setDriverClassName("com.mysql.jdbc.Driver");
   		dataSource.setUrl("jdbc:mysql://67.211.220.180:3306/jagtap_solutions_db");
+//		dataSource.setUrl("jdbc:mysql://localhost:3306/jagtap_solutions_db");
   	    dataSource.setUsername("root");
   		dataSource.setPassword("Replete@123");
   		
