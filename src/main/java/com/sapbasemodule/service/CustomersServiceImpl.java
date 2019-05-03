@@ -34,6 +34,7 @@ import com.sapbasemodule.model.BaseWrapper;
 import com.sapbasemodule.model.CustomerDetailsWrapper;
 import com.sapbasemodule.model.InvoiceItems;
 import com.sapbasemodule.model.InvoicesDetails;
+import com.sapbasemodule.model.OrderMgmtWrapper;
 import com.sapbasemodule.model.PaginationDetails;
 import com.sapbasemodule.persitence.CustomersAddressesRepository;
 import com.sapbasemodule.persitence.CustomersRepository;
@@ -572,7 +573,9 @@ public class CustomersServiceImpl implements CustomersService {
 
 		ordersList = null; // Make the Object Available for Garbage Collection
 
-		return new BaseWrapper(finalOrdersList);
+		OrderMgmtWrapper response = new OrderMgmtWrapper(finalOrdersList);
+		
+		return new BaseWrapper(response);
 	}
 
 	@Override

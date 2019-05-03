@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,6 +41,12 @@ public class OrdersController {
 	public Object placeOrder(@RequestBody AppOrders request) throws ParseException {
 		
 		return ordersService.doPlaceOrder(request);
+	}
+	
+	@GetMapping("/booked-orders")
+	public Object getBookedOrders() {
+	
+		return ordersService.doGetBookedOrders();
 	}
 	
 	

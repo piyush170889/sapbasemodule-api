@@ -14,8 +14,11 @@ public interface OrdersService {
 
 	BaseWrapper doPlaceOrder(AppOrders request) throws ParseException;
 
-//	BaseWrapper doGetOrderItemsDetails(int orderDlsId, String itemCode);
+	BaseWrapper doGetBookedOrders();
 
-//	BaseWrapper doGetOrderItemsDetailsAfterDate(int orderDlsId, String itemCode, String date);
+	// BaseWrapper doGetOrderItemsDetails(int orderDlsId, String itemCode);
+
+	// BaseWrapper doGetOrderItemsDetailsAfterDate(int orderDlsId, String
+	// itemCode, String date);
 
 }
