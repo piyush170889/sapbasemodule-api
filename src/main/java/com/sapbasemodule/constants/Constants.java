@@ -43,15 +43,15 @@ public class Constants {
 
 	public static final String UTC_TIMEZONE = "UTC";
 
-//	public static final String DB_SERVER_IP = "localhost";
-	public static final String DB_SERVER_IP = "116.75.129.27";
+	public static final String DB_SERVER_IP = "localhost";
+//	public static final String DB_SERVER_IP = "116.75.129.27";
 	
-//	public static final String DB_NAME = "New Demo";
+//	public static final String DB_NAME = "Adit_Infra_Final";
 	public static final String DB_NAME = "Jagtap";
 	
 	public static final String DB_USERNM = "sa";
 	
-//	public static final String DB_PASS = "replete@123";
-	public static final String DB_PASS = "jbsadmin@123";
+	public static final String DB_PASS = "replete@123";
+//	public static final String DB_PASS = "jbsadmin@123";
 	
 }

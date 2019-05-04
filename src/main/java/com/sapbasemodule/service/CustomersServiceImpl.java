@@ -30,6 +30,7 @@ import com.sapbasemodule.domain.OINV;
 import com.sapbasemodule.domain.OrderItems;
 import com.sapbasemodule.domain.Orders;
 import com.sapbasemodule.model.AgingDetails;
+import com.sapbasemodule.model.AgingReportTo;
 import com.sapbasemodule.model.BaseWrapper;
 import com.sapbasemodule.model.CustomerDetailsWrapper;
 import com.sapbasemodule.model.InvoiceItems;
@@ -38,7 +39,6 @@ import com.sapbasemodule.model.OrderMgmtWrapper;
 import com.sapbasemodule.model.PaginationDetails;
 import com.sapbasemodule.persitence.CustomersAddressesRepository;
 import com.sapbasemodule.persitence.CustomersRepository;
-import com.sapbasemodule.persitence.OINVRepository;
 import com.sapbasemodule.persitence.OrderItemsRepository;
 import com.sapbasemodule.persitence.OrdersRepository;
 import com.sapbasemodule.utils.CommonUtility;
@@ -63,9 +63,9 @@ public class CustomersServiceImpl implements CustomersService {
 	@Autowired
 	private CommonUtility commonUtility;
 
-	@Autowired
+/*	@Autowired
 	private OINVRepository oinvRepository;
-
+*/
 	@Override
 	public BaseWrapper doGetCustomersList(Optional<Integer> pageNo) {
 
@@ -129,16 +129,12 @@ public class CustomersServiceImpl implements CustomersService {
 	public BaseWrapper doGetCustomerAgingReport(String custCode, String fromDate)
 			throws ClassNotFoundException, SQLException, ParseException {
 
-		// TODO: Uncomment Below Section
-		AgingDetails agingDetails = getAgingDetails(custCode, fromDate);
+		AgingReportTo agingReportTo = getAgingDetails(custCode, fromDate);
 
-		// AgingDetails agingDetails = new AgingDetails(custCode, "Piyush",
-		// "60000", "20000", "30000", "40000", "50000", "60000");
-
-		return new BaseWrapper(agingDetails);
+		return new BaseWrapper(agingReportTo);
 	}
 
-	private AgingDetails getAgingDetails(String custCode, String fromDate)
+	private AgingReportTo getAgingDetails(String custCode, String fromDate)
 			throws ClassNotFoundException, SQLException, ParseException {
 
 		Connection conn = commonUtility.getDbConnection();
@@ -146,34 +142,58 @@ public class CustomersServiceImpl implements CustomersService {
 		String fromDateFormatted = new SimpleDateFormat("yyyyMMdd")
 				.format(new SimpleDateFormat("yyyy-MM-dd").parse(fromDate));
 
-//		String sqlQuery = "Select [Bp Code],[BP Name], [t] as Type ,[Posting date], [Due date], [Doc Date],[Ref1],SUM([Balance Due])'Balance',SUM(Future)'Future', "
-//				+ "SUM([0-30 days])'FirstQ',SUM([31-60 days])'SecondQ',SUM([61-90 days])'ThirdQ',SUM([90-120 days])'FourthQ', "
-//				+ "Sum([120+ days])'OtherQ',Trans from "
-//				+ "(select T1.cardcode 'BP Code',T1.cardname 'BP Name',sysdeb 'Debit Amount',syscred 'Credit Amount', "
-//				+ "(T0.BALDUEDEB - T0.BALDUECRED) as 'Balance Due', T0.AdjTran as 'Trans', "
-//				+ "case T0.transtype when '-2' then 'OB' when '13' then 'A/R Inv' when '14' then 'AR DN' when '24' then 'Incoming' else 'Other' end as 'T' ,Ref1, "
-//				+ "fccurrency 'BP Currency', " + "CONVERT(VARCHAR(10), refdate, 103) 'Posting Date', "
-//				+ "CONVERT(VARCHAR(10), duedate, 103) 'Due Date', " + "CONVERT(VARCHAR(10), taxdate, 103) 'Doc Date' , "
-//				+ "CASE When (DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) < 1 then "
-//				+ "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end 'Future', "
-//				+ "CASE when (DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) < 31 and (DATEDIFF(dd,duedate,'"
-//				+ fromDateFormatted + "')) >= 1 then "
-//				+ "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end '0-30 days', "
-//				+ "case when ((datediff(dd,duedate,'" + fromDateFormatted + "')) > 30 and (datediff(dd,duedate,'"
-//				+ fromDateFormatted + "'))< 61) then "
-//				+ "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end '31-60 days', "
-//				+ "case when ((datediff(dd,DueDate,'" + fromDateFormatted + "')) > 60 and (datediff(dd,duedate,'"
-//				+ fromDateFormatted + "'))< 91) then "
-//				+ "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB  end end '61-90 days', "
-//				+ "CASE when ((DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) > 90 and (datediff(dd,duedate,'"
-//				+ fromDateFormatted + "'))< 121) then "
-//				+ "case when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then -BALDUECRED end end '90-120 days', "
-//				+ "CASE when (DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) > 121 then "
-//				+ "case when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then -BALDUECRED end end '120+ days' "
-//				+ "from dbo.JDT1 T0 " + "INNER JOIN dbo.OCRD T1 ON T0.shortname = T1.cardcode "
-//				+ "and T1.cardtype = 'C' where T0.intrnmatch = '0' and  T0.BALDUEDEB != T0.BALDUECRED and  T1.CardCode= '"
-//				+ custCode + "' and " + "T0.RefDate  <='" + fromDateFormatted + "')"
-//				+ " sub group by [BP Code],[BP Name],[t],[Posting date], [Due date],[Doc Date],[Ref1],Trans order by [BP Code]";
+		// String sqlQuery = "Select [Bp Code],[BP Name], [t] as Type ,[Posting
+		// date], [Due date], [Doc Date],[Ref1],SUM([Balance
+		// Due])'Balance',SUM(Future)'Future', "
+		// + "SUM([0-30 days])'FirstQ',SUM([31-60 days])'SecondQ',SUM([61-90
+		// days])'ThirdQ',SUM([90-120 days])'FourthQ', "
+		// + "Sum([120+ days])'OtherQ',Trans from "
+		// + "(select T1.cardcode 'BP Code',T1.cardname 'BP Name',sysdeb 'Debit
+		// Amount',syscred 'Credit Amount', "
+		// + "(T0.BALDUEDEB - T0.BALDUECRED) as 'Balance Due', T0.AdjTran as
+		// 'Trans', "
+		// + "case T0.transtype when '-2' then 'OB' when '13' then 'A/R Inv'
+		// when '14' then 'AR DN' when '24' then 'Incoming' else 'Other' end as
+		// 'T' ,Ref1, "
+		// + "fccurrency 'BP Currency', " + "CONVERT(VARCHAR(10), refdate, 103)
+		// 'Posting Date', "
+		// + "CONVERT(VARCHAR(10), duedate, 103) 'Due Date', " +
+		// "CONVERT(VARCHAR(10), taxdate, 103) 'Doc Date' , "
+		// + "CASE When (DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) < 1
+		// then "
+		// + "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end
+		// 'Future', "
+		// + "CASE when (DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) < 31
+		// and (DATEDIFF(dd,duedate,'"
+		// + fromDateFormatted + "')) >= 1 then "
+		// + "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end
+		// '0-30 days', "
+		// + "case when ((datediff(dd,duedate,'" + fromDateFormatted + "')) > 30
+		// and (datediff(dd,duedate,'"
+		// + fromDateFormatted + "'))< 61) then "
+		// + "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end
+		// '31-60 days', "
+		// + "case when ((datediff(dd,DueDate,'" + fromDateFormatted + "')) > 60
+		// and (datediff(dd,duedate,'"
+		// + fromDateFormatted + "'))< 91) then "
+		// + "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end
+		// '61-90 days', "
+		// + "CASE when ((DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) > 90
+		// and (datediff(dd,duedate,'"
+		// + fromDateFormatted + "'))< 121) then "
+		// + "case when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then
+		// -BALDUECRED end end '90-120 days', "
+		// + "CASE when (DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) > 121
+		// then "
+		// + "case when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then
+		// -BALDUECRED end end '120+ days' "
+		// + "from dbo.JDT1 T0 " + "INNER JOIN dbo.OCRD T1 ON T0.shortname =
+		// T1.cardcode "
+		// + "and T1.cardtype = 'C' where T0.intrnmatch = '0' and T0.BALDUEDEB
+		// != T0.BALDUECRED and T1.CardCode= '"
+		// + custCode + "' and " + "T0.RefDate <='" + fromDateFormatted + "')"
+		// + " sub group by [BP Code],[BP Name],[t],[Posting date], [Due
+		// date],[Doc Date],[Ref1],Trans order by [BP Code]";
 
 		String sqlQuery = "Select [Bp Code],[BP Name], [t] as Type ,[Posting date], [Due date], [Doc Date],[Ref1],SUM([Balance Due])'Balance',"
 				+ "SUM(Future)'Future', SUM([0-30 days])'FirstQ',SUM([31-60 days])'SecondQ',SUM([61-90 days])'ThirdQ',SUM([90-120 days])'FourthQ',"
@@ -181,26 +201,51 @@ public class CustomersServiceImpl implements CustomersService {
 				+ "(T0.BALDUEDEB - T0.BALDUECRED) as 'Balance Due', T0.AdjTran as 'Trans', case T0.transtype when '13' then 'A/R Inv' "
 				+ "when '14' then 'AR DN' when '24' then 'Incoming' when '-2' then 'OB' else 'Other' end as 'T' , Ref1, "
 				+ "fccurrency 'BP Currency', CONVERT(VARCHAR(10), refdate, 103) 'Posting Date', CONVERT(VARCHAR(10), duedate, 103) 'Due Date', "
-				+ "CONVERT(VARCHAR(10), taxdate, 103) 'Doc Date' , CASE When (DATEDIFF(dd,refdate,'" + fromDateFormatted + "')) < 1 then case "
-				+ "when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end 'Future', CASE when (DATEDIFF(dd,refdate,'" + fromDateFormatted + "')) < 31 "
-				+ "and (DATEDIFF(dd,refdate,'" + fromDateFormatted + "')) >= 1 then case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end '0-30 days', "
-				+ "case when ((datediff(dd,refdate,'" + fromDateFormatted + "')) > 30 and (datediff(dd,refdate,'" + fromDateFormatted + "'))< 61) then case "
-				+ "when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end '31-60 days', case when ((datediff(dd,refdate,'" + fromDateFormatted + "')) > 60 "
-				+ "and (datediff(dd,refdate,'" + fromDateFormatted + "'))< 91) then case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB  end end '61-90 days', "
-				+ "CASE when ((DATEDIFF(dd,refdate,'" + fromDateFormatted + "')) > 90 and (datediff(dd,refdate,'" + fromDateFormatted + "'))< 121) then case "
+				+ "CONVERT(VARCHAR(10), taxdate, 103) 'Doc Date' , CASE When (DATEDIFF(dd,refdate,'" + fromDateFormatted
+				+ "')) < 1 then case "
+				+ "when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end 'Future', CASE when (DATEDIFF(dd,refdate,'"
+				+ fromDateFormatted + "')) < 31 " + "and (DATEDIFF(dd,refdate,'" + fromDateFormatted
+				+ "')) >= 1 then case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end '0-30 days', "
+				+ "case when ((datediff(dd,refdate,'" + fromDateFormatted + "')) > 30 and (datediff(dd,refdate,'"
+				+ fromDateFormatted + "'))< 61) then case "
+				+ "when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end '31-60 days', case when ((datediff(dd,refdate,'"
+				+ fromDateFormatted + "')) > 60 " + "and (datediff(dd,refdate,'" + fromDateFormatted
+				+ "'))< 91) then case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB  end end '61-90 days', "
+				+ "CASE when ((DATEDIFF(dd,refdate,'" + fromDateFormatted + "')) > 90 and (datediff(dd,refdate,'"
+				+ fromDateFormatted + "'))< 121) then case "
 				+ "when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then -BALDUECRED end end '90-120 days', CASE "
-				+ "when (DATEDIFF(dd,refdate,'" + fromDateFormatted + "')) > 121 then case when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then -BALDUECRED end end '120+ days' "
+				+ "when (DATEDIFF(dd,refdate,'" + fromDateFormatted
+				+ "')) > 121 then case when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then -BALDUECRED end end '120+ days' "
 				+ "from dbo.JDT1 T0 INNER JOIN dbo.OCRD T1 ON T0.shortname = T1.cardcode and T1.cardtype = 'C' where T0.intrnmatch = '0' "
-				+ "and T0.BALDUEDEB != T0.BALDUECRED and T1.CardCode=  '" + custCode + "' and T0.RefDate <='" + fromDateFormatted + "') "
+				+ "and T0.BALDUEDEB != T0.BALDUECRED and T1.CardCode=  '" + custCode + "' and T0.RefDate <='"
+				+ fromDateFormatted + "') "
 				+ "sub group by [BP Code],[BP Name],[t],[Posting date], [Due date],[Doc Date],[Ref1],Trans order by [BP Code]";
-		
+
 		System.out.println("Final SQL = " + sqlQuery);
 
 		PreparedStatement ps = conn.prepareStatement(sqlQuery);
 		ResultSet rs = ps.executeQuery();
 
 		AgingDetails agingDetails = null;
+		List<OINV> firstQInvoicesList = new ArrayList<OINV>();
+		List<OINV> secondQInvoicesList = new ArrayList<OINV>();
+		List<OINV> thirdQInvoicesList = new ArrayList<OINV>();
+		List<OINV> fourthQInvoicesList = new ArrayList<OINV>();
+		List<OINV> otherQInvoicesList = new ArrayList<OINV>();
+
+		List<InvoicesDetails> finalFirstQInvoicesList = new ArrayList<InvoicesDetails>();
+		List<InvoicesDetails> finalSecondQInvoicesList = new ArrayList<InvoicesDetails>();
+		List<InvoicesDetails> finalThirdQInvoicesList = new ArrayList<InvoicesDetails>();
+		List<InvoicesDetails> finalFourthQInvoicesList = new ArrayList<InvoicesDetails>();
+		List<InvoicesDetails> finalOtherQInvoicesList = new ArrayList<InvoicesDetails>();
+
 		if (rs.next()) {
+
+			DateFormat dfDash = new SimpleDateFormat("yyyy-MM-dd");
+			DateFormat dfSlash = new SimpleDateFormat("dd/MM/yyyy");
+
+			int ref1 = Integer.parseInt(
+					null == rs.getString("Ref1") || rs.getString("Ref1").isEmpty() ? "0" : rs.getString("Ref1"));
 
 			Float balanceDue = rs.getFloat("Balance");
 			Float firstQ = rs.getFloat("FirstQ");
@@ -210,95 +255,150 @@ public class CustomersServiceImpl implements CustomersService {
 			Float otherQ = rs.getFloat("OtherQ");
 			String custName = rs.getString("BP Name");
 
+			OINV oinv = new OINV(ref1, ref1, dfDash.format(dfSlash.parse(rs.getString("Posting date"))),
+					dfDash.format(dfSlash.parse(rs.getString("Due date"))), custCode, custName, balanceDue, "O",
+					rs.getString("Type"));
+
+			if (firstQ != 0)
+				firstQInvoicesList.add(oinv);
+			else if (secondQ != 0)
+				secondQInvoicesList.add(oinv);
+			else if (thirdQ != 0)
+				thirdQInvoicesList.add(oinv);
+			else if (fourthQ != 0)
+				fourthQInvoicesList.add(oinv);
+			else if (otherQ != 0)
+				otherQInvoicesList.add(oinv);
+
 			while (rs.next()) {
+
+				int ref1Next = Integer.parseInt(
+						null == rs.getString("Ref1") || rs.getString("Ref1").isEmpty() ? "0" : rs.getString("Ref1"));
+
 				balanceDue = balanceDue + rs.getFloat("Balance");
 				firstQ = firstQ + rs.getFloat("FirstQ");
 				secondQ = secondQ + rs.getFloat("SecondQ");
 				thirdQ = thirdQ + rs.getFloat("ThirdQ");
 				fourthQ = fourthQ + rs.getFloat("FourthQ");
 				otherQ = otherQ + rs.getFloat("OtherQ");
+
+				OINV oinvNext = new OINV(ref1Next, ref1Next, dfDash.format(dfSlash.parse(rs.getString("Posting date"))),
+						dfDash.format(dfSlash.parse(rs.getString("Due date"))), custCode, custName,
+						rs.getFloat("Balance"), "O", rs.getString("Type"));
+
+				if (firstQ != 0)
+					firstQInvoicesList.add(oinvNext);
+				else if (secondQ != 0)
+					secondQInvoicesList.add(oinvNext);
+				else if (thirdQ != 0)
+					thirdQInvoicesList.add(oinvNext);
+				else if (fourthQ != 0)
+					fourthQInvoicesList.add(oinvNext);
+				else if (otherQ != 0)
+					otherQInvoicesList.add(oinvNext);
 			}
 
 			agingDetails = new AgingDetails(custCode, custName, Float.toString(balanceDue), Float.toString(firstQ),
 					Float.toString(secondQ), Float.toString(thirdQ), Float.toString(fourthQ), Float.toString(otherQ));
+
+			finalFirstQInvoicesList = processInvoices(firstQInvoicesList, custCode);
+			finalSecondQInvoicesList = processInvoices(secondQInvoicesList, custCode);
+			finalThirdQInvoicesList = processInvoices(thirdQInvoicesList, custCode);
+			finalFourthQInvoicesList = processInvoices(fourthQInvoicesList, custCode);
+			finalOtherQInvoicesList = processInvoices(otherQInvoicesList, custCode);
 		} else
 			agingDetails = new AgingDetails(custCode, "", "0", "0", "0", "0", "0", "0");
 
-		return agingDetails;
+		AgingReportTo agingReportTo = new AgingReportTo(agingDetails, finalFirstQInvoicesList, finalSecondQInvoicesList,
+				finalThirdQInvoicesList, finalFourthQInvoicesList, finalOtherQInvoicesList);
+
+		return agingReportTo;
 	}
 
-	/*
-	 * private AgingDetails getAgingDetails(String custCode, String fromDate)
-	 * throws ClassNotFoundException, SQLException, ParseException {
-	 * 
-	 * Connection conn = commonUtility.getDbConnection();
-	 * 
-	 * String fromDateFormatted = new SimpleDateFormat("yyyyMMdd") .format(new
-	 * SimpleDateFormat("yyyy-MM-dd").parse(fromDate));
-	 * 
-	 * String sqlQuery =
-	 * "select T1.ShortName,(select a1.CardName from OCRD a1 where a1.CardCode=T1.ShortName)'CardName' ,"
-	 * + "(SUM(T1.BalDueDeb)-SUM(T1.BalDueCred))'BalanceDue', " +
-	 * "(select case when (SUM(a1.BalDueDeb)-SUM(a1.BalDueCred)) is null then 0 else (SUM(a1.BalDueDeb)-SUM(a1.BalDueCred)) end from JDT1 a1 where a1.ShortName=T1.ShortName and DATEDIFF(DAY,a1.DueDate, '"
-	 * + fromDateFormatted + "' )>=0 and DATEDIFF(DAY,a1.DueDate, '" +
-	 * fromDateFormatted + "' )<=30)'FirstQ'," +
-	 * "(select case when (SUM(a1.BalDueDeb)-SUM(a1.BalDueCred)) is null then 0 else (SUM(a1.BalDueDeb)-SUM(a1.BalDueCred)) end from JDT1 a1 where a1.ShortName=T1.ShortName and DATEDIFF(DAY,a1.DueDate, '"
-	 * + fromDateFormatted + "' )>30 and DATEDIFF(DAY,a1.DueDate, '" +
-	 * fromDateFormatted + "' )<=60)'SecondQ'," +
-	 * "(select case when (SUM(a1.BalDueDeb)-SUM(a1.BalDueCred)) is null then 0 else (SUM(a1.BalDueDeb)-SUM(a1.BalDueCred)) end from JDT1 a1 where a1.ShortName=T1.ShortName and DATEDIFF(DAY,a1.DueDate, '"
-	 * + fromDateFormatted + "' )>60 and DATEDIFF(DAY,a1.DueDate, '" +
-	 * fromDateFormatted + "' )<=90)'ThirdQ'," +
-	 * "(select case when (SUM(a1.BalDueDeb)-SUM(a1.BalDueCred)) is null then 0 else (SUM(a1.BalDueDeb)-SUM(a1.BalDueCred)) end from JDT1 a1 where a1.ShortName=T1.ShortName and DATEDIFF(DAY,a1.DueDate, '"
-	 * + fromDateFormatted + "' )>90 and DATEDIFF(DAY,a1.DueDate, '" +
-	 * fromDateFormatted + "' )<=120)'FourthQ'," +
-	 * "(select case when (SUM(a1.BalDueDeb)-SUM(a1.BalDueCred)) is null then 0 else (SUM(a1.BalDueDeb)-SUM(a1.BalDueCred)) end from JDT1 a1 where a1.ShortName=T1.ShortName and DATEDIFF(DAY,a1.DueDate, '"
-	 * + fromDateFormatted + "' )>120)'OtherQ' " +
-	 * "from OJDT T0 inner join JDT1 T1 on T0.TransId=T1.TransId where " +
-	 * "T0.DueDate<= '" + fromDateFormatted + "' and T1.ShortName= '" + custCode
-	 * + "' group by T1.ShortName " +
-	 * "having T1.ShortName in (select a1.CardCode from OCRD a1 where a1.CardType='C') and (SUM(T1.BalDueDeb)-SUM(T1.BalDueCred))>0 "
-	 * + "order by T1.ShortName";
-	 * 
-	 * System.out.println("Final SQL = " + sqlQuery);
-	 * 
-	 * PreparedStatement ps = conn.prepareStatement(sqlQuery); ResultSet rs =
-	 * ps.executeQuery();
-	 * 
-	 * AgingDetails agingDetails = null; if (rs.next()) agingDetails = new
-	 * AgingDetails(custCode, rs.getString("CardName"),
-	 * rs.getString("BalanceDue"), rs.getString("FirstQ"),
-	 * rs.getString("SecondQ"), rs.getString("ThirdQ"), rs.getString("FourthQ"),
-	 * rs.getString("OtherQ")); else agingDetails = new AgingDetails(custCode,
-	 * "", "0", "0", "0", "0", "0", "0");
-	 * 
-	 * return agingDetails; }
-	 */
+	public List<InvoicesDetails> processInvoices(List<OINV> invoicesList, String custCode)
+			throws ParseException, ClassNotFoundException, SQLException {
 
-	// TODO: Write Proper API For This
+		if (invoicesList.isEmpty())
+			invoicesList = new ArrayList<OINV>();
+
+		// Get DocEntry for all invoices
+		List<Integer> invoiceDocEntriesList = new ArrayList<Integer>();
+		for (OINV oinv : invoicesList)
+			invoiceDocEntriesList.add(oinv.getDocEntry());
+
+		System.out.println(invoiceDocEntriesList.toString());
+
+		List<InvoiceItems> invoiceItemsList;
+		Map<Integer, List<InvoiceItems>> invoiceItemsMap;
+		List<InvoicesDetails> invoiceDetailsList = new ArrayList<InvoicesDetails>();
+		if (invoiceDocEntriesList.size() > 0) {
+			invoiceItemsList = getInvoiceItemsListForDocEntries(invoiceDocEntriesList);
+
+			// Separate All Invoice Items As Per Invoice No (DocEntry)
+			invoiceItemsMap = new HashMap<Integer, List<InvoiceItems>>();
+			for (InvoiceItems invoiceItems : invoiceItemsList) {
+				int invoiceDocEntry = invoiceItems.getDocEntry();
+
+				List<InvoiceItems> invoiceItemMapList;
+				if (invoiceItemsMap.containsKey(invoiceDocEntry))
+					invoiceItemMapList = invoiceItemsMap.get(invoiceDocEntry);
+				else
+					invoiceItemMapList = new ArrayList<InvoiceItems>();
+
+				invoiceItemMapList.add(invoiceItems);
+
+				invoiceItemsMap.put(invoiceDocEntry, invoiceItemMapList);
+			}
+
+			System.out.println("Invoice Doc Entry Keys In Map = " + invoiceItemsMap.keySet().toString());
+
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+			df.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+
+			String currentDate = df.format(new Date());
+			NumberToWord numberToWord = new NumberToWord();
+			for (OINV oinv : invoicesList) {
+
+				int invoiceDocEntry = oinv.getDocEntry();
+				System.out.println("Invoice Doc Entry In Iteration : " + invoiceDocEntry);
+
+				String invoiceDate = oinv.getDocDate();
+				String invoiceDueDate = oinv.getDocDueDate();
+				long paymentDueDays = commonUtility.getDaysDiffBetweenDates(invoiceDate, invoiceDueDate);
+				long dueDateInDays = commonUtility.getDaysDiffBetweenDates(currentDate, invoiceDueDate);
+				List<InvoiceItems> invoiceItemsListFromMap = invoiceItemsMap.get(invoiceDocEntry);
+				System.out.println("invoiceItemsListFromMap = " + invoiceItemsListFromMap);
+
+				String invoiceAmountInWords = numberToWord.convert(Math.round(oinv.getDocTotal()));
+
+				float finalTaxAmount = 0F;
+
+				if (null != invoiceItemsListFromMap) {
+					for (InvoiceItems invoiceItems : invoiceItemsListFromMap) {
+						// finalTaxAmount = finalTaxAmount +
+						// Float.parseFloat(invoiceItems.getCgstTax())
+						// + Float.parseFloat(invoiceItems.getSgstTax());
+						finalTaxAmount = finalTaxAmount + invoiceItems.getCgstTax() + invoiceItems.getSgstTax();
+					}
+				}
+				String taxAmountInWords = numberToWord.convert((int) Math.floor(finalTaxAmount));
+
+				InvoicesDetails invoicesDetails = new InvoicesDetails(invoiceDocEntry,
+						Integer.toString(oinv.getDocNum()), invoiceDate, invoiceDueDate, paymentDueDays,
+						oinv.getDocStatus(), 0F, custCode, "", oinv.getType(), invoiceItemsListFromMap, 0F, 0F, 0F, 0F,
+						oinv.getDocTotal(), "", dueDateInDays, 0F, 0F, 0F, 0F, invoiceAmountInWords, taxAmountInWords);
+
+				invoiceDetailsList.add(invoicesDetails);
+			}
+		}
+
+		return invoiceDetailsList;
+	}
+
+
 	@Override
 	public BaseWrapper doGetCustomerInvoices(String custCode, int noOfDays, String dueDate)
 			throws ParseException, ClassNotFoundException, SQLException {
-
-		// TODO: Remove Test Code
-		/*
-		 * List<InvoicesDetails> invoiceDetailsList = new
-		 * ArrayList<InvoicesDetails>();
-		 * 
-		 * List<InvoiceItems> invoiceItemsList = new ArrayList<>(); InvoiceItems
-		 * invoiceItems = new InvoiceItems(1, 1, "ITM001", "Birla Super", 100F,
-		 * 270F, 25000F, "32456", "14", "14", "0", "Test Pay To Address",
-		 * "Test Ship To Address", "-0.01", "30 Days", "Pune", "27GDJKKADS9K",
-		 * "27", "Maharashtra", "1600", "1600", "0", "Test Freight Name", "0",
-		 * null);
-		 * 
-		 * invoiceItemsList.add(invoiceItems);
-		 * 
-		 * for (int i = 0; i < 10; i++) { InvoicesDetails invoiceDetails = new
-		 * InvoicesDetails((i + 1), Integer.toString(i*2), "1 Apr", "14 Apr", 1,
-		 * "O", 31000F, custCode, "Piyush", "Sales GST", invoiceItemsList,
-		 * 25781.25F, 14F, 14F, -0.01F, 33000F, "Dispatch Report As On 28.2.19",
-		 * 30L, 0F, 0F, 1600F, 1600F); invoiceDetailsList.add(invoiceDetails); }
-		 */
 
 		// Working Code
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
@@ -332,7 +432,7 @@ public class CustomersServiceImpl implements CustomersService {
 			invoiceDocEntriesList.add(oinv.getDocEntry());
 
 		System.out.println(invoiceDocEntriesList.toString());
-		
+
 		List<InvoiceItems> invoiceItemsList;
 		Map<Integer, List<InvoiceItems>> invoiceItemsMap;
 		List<InvoicesDetails> invoiceDetailsList = new ArrayList<InvoicesDetails>();
@@ -354,7 +454,7 @@ public class CustomersServiceImpl implements CustomersService {
 
 				invoiceItemsMap.put(invoiceDocEntry, invoiceItemMapList);
 			}
-			
+
 			System.out.println("Invoice Doc Entry Keys In Map = " + invoiceItemsMap.keySet().toString());
 
 			String currentDate = df.format(new Date());
@@ -363,28 +463,27 @@ public class CustomersServiceImpl implements CustomersService {
 
 				int invoiceDocEntry = oinv.getDocEntry();
 				System.out.println("Invoice Doc Entry In Iteration : " + invoiceDocEntry);
-				
+
 				String invoiceDate = oinv.getDocDate();
 				String invoiceDueDate = oinv.getDocDueDate();
 				long paymentDueDays = commonUtility.getDaysDiffBetweenDates(invoiceDate, invoiceDueDate);
 				long dueDateInDays = commonUtility.getDaysDiffBetweenDates(currentDate, invoiceDueDate);
 				List<InvoiceItems> invoiceItemsListFromMap = invoiceItemsMap.get(invoiceDocEntry);
 				System.out.println("invoiceItemsListFromMap = " + invoiceItemsListFromMap);
-				
-				String invoiceAmountInWords = numberToWord
-						.convert(Math.round(oinv.getDocTotal()));
+
+				String invoiceAmountInWords = numberToWord.convert(Math.round(oinv.getDocTotal()));
 
 				float finalTaxAmount = 0F;
-				
+
 				if (null != invoiceItemsListFromMap) {
 					for (InvoiceItems invoiceItems : invoiceItemsListFromMap) {
-	//					finalTaxAmount = finalTaxAmount + Float.parseFloat(invoiceItems.getCgstTax())
-	//							+ Float.parseFloat(invoiceItems.getSgstTax());
-						finalTaxAmount = finalTaxAmount + invoiceItems.getCgstTax()
-						+ invoiceItems.getSgstTax();
+						// finalTaxAmount = finalTaxAmount +
+						// Float.parseFloat(invoiceItems.getCgstTax())
+						// + Float.parseFloat(invoiceItems.getSgstTax());
+						finalTaxAmount = finalTaxAmount + invoiceItems.getCgstTax() + invoiceItems.getSgstTax();
 					}
 				}
-				String taxAmountInWords = numberToWord.convert((int)Math.floor(finalTaxAmount));
+				String taxAmountInWords = numberToWord.convert((int) Math.floor(finalTaxAmount));
 
 				InvoicesDetails invoicesDetails = new InvoicesDetails(invoiceDocEntry,
 						Integer.toString(oinv.getDocNum()), invoiceDate, invoiceDueDate, paymentDueDays,
@@ -461,8 +560,11 @@ public class CustomersServiceImpl implements CustomersService {
 			invoicesList.add(oinv);
 
 			while (rs.next()) {
-				OINV oinvNext = new OINV(Integer.parseInt(rs.getString("Ref1") == null || rs.getString("Ref1").isEmpty() ? "0" : rs.getString("Ref1")), 
-						Integer.parseInt(rs.getString("Ref1") == null || rs.getString("Ref1").isEmpty() ? "0" : rs.getString("Ref1")),
+				OINV oinvNext = new OINV(
+						Integer.parseInt(rs.getString("Ref1") == null || rs.getString("Ref1").isEmpty() ? "0"
+								: rs.getString("Ref1")),
+						Integer.parseInt(rs.getString("Ref1") == null || rs.getString("Ref1").isEmpty() ? "0"
+								: rs.getString("Ref1")),
 						dfDash.format(dfSlash.parse(rs.getString("Posting date"))),
 						dfDash.format(dfSlash.parse(rs.getString("Due date"))), custCode, rs.getString("BP Name"),
 						rs.getFloat("Balance"), "O", rs.getString("Type"));
@@ -519,12 +621,11 @@ public class CustomersServiceImpl implements CustomersService {
 			InvoiceItems invoiceItems = new InvoiceItems(rs.getInt("DocEntry"), rs.getInt("DocNum"),
 					rs.getString("ItemCode"), rs.getString("Dscription"), rs.getFloat("Quantity"), rs.getFloat("Price"),
 					rs.getFloat("LineTotal"), rs.getString("Chap_Id"), rs.getFloat("CGST Rate"),
-					rs.getFloat("SGST Rate"), rs.getFloat("IGST Rate"), rs.getString("Pay_To"),
-					rs.getString("Ship_To"), rs.getFloat("RoundDif"), rs.getString("Payment Terms"),
-					rs.getString("Party City"), rs.getString("Party GSTIN No"), rs.getString("StateCode"),
-					rs.getString("StateName"), rs.getFloat("CGST TAX"), rs.getFloat("SGST TAX"),
-					rs.getFloat("IGST TAX"), rs.getString("Frieght Name"), rs.getString("Frieght Amt"),
-					rs.getString("Sac_Code"));
+					rs.getFloat("SGST Rate"), rs.getFloat("IGST Rate"), rs.getString("Pay_To"), rs.getString("Ship_To"),
+					rs.getFloat("RoundDif"), rs.getString("Payment Terms"), rs.getString("Party City"),
+					rs.getString("Party GSTIN No"), rs.getString("StateCode"), rs.getString("StateName"),
+					rs.getFloat("CGST TAX"), rs.getFloat("SGST TAX"), rs.getFloat("IGST TAX"),
+					rs.getString("Frieght Name"), rs.getString("Frieght Amt"), rs.getString("Sac_Code"));
 
 			invoicesItemsDetailsList.add(invoiceItems);
 		}
@@ -592,7 +693,7 @@ public class CustomersServiceImpl implements CustomersService {
 		ordersList = null; // Make the Object Available for Garbage Collection
 
 		OrderMgmtWrapper response = new OrderMgmtWrapper(finalOrdersList);
-		
+
 		return new BaseWrapper(response);
 	}
 
@@ -612,7 +713,7 @@ public class CustomersServiceImpl implements CustomersService {
 
 		List<InvoicesDetails> invoiceDetailsList = new ArrayList<InvoicesDetails>();
 		NumberToWord numberToWord = new NumberToWord();
-		
+
 		for (OINV oinv : invoicesList) {
 
 			int invoiceDocEntry = oinv.getDocEntry();
@@ -624,13 +725,13 @@ public class CustomersServiceImpl implements CustomersService {
 			 * List<InvoiceItems> invoiceItems =
 			 * invoiceItemsMap.get(invoiceDocEntry);
 			 */
-			
-			String invoiceAmountInWords = numberToWord
-					.convert(Math.round(oinv.getDocTotal()));
+
+			String invoiceAmountInWords = numberToWord.convert(Math.round(oinv.getDocTotal()));
 
 			InvoicesDetails invoicesDetails = new InvoicesDetails(invoiceDocEntry, Integer.toString(oinv.getDocNum()),
 					invoiceDate, invoiceDueDate, paymentDueDays, oinv.getDocStatus(), 0F, custCode, "", oinv.getType(),
-					null, 0F, 0F, 0F, 0F, oinv.getDocTotal(), "", dueDateInDays, 0F, 0F, 0F, 0F, invoiceAmountInWords, "");
+					null, 0F, 0F, 0F, 0F, oinv.getDocTotal(), "", dueDateInDays, 0F, 0F, 0F, 0F, invoiceAmountInWords,
+					"");
 
 			invoiceDetailsList.add(invoicesDetails);
 		}
