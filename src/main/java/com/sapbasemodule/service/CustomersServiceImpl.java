@@ -146,35 +146,54 @@ public class CustomersServiceImpl implements CustomersService {
 		String fromDateFormatted = new SimpleDateFormat("yyyyMMdd")
 				.format(new SimpleDateFormat("yyyy-MM-dd").parse(fromDate));
 
-		String sqlQuery = "Select [Bp Code],[BP Name], [t] as Type ,[Posting date], [Due date], [Doc Date],[Ref1],SUM([Balance Due])'Balance',SUM(Future)'Future', "
-				+ "SUM([0-30 days])'FirstQ',SUM([31-60 days])'SecondQ',SUM([61-90 days])'ThirdQ',SUM([90-120 days])'FourthQ', "
-				+ "Sum([120+ days])'OtherQ',Trans from "
-				+ "(select T1.cardcode 'BP Code',T1.cardname 'BP Name',sysdeb 'Debit Amount',syscred 'Credit Amount', "
-				+ "(T0.BALDUEDEB - T0.BALDUECRED) as 'Balance Due', T0.AdjTran as 'Trans', "
-				+ "case T0.transtype when '-2' then 'OB' when '13' then 'A/R Inv' when '14' then 'AR DN' when '24' then 'Incoming' else 'Other' end as 'T' ,Ref1, "
-				+ "fccurrency 'BP Currency', " + "CONVERT(VARCHAR(10), refdate, 103) 'Posting Date', "
-				+ "CONVERT(VARCHAR(10), duedate, 103) 'Due Date', " + "CONVERT(VARCHAR(10), taxdate, 103) 'Doc Date' , "
-				+ "CASE When (DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) < 1 then "
-				+ "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end 'Future', "
-				+ "CASE when (DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) < 31 and (DATEDIFF(dd,duedate,'"
-				+ fromDateFormatted + "')) >= 1 then "
-				+ "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end '0-30 days', "
-				+ "case when ((datediff(dd,duedate,'" + fromDateFormatted + "')) > 30 and (datediff(dd,duedate,'"
-				+ fromDateFormatted + "'))< 61) then "
-				+ "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end '31-60 days', "
-				+ "case when ((datediff(dd,DueDate,'" + fromDateFormatted + "')) > 60 and (datediff(dd,duedate,'"
-				+ fromDateFormatted + "'))< 91) then "
-				+ "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB  end end '61-90 days', "
-				+ "CASE when ((DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) > 90 and (datediff(dd,duedate,'"
-				+ fromDateFormatted + "'))< 121) then "
-				+ "case when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then -BALDUECRED end end '90-120 days', "
-				+ "CASE when (DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) > 121 then "
-				+ "case when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then -BALDUECRED end end '120+ days' "
-				+ "from dbo.JDT1 T0 " + "INNER JOIN dbo.OCRD T1 ON T0.shortname = T1.cardcode "
-				+ "and T1.cardtype = 'C' where T0.intrnmatch = '0' and  T0.BALDUEDEB != T0.BALDUECRED and  T1.CardCode= '"
-				+ custCode + "' and " + "T0.RefDate  <='" + fromDateFormatted + "')"
-				+ " sub group by [BP Code],[BP Name],[t],[Posting date], [Due date],[Doc Date],[Ref1],Trans order by [BP Code]";
+//		String sqlQuery = "Select [Bp Code],[BP Name], [t] as Type ,[Posting date], [Due date], [Doc Date],[Ref1],SUM([Balance Due])'Balance',SUM(Future)'Future', "
+//				+ "SUM([0-30 days])'FirstQ',SUM([31-60 days])'SecondQ',SUM([61-90 days])'ThirdQ',SUM([90-120 days])'FourthQ', "
+//				+ "Sum([120+ days])'OtherQ',Trans from "
+//				+ "(select T1.cardcode 'BP Code',T1.cardname 'BP Name',sysdeb 'Debit Amount',syscred 'Credit Amount', "
+//				+ "(T0.BALDUEDEB - T0.BALDUECRED) as 'Balance Due', T0.AdjTran as 'Trans', "
+//				+ "case T0.transtype when '-2' then 'OB' when '13' then 'A/R Inv' when '14' then 'AR DN' when '24' then 'Incoming' else 'Other' end as 'T' ,Ref1, "
+//				+ "fccurrency 'BP Currency', " + "CONVERT(VARCHAR(10), refdate, 103) 'Posting Date', "
+//				+ "CONVERT(VARCHAR(10), duedate, 103) 'Due Date', " + "CONVERT(VARCHAR(10), taxdate, 103) 'Doc Date' , "
+//				+ "CASE When (DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) < 1 then "
+//				+ "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end 'Future', "
+//				+ "CASE when (DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) < 31 and (DATEDIFF(dd,duedate,'"
+//				+ fromDateFormatted + "')) >= 1 then "
+//				+ "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end '0-30 days', "
+//				+ "case when ((datediff(dd,duedate,'" + fromDateFormatted + "')) > 30 and (datediff(dd,duedate,'"
+//				+ fromDateFormatted + "'))< 61) then "
+//				+ "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end '31-60 days', "
+//				+ "case when ((datediff(dd,DueDate,'" + fromDateFormatted + "')) > 60 and (datediff(dd,duedate,'"
+//				+ fromDateFormatted + "'))< 91) then "
+//				+ "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB  end end '61-90 days', "
+//				+ "CASE when ((DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) > 90 and (datediff(dd,duedate,'"
+//				+ fromDateFormatted + "'))< 121) then "
+//				+ "case when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then -BALDUECRED end end '90-120 days', "
+//				+ "CASE when (DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) > 121 then "
+//				+ "case when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then -BALDUECRED end end '120+ days' "
+//				+ "from dbo.JDT1 T0 " + "INNER JOIN dbo.OCRD T1 ON T0.shortname = T1.cardcode "
+//				+ "and T1.cardtype = 'C' where T0.intrnmatch = '0' and  T0.BALDUEDEB != T0.BALDUECRED and  T1.CardCode= '"
+//				+ custCode + "' and " + "T0.RefDate  <='" + fromDateFormatted + "')"
+//				+ " sub group by [BP Code],[BP Name],[t],[Posting date], [Due date],[Doc Date],[Ref1],Trans order by [BP Code]";
 
+		String sqlQuery = "Select [Bp Code],[BP Name], [t] as Type ,[Posting date], [Due date], [Doc Date],[Ref1],SUM([Balance Due])'Balance',"
+				+ "SUM(Future)'Future', SUM([0-30 days])'FirstQ',SUM([31-60 days])'SecondQ',SUM([61-90 days])'ThirdQ',SUM([90-120 days])'FourthQ',"
+				+ "Sum([120+ days])'OtherQ',Trans from (select T1.cardcode 'BP Code',T1.cardname 'BP Name',sysdeb 'Debit Amount',syscred 'Credit Amount', "
+				+ "(T0.BALDUEDEB - T0.BALDUECRED) as 'Balance Due', T0.AdjTran as 'Trans', case T0.transtype when '13' then 'A/R Inv' "
+				+ "when '14' then 'AR DN' when '24' then 'Incoming' when '-2' then 'OB' else 'Other' end as 'T' , Ref1, "
+				+ "fccurrency 'BP Currency', CONVERT(VARCHAR(10), refdate, 103) 'Posting Date', CONVERT(VARCHAR(10), duedate, 103) 'Due Date', "
+				+ "CONVERT(VARCHAR(10), taxdate, 103) 'Doc Date' , CASE When (DATEDIFF(dd,refdate,'" + fromDateFormatted + "')) < 1 then case "
+				+ "when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end 'Future', CASE when (DATEDIFF(dd,refdate,'" + fromDateFormatted + "')) < 31 "
+				+ "and (DATEDIFF(dd,refdate,'" + fromDateFormatted + "')) >= 1 then case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end '0-30 days', "
+				+ "case when ((datediff(dd,refdate,'" + fromDateFormatted + "')) > 30 and (datediff(dd,refdate,'" + fromDateFormatted + "'))< 61) then case "
+				+ "when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end '31-60 days', case when ((datediff(dd,refdate,'" + fromDateFormatted + "')) > 60 "
+				+ "and (datediff(dd,refdate,'" + fromDateFormatted + "'))< 91) then case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB  end end '61-90 days', "
+				+ "CASE when ((DATEDIFF(dd,refdate,'" + fromDateFormatted + "')) > 90 and (datediff(dd,refdate,'" + fromDateFormatted + "'))< 121) then case "
+				+ "when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then -BALDUECRED end end '90-120 days', CASE "
+				+ "when (DATEDIFF(dd,refdate,'" + fromDateFormatted + "')) > 121 then case when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then -BALDUECRED end end '120+ days' "
+				+ "from dbo.JDT1 T0 INNER JOIN dbo.OCRD T1 ON T0.shortname = T1.cardcode and T1.cardtype = 'C' where T0.intrnmatch = '0' "
+				+ "and T0.BALDUEDEB != T0.BALDUECRED and T1.CardCode=  '" + custCode + "' and T0.RefDate <='" + fromDateFormatted + "') "
+				+ "sub group by [BP Code],[BP Name],[t],[Posting date], [Due date],[Doc Date],[Ref1],Trans order by [BP Code]";
+		
 		System.out.println("Final SQL = " + sqlQuery);
 
 		PreparedStatement ps = conn.prepareStatement(sqlQuery);
@@ -397,28 +416,26 @@ public class CustomersServiceImpl implements CustomersService {
 				+ "(T0.BALDUEDEB - T0.BALDUECRED) as 'Balance Due', T0.AdjTran as 'Trans', "
 				+ "case T0.transtype when '-2' then 'OB' when '13' then 'A/R Inv' when '14' then 'AR DN' when '24' then 'Incoming' else 'Other' end as 'T' ,Ref1, "
 				+ "fccurrency 'BP Currency', " + "CONVERT(VARCHAR(10), refdate, 103) 'Posting Date', "
-				+ "CONVERT(VARCHAR(10), duedate, 103) 'Due Date', " + "CONVERT(VARCHAR(10), taxdate, 103) 'Doc Date' , "
-				+ "CASE When (DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) < 1 then "
+				+ "CONVERT(VARCHAR(10), refdate, 103) 'Due Date', " + "CONVERT(VARCHAR(10), taxdate, 103) 'Doc Date' , "
+				+ "CASE When (DATEDIFF(dd,refdate,'" + fromDateFormatted + "')) < 1 then "
 				+ "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end 'Future', "
-				+ "CASE when (DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) < 31 and (DATEDIFF(dd,duedate,'"
+				+ "CASE when (DATEDIFF(dd,refdate,'" + fromDateFormatted + "')) < 31 and (DATEDIFF(dd,refdate,'"
 				+ fromDateFormatted + "')) >= 1 then "
 				+ "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end '0-30 days', "
-				+ "case when ((datediff(dd,duedate,'" + fromDateFormatted + "')) > 30 and (datediff(dd,duedate,'"
+				+ "case when ((datediff(dd,refdate,'" + fromDateFormatted + "')) > 30 and (datediff(dd,refdate,'"
 				+ fromDateFormatted + "'))< 61) then "
 				+ "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end '31-60 days', "
-				+ "case when ((datediff(dd,DueDate,'" + fromDateFormatted + "')) > 60 and (datediff(dd,duedate,'"
+				+ "case when ((datediff(dd,refdate,'" + fromDateFormatted + "')) > 60 and (datediff(dd,refdate,'"
 				+ fromDateFormatted + "'))< 91) then "
 				+ "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB  end end '61-90 days', "
-				+ "CASE when ((DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) > 90 and (datediff(dd,duedate,'"
+				+ "CASE when ((DATEDIFF(dd,refdate,'" + fromDateFormatted + "')) > 90 and (datediff(dd,refdate,'"
 				+ fromDateFormatted + "'))< 121) then "
 				+ "case when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then -BALDUECRED end end '90-120 days', "
-				+ "CASE when (DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) > 121 then "
+				+ "CASE when (DATEDIFF(dd,refdate,'" + fromDateFormatted + "')) > 121 then "
 				+ "case when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then -BALDUECRED end end '120+ days' "
 				+ "from dbo.JDT1 T0 " + "INNER JOIN dbo.OCRD T1 ON T0.shortname = T1.cardcode "
 				+ "and T1.cardtype = 'C' where T0.intrnmatch = '0' and  T0.BALDUEDEB != T0.BALDUECRED and  T1.CardCode= '"
-				// + custCode + "' and T0.RefDate >='" + fromDateFormatted + "'
-				// and T0.RefDate <='" + toDateFormatted
-				+ custCode + "' and T0.DueDate >='" + fromDateFormatted + "' and T0.DueDate <='" + toDateFormatted
+				+ custCode + "' and T0.RefDate >='" + fromDateFormatted + "' and T0.RefDate <='" + toDateFormatted
 				+ "')"
 				+ " sub group by [BP Code],[BP Name],[t],[Posting date], [Due date],[Doc Date],[Ref1],Trans order by [BP Code]";
 
@@ -444,7 +461,8 @@ public class CustomersServiceImpl implements CustomersService {
 			invoicesList.add(oinv);
 
 			while (rs.next()) {
-				OINV oinvNext = new OINV(rs.getInt("Ref1"), rs.getInt("Ref1"),
+				OINV oinvNext = new OINV(Integer.parseInt(rs.getString("Ref1") == null || rs.getString("Ref1").isEmpty() ? "0" : rs.getString("Ref1")), 
+						Integer.parseInt(rs.getString("Ref1") == null || rs.getString("Ref1").isEmpty() ? "0" : rs.getString("Ref1")),
 						dfDash.format(dfSlash.parse(rs.getString("Posting date"))),
 						dfDash.format(dfSlash.parse(rs.getString("Due date"))), custCode, rs.getString("BP Name"),
 						rs.getFloat("Balance"), "O", rs.getString("Type"));
