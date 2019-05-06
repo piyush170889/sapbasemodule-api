@@ -74,7 +74,7 @@ public class CustomersServiceImpl implements CustomersService {
 
 		long totalCustCount = customersRepository.count();
 		if (pageNo.isPresent()) {
-			Sort sort = new Sort(Direction.DESC, "cardCode");
+			Sort sort = new Sort(Direction.ASC, "cardName");
 			PageRequest pageRequest = commonUtility.getPageRequest(pageNo.get(), sort);
 
 			customersList = customersRepository.findAll(pageRequest).getContent();
@@ -259,6 +259,7 @@ public class CustomersServiceImpl implements CustomersService {
 					dfDash.format(dfSlash.parse(rs.getString("Due date"))), custCode, custName, balanceDue, "O",
 					rs.getString("Type"));
 
+//			System.out.println(ref1 + " = " + firstQ + ", " + secondQ + ", " + thirdQ + ", " + fourthQ + ", " + otherQ);
 			if (firstQ != 0)
 				firstQInvoicesList.add(oinv);
 			else if (secondQ != 0)
@@ -276,25 +277,36 @@ public class CustomersServiceImpl implements CustomersService {
 						null == rs.getString("Ref1") || rs.getString("Ref1").isEmpty() ? "0" : rs.getString("Ref1"));
 
 				balanceDue = balanceDue + rs.getFloat("Balance");
-				firstQ = firstQ + rs.getFloat("FirstQ");
-				secondQ = secondQ + rs.getFloat("SecondQ");
-				thirdQ = thirdQ + rs.getFloat("ThirdQ");
-				fourthQ = fourthQ + rs.getFloat("FourthQ");
-				otherQ = otherQ + rs.getFloat("OtherQ");
+				Float rsFirstQ = rs.getFloat("FirstQ");
+				firstQ = firstQ + rsFirstQ;
+				
+				Float rsSecondQ = rs.getFloat("SecondQ");
+				secondQ = secondQ + rsSecondQ;
+				
+				Float rsThirdQ = rs.getFloat("ThirdQ");
+				thirdQ = thirdQ + rsThirdQ;
+				
+				Float rsFourthQ = rs.getFloat("FourthQ");
+				fourthQ = fourthQ + rsFourthQ;
+				
+				Float rsOtherQ = rs.getFloat("OtherQ");
+				otherQ = otherQ + rsOtherQ;
 
 				OINV oinvNext = new OINV(ref1Next, ref1Next, dfDash.format(dfSlash.parse(rs.getString("Posting date"))),
 						dfDash.format(dfSlash.parse(rs.getString("Due date"))), custCode, custName,
 						rs.getFloat("Balance"), "O", rs.getString("Type"));
 
-				if (firstQ != 0)
+//				System.out.println(ref1 + " = " + firstQ + ", " + secondQ + ", " + thirdQ + ", " + fourthQ + ", " + otherQ);
+				
+				if (rsFirstQ != 0)
 					firstQInvoicesList.add(oinvNext);
-				else if (secondQ != 0)
+				else if (rsSecondQ != 0)
 					secondQInvoicesList.add(oinvNext);
-				else if (thirdQ != 0)
+				else if (rsThirdQ != 0)
 					thirdQInvoicesList.add(oinvNext);
-				else if (fourthQ != 0)
+				else if (rsFourthQ != 0)
 					fourthQInvoicesList.add(oinvNext);
-				else if (otherQ != 0)
+				else if (rsOtherQ != 0)
 					otherQInvoicesList.add(oinvNext);
 			}
 
