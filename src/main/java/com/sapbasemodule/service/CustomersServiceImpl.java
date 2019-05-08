@@ -37,6 +37,7 @@ import com.sapbasemodule.model.InvoiceItems;
 import com.sapbasemodule.model.InvoicesDetails;
 import com.sapbasemodule.model.OrderMgmtWrapper;
 import com.sapbasemodule.model.PaginationDetails;
+import com.sapbasemodule.model.PendingInvoicesTo;
 import com.sapbasemodule.persitence.CustomersAddressesRepository;
 import com.sapbasemodule.persitence.CustomersRepository;
 import com.sapbasemodule.persitence.OrderItemsRepository;
@@ -762,5 +763,38 @@ public class CustomersServiceImpl implements CustomersService {
 		// }
 
 		return new BaseWrapper(invoiceDetailsList);
+	}
+	
+	@Override
+	public BaseWrapper doGetCustomersPendingInvoices(String custCode, String fromDate, String toDate)
+			throws ClassNotFoundException, SQLException, ParseException {
+
+		String pendingInvoicesSqlQuery = "Select T0.Docnum 'Ref.No', T0.DocDate 'Inv.Date',"
+				+ "(SELECT Top 1 T0.[ExtraDays] FROM OCTG T10  Where T10.[GroupNum] = T0.[GroupNum])As'Due Date OR Credit Days', "
+				+ "DateDiff(DAY,T0.[DocDate],GETDATE())as[Over Due For Billing], "
+				+ "T0.CardName As'Party Name',T0.DocTotal as'Opening Amount', "
+				+ "(T0.DocTotal - T0.PaidToDate)As'pending Amount',T0.DocDueDate 'Due On', "
+				+ "DateDiff(DAY,T0.[DocDueDate],GETDATE())as[Over Due Days] "
+				+ "From OINV T0 INNER JOIN INV1 T1 ON T0.DocEntry=T1.DocEntry "
+				+ "Where T0.CANCELED='N' And T1.TargetType <> 14 And  " + "T0.DocDate >='" + fromDate + "'"
+				+ "And T0.DocDate <='" + toDate + "' " + "And T0.CardCode ='" + custCode + "' order by 'Inv.Date' ASC";
+		
+		System.out.println("Final Sql Query = " + pendingInvoicesSqlQuery);
+		
+		Connection conn = commonUtility.getDbConnection();
+
+		PreparedStatement ps = conn.prepareStatement(pendingInvoicesSqlQuery);
+		ResultSet rs = ps.executeQuery();
+
+		List<PendingInvoicesTo> pendingInvoicesList = new ArrayList<PendingInvoicesTo>();
+		while (rs.next()) {
+			PendingInvoicesTo pendingInvoices = new PendingInvoicesTo(rs.getString("Ref.No"), rs.getString("Inv.Date"),
+					rs.getString("Due Date OR Credit Days"), rs.getString("Over Due For Billing"), rs.getString("Party Name"), 
+					rs.getString("Opening Amount"), rs.getString("pending Amount"), rs.getString("Due On"), rs.getString("Over Due Days"));
+
+			pendingInvoicesList.add(pendingInvoices);
+		}
+
+		return new BaseWrapper(pendingInvoicesList);
 	}
 }

@@ -59,11 +59,21 @@ public class CustomersController {
 		System.out.println("Cust Code = " + custCode);
 		return customersService.doGetCustomerOrders(custCode, pageNo, limit);
 	}
-	
+
 	@GetMapping(value = "/{cust-code}/ledger-report")
-	public Object getCustomersOrders(@PathVariable("cust-code") String custCode) throws ClassNotFoundException, SQLException, ParseException {
+	public Object getCustomersOrders(@PathVariable("cust-code") String custCode)
+			throws ClassNotFoundException, SQLException, ParseException {
 
 		System.out.println("Cust Code = " + custCode);
 		return customersService.doGetCustomerLedgerReport(custCode);
+	}
+
+	@GetMapping(value = "/{cust-code}/pending-invoices")
+	public Object getCustomersPendingInvoices(@PathVariable("cust-code") String custCode,
+			@RequestParam(value = "from-date", required = true) String fromDate,
+			@RequestParam(value = "to-date", required = true) String toDate) throws ClassNotFoundException, SQLException, ParseException {
+
+		System.out.println("custCode: " + custCode + ", fromDate: " + fromDate + ", toDate: " + toDate);
+		return customersService.doGetCustomersPendingInvoices(custCode, fromDate, toDate);
 	}
 }
