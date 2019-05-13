@@ -20,11 +20,13 @@ public class PendingInvoicesTo {
 
 	private String overDueDays;
 
+	private String ob;
+
 	public PendingInvoicesTo() {
 	}
 
 	public PendingInvoicesTo(String refNo, String invDate, String dueDateOrCreditDays, String overDueForBilling,
-			String partyName, String openingAmount, String pendingAmount, String dueOn, String overDueDays) {
+			String partyName, String openingAmount, String pendingAmount, String dueOn, String overDueDays, String ob) {
 		this.refNo = refNo;
 		this.invDate = invDate;
 		this.dueDateOrCreditDays = dueDateOrCreditDays;
@@ -34,6 +36,15 @@ public class PendingInvoicesTo {
 		this.pendingAmount = pendingAmount;
 		this.dueOn = dueOn;
 		this.overDueDays = overDueDays;
+		this.ob = ob;
+	}
+
+	public String getOb() {
+		return ob;
+	}
+
+	public void setOb(String ob) {
+		this.ob = ob;
 	}
 
 	public String getRefNo() {

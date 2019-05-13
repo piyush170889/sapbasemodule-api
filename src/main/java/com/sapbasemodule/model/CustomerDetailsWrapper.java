@@ -11,12 +11,29 @@ public class CustomerDetailsWrapper {
 
 	private List<CustomerAddresses> customerAddressesList;
 
+	private List<InvoicesDetails> customerInvoicesList;
+
 	public CustomerDetailsWrapper() {
 	}
 
 	public CustomerDetailsWrapper(Customers customers, List<CustomerAddresses> customerAddressesList) {
 		this.customerDetails = customers;
 		this.customerAddressesList = customerAddressesList;
+	}
+
+	public CustomerDetailsWrapper(Customers customers, List<CustomerAddresses> customerAddressesList,
+			List<InvoicesDetails> customerInvoicesList) {
+		this.customerDetails = customers;
+		this.customerAddressesList = customerAddressesList;
+		this.customerInvoicesList = customerInvoicesList;
+	}
+
+	public List<InvoicesDetails> getCustomerInvoicesList() {
+		return customerInvoicesList;
+	}
+
+	public void setCustomerInvoicesList(List<InvoicesDetails> customerInvoicesList) {
+		this.customerInvoicesList = customerInvoicesList;
 	}
 
 	public Customers getCustomerDetails() {

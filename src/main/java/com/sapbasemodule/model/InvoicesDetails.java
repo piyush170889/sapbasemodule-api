@@ -52,7 +52,46 @@ public class InvoicesDetails {
 
 	private String taxAmountInWords;
 
+	private String transId;
+
+	private String originNo;
+
+	private String debit;
+
+	private String credit;
+
+	private String cumulativeBalance;
+
 	public InvoicesDetails() {
+	}
+
+	public InvoicesDetails(int invoiceDtlsId, String invoiceNo, String invoiceDate, String dueDate, long paymentDueDays,
+			String isPaid, float amountDue, String cardCode, String cardName, String type,
+			List<InvoiceItems> invoiceItemsList, float netAmount, float grossTotal, String narration,
+			long dueDateInDays, String amountInWords, String taxAmountInWords, String transId, String originNo,
+			String debit, String credit, String cumulativeBalance) {
+		this.invoiceDtlsId = invoiceDtlsId;
+		this.invoiceNo = invoiceNo;
+		this.invoiceDate = invoiceDate;
+		this.dueDate = dueDate;
+		this.paymentDueDays = paymentDueDays;
+		this.isPaid = isPaid;
+		this.amountDue = amountDue;
+		this.cardCode = cardCode;
+		this.cardName = cardName;
+		this.type = type;
+		this.invoiceItemsList = invoiceItemsList;
+		this.netAmount = netAmount;
+		this.grossTotal = grossTotal;
+		this.narration = narration;
+		this.dueDateInDays = dueDateInDays;
+		this.amountInWords = amountInWords;
+		this.taxAmountInWords = taxAmountInWords;
+		this.transId = transId;
+		this.originNo = originNo;
+		this.debit = debit;
+		this.credit = credit;
+		this.cumulativeBalance = cumulativeBalance;
 	}
 
 	public InvoicesDetails(int invoiceDtlsId, String invoiceNo, String invoiceDate, String dueDate, long paymentDueDays,
@@ -72,18 +111,58 @@ public class InvoicesDetails {
 		this.type = type;
 		this.invoiceItemsList = invoiceItemsList;
 		this.netAmount = netAmount;
-		this.cgst = cgst;
-		this.sgst = sgst;
-		this.roundOff = roundOff;
 		this.grossTotal = grossTotal;
 		this.narration = narration;
 		this.dueDateInDays = dueDateInDays;
+		this.roundOff = roundOff;
+		this.cgst = cgst;
+		this.sgst = sgst;
 		this.igst = igst;
 		this.igstTax = igstTax;
 		this.cgstTax = cgstTax;
 		this.sgstTax = sgstTax;
 		this.amountInWords = amountInWords;
 		this.taxAmountInWords = taxAmountInWords;
+	}
+
+	public String getTransId() {
+		return transId;
+	}
+
+	public void setTransId(String transId) {
+		this.transId = transId;
+	}
+
+	public String getOriginNo() {
+		return originNo;
+	}
+
+	public void setOriginNo(String originNo) {
+		this.originNo = originNo;
+	}
+
+	public String getDebit() {
+		return debit;
+	}
+
+	public void setDebit(String debit) {
+		this.debit = debit;
+	}
+
+	public String getCredit() {
+		return credit;
+	}
+
+	public void setCredit(String credit) {
+		this.credit = credit;
+	}
+
+	public String getCumulativeBalance() {
+		return cumulativeBalance;
+	}
+
+	public void setCumulativeBalance(String cumulativeBalance) {
+		this.cumulativeBalance = cumulativeBalance;
 	}
 
 	public String getAmountInWords() {

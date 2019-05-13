@@ -68,12 +68,36 @@ public class CustomersController {
 		return customersService.doGetCustomerLedgerReport(custCode);
 	}
 
+	@GetMapping(value = "/{cust-code}/new-ledger-report")
+	public Object getCustomersLedgerReportNew(@PathVariable("cust-code") String custCode)
+			throws ClassNotFoundException, SQLException, ParseException {
+
+		System.out.println("Cust Code = " + custCode);
+		return customersService.doGetCustomersLedgerReportNew(custCode);
+	}
+
+	@GetMapping(value = "/{cust-code}/all-invoices")
+	public Object getCustomersLedgerReportNew(@PathVariable("cust-code") String custCode,
+			@RequestParam(value = "till-date") String tillDate)
+					throws ClassNotFoundException, SQLException, ParseException {
+
+		System.out.println("Cust Code = " + custCode);
+		return customersService.doGetCustomersAllInvoices(custCode, tillDate);
+	}
+
 	@GetMapping(value = "/{cust-code}/pending-invoices")
 	public Object getCustomersPendingInvoices(@PathVariable("cust-code") String custCode,
 			@RequestParam(value = "from-date", required = true) String fromDate,
-			@RequestParam(value = "to-date", required = true) String toDate) throws ClassNotFoundException, SQLException, ParseException {
+			@RequestParam(value = "to-date", required = true) String toDate)
+					throws ClassNotFoundException, SQLException, ParseException {
 
 		System.out.println("custCode: " + custCode + ", fromDate: " + fromDate + ", toDate: " + toDate);
 		return customersService.doGetCustomersPendingInvoices(custCode, fromDate, toDate);
+	}
+	
+	@GetMapping(value="/sync")
+	public Object getCustomersDataForSync() throws ClassNotFoundException, SQLException, ParseException {
+		
+		return customersService.doGetCustomerDataForSync();
 	}
 }

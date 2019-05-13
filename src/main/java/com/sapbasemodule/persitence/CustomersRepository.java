@@ -2,6 +2,8 @@ package com.sapbasemodule.persitence;
 
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -12,7 +14,7 @@ import com.sapbasemodule.model.AgingDetails;
 @Repository
 public interface CustomersRepository extends JpaRepository<Customers, String> {
 
-	@Query("select c from Customers c where lower(c.cardCode) like %?1% or lower(c.cardName) like %?1% or c.phone1 like %?1% or c.phone2 like %?1%")
+	@Query("select c from Customers c where c.cardType='C' and lower(c.cardCode) like %?1% or lower(c.cardName) like %?1% or c.phone1 like %?1% or c.phone2 like %?1%")
 	List<Customers> findCustomerBySearchTerm(String searchTerm);
 
 	@Query(nativeQuery = true, value = "select T1.ShortName,(select a1.CardName from OCRD a1 where a1.CardCode=T1.ShortName)'CardName' ,"
@@ -27,6 +29,10 @@ public interface CustomersRepository extends JpaRepository<Customers, String> {
 			+ "having T1.ShortName in (select a1.CardCode from OCRD a1 where a1.CardType='C') and (SUM(T1.BalDueDeb)-SUM(T1.BalDueCred))>0 "
 			+ "order by T1.ShortName")
 	AgingDetails getAgingDetails(String date, String custCode);
+
+	List<Customers> findByCardType(String customerType, Pageable pageRequest);
+
+	List<Customers> findByCardType(String customerType);
 
 	// List<Customers> findByCardCodeOrCardNameOrPhone1OrPhone2Containing(String
 	// searchTerm);

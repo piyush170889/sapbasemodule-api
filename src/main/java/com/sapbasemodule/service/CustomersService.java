@@ -22,4 +22,10 @@ public interface CustomersService {
 
 	BaseWrapper doGetCustomersPendingInvoices(String custCode, String fromDate, String toDate) throws ClassNotFoundException, SQLException, ParseException;
 
+	BaseWrapper doGetCustomersLedgerReportNew(String custCode) throws ClassNotFoundException, SQLException;
+
+	BaseWrapper doGetCustomersAllInvoices(String custCode, String tillDate) throws ClassNotFoundException, SQLException, ParseException;
+
+	BaseWrapper doGetCustomerDataForSync() throws ClassNotFoundException, SQLException, ParseException;
+
 }

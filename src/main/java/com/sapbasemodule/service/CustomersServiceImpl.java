@@ -33,8 +33,10 @@ import com.sapbasemodule.model.AgingDetails;
 import com.sapbasemodule.model.AgingReportTo;
 import com.sapbasemodule.model.BaseWrapper;
 import com.sapbasemodule.model.CustomerDetailsWrapper;
+import com.sapbasemodule.model.InvoiceDetailsNewTo;
 import com.sapbasemodule.model.InvoiceItems;
 import com.sapbasemodule.model.InvoicesDetails;
+import com.sapbasemodule.model.LedgerReport;
 import com.sapbasemodule.model.OrderMgmtWrapper;
 import com.sapbasemodule.model.PaginationDetails;
 import com.sapbasemodule.model.PendingInvoicesTo;
@@ -78,11 +80,10 @@ public class CustomersServiceImpl implements CustomersService {
 			Sort sort = new Sort(Direction.ASC, "cardName");
 			PageRequest pageRequest = commonUtility.getPageRequest(pageNo.get(), sort);
 
-			customersList = customersRepository.findAll(pageRequest).getContent();
-
+			customersList = customersRepository.findByCardType("C", pageRequest);
 			paginationDetails = commonUtility.getPaginationDetails(totalCustCount, pageNo.get());
 		} else {
-			customersList = customersRepository.findAll();
+			customersList = customersRepository.findByCardType("C");
 		}
 
 		if (customersList.isEmpty())
@@ -143,60 +144,7 @@ public class CustomersServiceImpl implements CustomersService {
 		String fromDateFormatted = new SimpleDateFormat("yyyyMMdd")
 				.format(new SimpleDateFormat("yyyy-MM-dd").parse(fromDate));
 
-		// String sqlQuery = "Select [Bp Code],[BP Name], [t] as Type ,[Posting
-		// date], [Due date], [Doc Date],[Ref1],SUM([Balance
-		// Due])'Balance',SUM(Future)'Future', "
-		// + "SUM([0-30 days])'FirstQ',SUM([31-60 days])'SecondQ',SUM([61-90
-		// days])'ThirdQ',SUM([90-120 days])'FourthQ', "
-		// + "Sum([120+ days])'OtherQ',Trans from "
-		// + "(select T1.cardcode 'BP Code',T1.cardname 'BP Name',sysdeb 'Debit
-		// Amount',syscred 'Credit Amount', "
-		// + "(T0.BALDUEDEB - T0.BALDUECRED) as 'Balance Due', T0.AdjTran as
-		// 'Trans', "
-		// + "case T0.transtype when '-2' then 'OB' when '13' then 'A/R Inv'
-		// when '14' then 'AR DN' when '24' then 'Incoming' else 'Other' end as
-		// 'T' ,Ref1, "
-		// + "fccurrency 'BP Currency', " + "CONVERT(VARCHAR(10), refdate, 103)
-		// 'Posting Date', "
-		// + "CONVERT(VARCHAR(10), duedate, 103) 'Due Date', " +
-		// "CONVERT(VARCHAR(10), taxdate, 103) 'Doc Date' , "
-		// + "CASE When (DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) < 1
-		// then "
-		// + "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end
-		// 'Future', "
-		// + "CASE when (DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) < 31
-		// and (DATEDIFF(dd,duedate,'"
-		// + fromDateFormatted + "')) >= 1 then "
-		// + "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end
-		// '0-30 days', "
-		// + "case when ((datediff(dd,duedate,'" + fromDateFormatted + "')) > 30
-		// and (datediff(dd,duedate,'"
-		// + fromDateFormatted + "'))< 61) then "
-		// + "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end
-		// '31-60 days', "
-		// + "case when ((datediff(dd,DueDate,'" + fromDateFormatted + "')) > 60
-		// and (datediff(dd,duedate,'"
-		// + fromDateFormatted + "'))< 91) then "
-		// + "case when BALDUECRED <> 0 then -BALDUECRED else BALDUEDEB end end
-		// '61-90 days', "
-		// + "CASE when ((DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) > 90
-		// and (datediff(dd,duedate,'"
-		// + fromDateFormatted + "'))< 121) then "
-		// + "case when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then
-		// -BALDUECRED end end '90-120 days', "
-		// + "CASE when (DATEDIFF(dd,duedate,'" + fromDateFormatted + "')) > 121
-		// then "
-		// + "case when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then
-		// -BALDUECRED end end '120+ days' "
-		// + "from dbo.JDT1 T0 " + "INNER JOIN dbo.OCRD T1 ON T0.shortname =
-		// T1.cardcode "
-		// + "and T1.cardtype = 'C' where T0.intrnmatch = '0' and T0.BALDUEDEB
-		// != T0.BALDUECRED and T1.CardCode= '"
-		// + custCode + "' and " + "T0.RefDate <='" + fromDateFormatted + "')"
-		// + " sub group by [BP Code],[BP Name],[t],[Posting date], [Due
-		// date],[Doc Date],[Ref1],Trans order by [BP Code]";
-
-		String sqlQuery = "Select [Bp Code],[BP Name], [t] as Type ,[Posting date], [Due date], [Doc Date],[Ref1],SUM([Balance Due])'Balance',"
+		String sqlQuery = "Select [Bp Code],[BP Name], [t] as Type ,[Posting date], [Due date], [Doc Date],[Invoice No.], [Ref1],[Invoice Status],SUM([Balance Due])'Balance',"
 				+ "SUM(Future)'Future', SUM([0-30 days])'FirstQ',SUM([31-60 days])'SecondQ',SUM([61-90 days])'ThirdQ',SUM([90-120 days])'FourthQ',"
 				+ "Sum([120+ days])'OtherQ',Trans from (select T1.cardcode 'BP Code',T1.cardname 'BP Name',sysdeb 'Debit Amount',syscred 'Credit Amount', "
 				+ "(T0.BALDUEDEB - T0.BALDUECRED) as 'Balance Due', T0.AdjTran as 'Trans', case T0.transtype when '13' then 'A/R Inv' "
@@ -216,8 +164,11 @@ public class CustomersServiceImpl implements CustomersService {
 				+ fromDateFormatted + "'))< 121) then case "
 				+ "when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then -BALDUECRED end end '90-120 days', CASE "
 				+ "when (DATEDIFF(dd,refdate,'" + fromDateFormatted
-				+ "')) > 121 then case when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then -BALDUECRED end end '120+ days' "
-				+ "from dbo.JDT1 T0 INNER JOIN dbo.OCRD T1 ON T0.shortname = T1.cardcode and T1.cardtype = 'C' where T0.intrnmatch = '0' "
+				+ "')) > 121 then case when BALDUECRED= 0 then BALDUEDEB when BALDUEDEB= 0 then -BALDUECRED end end '120+ days', "
+				+ "T5.DocNum as 'Invoice No.', T5.DocStatus as 'Invoice Status' "
+				+ "from dbo.JDT1 T0 INNER JOIN dbo.OCRD T1 ON T0.shortname = T1.cardcode and T1.cardtype = 'C' "
+				+ "LEFT JOIN OINV T5 ON T0.Ref1 = T5.DocNum "
+				+ "where T0.intrnmatch = '0' "
 				+ "and T0.BALDUEDEB != T0.BALDUECRED and T1.CardCode=  '" + custCode + "' and T0.RefDate <='"
 				+ fromDateFormatted + "') "
 				+ "sub group by [BP Code],[BP Name],[t],[Posting date], [Due date],[Doc Date],[Ref1],Trans order by [BP Code]";
@@ -515,11 +466,9 @@ public class CustomersServiceImpl implements CustomersService {
 
 		Connection conn = commonUtility.getDbConnection();
 
-		String fromDateFormatted = new SimpleDateFormat("yyyyMMdd")
-				.format(new SimpleDateFormat("yyyy-MM-dd").parse(startDate));
-
-		String toDateFormatted = new SimpleDateFormat("yyyyMMdd")
-				.format(new SimpleDateFormat("yyyy-MM-dd").parse(endDate));
+		DateFormat dfYYYYMMDD = new SimpleDateFormat("yyyyMMdd");
+		String fromDateFormatted = dfYYYYMMDD.format(new SimpleDateFormat("yyyy-MM-dd").parse(startDate));
+		String toDateFormatted = dfYYYYMMDD.format(new SimpleDateFormat("yyyy-MM-dd").parse(endDate));
 
 		String sqlQuery = "Select [Bp Code],[BP Name], [t] as Type ,[Posting date], [Due date], [Doc Date],[Ref1],SUM([Balance Due])'Balance',SUM(Future)'Future', "
 				+ "SUM([0-30 days])'FirstQ',SUM([31-60 days])'SecondQ',SUM([61-90 days])'ThirdQ',SUM([90-120 days])'FourthQ', "
@@ -549,7 +498,7 @@ public class CustomersServiceImpl implements CustomersService {
 				+ "and T1.cardtype = 'C' where T0.intrnmatch = '0' and  T0.BALDUEDEB != T0.BALDUECRED and  T1.CardCode= '"
 				+ custCode + "' and T0.RefDate >='" + fromDateFormatted + "' and T0.RefDate <='" + toDateFormatted
 				+ "')"
-				+ " sub group by [BP Code],[BP Name],[t],[Posting date], [Due date],[Doc Date],[Ref1],Trans order by [BP Code]";
+				+ " sub group by [BP Code],[BP Name],[t],[Posting date], [Due date],[Doc Date],[Ref1],Trans order by [Posting date]";
 
 		System.out.println("Final SQL = " + sqlQuery);
 
@@ -716,8 +665,6 @@ public class CustomersServiceImpl implements CustomersService {
 
 		String startDate = "2019-04-01";
 		String endDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-
-		// TODO: Get Ledger Report Dynamically
 		List<OINV> invoicesList = getInvoicesList(custCode, endDate, startDate);
 
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
@@ -734,10 +681,6 @@ public class CustomersServiceImpl implements CustomersService {
 			String invoiceDueDate = oinv.getDocDueDate();
 			long paymentDueDays = commonUtility.getDaysDiffBetweenDates(invoiceDate, invoiceDueDate);
 			long dueDateInDays = commonUtility.getDaysDiffBetweenDates(currentDate, invoiceDueDate);
-			/*
-			 * List<InvoiceItems> invoiceItems =
-			 * invoiceItemsMap.get(invoiceDocEntry);
-			 */
 
 			String invoiceAmountInWords = numberToWord.convert(Math.round(oinv.getDocTotal()));
 
@@ -749,35 +692,88 @@ public class CustomersServiceImpl implements CustomersService {
 			invoiceDetailsList.add(invoicesDetails);
 		}
 
-		// List<OINV> invoicesList = new ArrayList<OINV>();
-
-		// OINV oinv = new OINV(1, 1, "2 Apr 19", "3 May 19", "", "", 36000F,
-		// "O", "OB");
-		// invoicesList.add(oinv);
-		//
-		// for (int i = 1; i <= 3; i++) {
-		// OINV oinvNext = new OINV((i + 2), (i + 2), (i + 2) + " Apr 19", (i +
-		// 2) + " May 19", "", "", i * 36000F,
-		// "O", "AR IN");
-		// invoicesList.add(oinvNext);
-		// }
-
 		return new BaseWrapper(invoiceDetailsList);
 	}
+	
+	
+	@Override
+	public BaseWrapper doGetCustomersLedgerReportNew(String custCode) throws ClassNotFoundException, SQLException {
+
+		String startDate = "20190401";
+		
+		DateFormat dfYYYYMMDD = new SimpleDateFormat("yyyyMMdd");
+		dfYYYYMMDD.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+		
+		String endDate = dfYYYYMMDD.format(new Date());
+
+		String ledgerReportQuery = "Select T0.TransId ,T0.RefDate As'Posting Date',T0.DueDate,(Select (Case " 
+			+ "When T2.TransType=13 Then 'IN' "
+			+ "When T2.TransType=-2 Then 'OB' "
+			+ "When T2.TransType=24 Then 'RC' "
+			+ "When T2.TransType=30 Then 'JE' "
+			+ "When T2.TransType=321 Then 'M.Reco' "
+			+ "When T2.TransType=18 Then 'CN' "
+			+ "Else 'Other' End) "
+			+ "From OJDT T2 Where T2.TransId =T0.TransId)As'Origin', "
+			+ "T0.Ref1 As'Origin No', "
+			+ "T0.Debit  As'Debit',T0.Credit  As'Credit', "
+			+ "((select sum(T4.debit)-sum(T4.Credit) from OJDT T3 INNER JOIN JDT1 T4 on T3.TransId=T4.TransId " 
+			+ "WHERE T4.ShortName=T0.ShortName and T3.TransId<=T0.TransId)) 'Cumulative Balance', "
+			+ " (T0.BALDUEDEB - T0.BALDUECRED) as 'Balance Due' "
+			  + "From JDT1 T0 INNER JOIN OCRD T1 ON T1.CardCode=T0.ShortName "
+			+ "WHere "
+			 + "T0.RefDate >='" + startDate + "' "
+			+ "And "
+			+ "T0.RefDate <='" + endDate + "' "
+			+ "And "
+			+ "T1.CardCode='" + custCode + "' "
+			+ "And T1.CardType ='C' order by [Posting Date],TransId";
+		
+		System.out.println("Final New Ledger Query = " + ledgerReportQuery);
+		
+		Connection con = commonUtility.getDbConnection();
+		PreparedStatement ps = con.prepareStatement(ledgerReportQuery);
+		
+		ResultSet rs = ps.executeQuery();
+		
+		List<LedgerReport> ledgerReportInvociesList = new ArrayList<LedgerReport>();
+		while (rs.next()) {
+			LedgerReport ledgerReport = new LedgerReport(rs.getString("TransId"), rs.getString("Posting Date"), 
+					rs.getString("DueDate"), rs.getString("Origin"), rs.getString("Origin No"), rs.getString("Debit"), 
+					rs.getString("Credit"), rs.getString("Cumulative Balance"), rs.getString("Balance Due"));
+			
+			ledgerReportInvociesList.add(ledgerReport);
+		}
+		
+		return new BaseWrapper(ledgerReportInvociesList);
+	}
+	
 	
 	@Override
 	public BaseWrapper doGetCustomersPendingInvoices(String custCode, String fromDate, String toDate)
 			throws ClassNotFoundException, SQLException, ParseException {
 
-		String pendingInvoicesSqlQuery = "Select T0.Docnum 'Ref.No', T0.DocDate 'Inv.Date',"
+//		String pendingInvoicesSqlQuery = "Select T0.Docnum 'Ref.No', T0.DocDate 'Inv.Date',"
+//				+ "(SELECT Top 1 T0.[ExtraDays] FROM OCTG T10  Where T10.[GroupNum] = T0.[GroupNum])As'Due Date OR Credit Days', "
+//				+ "DateDiff(DAY,T0.[DocDate],GETDATE())as[Over Due For Billing], "
+//				+ "T0.CardName As'Party Name',T0.DocTotal as'Opening Amount', "
+//				+ "(T0.DocTotal - T0.PaidToDate)As'pending Amount',T0.DocDueDate 'Due On', "
+//				+ "DateDiff(DAY,T0.[DocDueDate],GETDATE())as[Over Due Days] "
+//				+ "From OINV T0 INNER JOIN INV1 T1 ON T0.DocEntry=T1.DocEntry "
+//				+ "Where T0.CANCELED='N' And T1.TargetType <> 14 And  " + "T0.DocDate >='" + fromDate + "'"
+//				+ "And T0.DocDate <='" + toDate + "' " + "And T0.CardCode ='" + custCode + "' order by 'Inv.Date' ASC";
+		
+		String pendingInvoicesSqlQuery = "SELECT Distinct 0 as 'Ref.No', T10.RefDate as 'Inv.Date', T11.[Debit] as OB, "
+				+ "	0 as [Due Date OR Credit Days],	0 as [Over Due For Billing], '' as [Party Name], 0 as [Opening Amount], "
+				+ "0 as [pending Amount], '' as [Due On], 0 as [Over Due Days] FROM OJDT T10 Inner Join [dbo].[JDT1] T11 on T10.TransId=T11.TransId "
+				+ "Left join OCRD T14 ON T14.CardCode = T11.ShortName Where T10.RefDate >='"+ fromDate +"' And T10.RefDate <='"+ toDate 
+				+"' And T14.CardCode ='" + custCode + "' "
+				+ "and T10.TransType=-2 Union All Select T0.Docnum 'Ref.No', T0.DocDate 'Inv.Date', 0 OB, "
 				+ "(SELECT Top 1 T0.[ExtraDays] FROM OCTG T10  Where T10.[GroupNum] = T0.[GroupNum])As'Due Date OR Credit Days', "
-				+ "DateDiff(DAY,T0.[DocDate],GETDATE())as[Over Due For Billing], "
-				+ "T0.CardName As'Party Name',T0.DocTotal as'Opening Amount', "
-				+ "(T0.DocTotal - T0.PaidToDate)As'pending Amount',T0.DocDueDate 'Due On', "
-				+ "DateDiff(DAY,T0.[DocDueDate],GETDATE())as[Over Due Days] "
-				+ "From OINV T0 INNER JOIN INV1 T1 ON T0.DocEntry=T1.DocEntry "
-				+ "Where T0.CANCELED='N' And T1.TargetType <> 14 And  " + "T0.DocDate >='" + fromDate + "'"
-				+ "And T0.DocDate <='" + toDate + "' " + "And T0.CardCode ='" + custCode + "' order by 'Inv.Date' ASC";
+				+ "DateDiff(DAY,T0.[DocDate],GETDATE())as[Over Due For Billing], T0.CardName As'Party Name',T0.DocTotal as'Opening Amount', "
+				+ "(T0.DocTotal - T0.PaidToDate)As'pending Amount',T0.DocDueDate 'Due On', DateDiff(DAY,T0.[DocDueDate],GETDATE())as[Over Due Days] "
+				+ "From OINV T0 Where T0.CANCELED='N' And T0.DocDate >='" + fromDate + "' And T0.DocDate <='" + toDate + "' And T0.CardCode ='" + custCode + "' "
+				+ "And T0.DocStatus <>'C' And (Select Distinct T1.TargetType  From INV1 T1 Where T1.DocEntry =T0.DocEntry)<>14";
 		
 		System.out.println("Final Sql Query = " + pendingInvoicesSqlQuery);
 		
@@ -790,11 +786,240 @@ public class CustomersServiceImpl implements CustomersService {
 		while (rs.next()) {
 			PendingInvoicesTo pendingInvoices = new PendingInvoicesTo(rs.getString("Ref.No"), rs.getString("Inv.Date"),
 					rs.getString("Due Date OR Credit Days"), rs.getString("Over Due For Billing"), rs.getString("Party Name"), 
-					rs.getString("Opening Amount"), rs.getString("pending Amount"), rs.getString("Due On"), rs.getString("Over Due Days"));
+					rs.getString("Opening Amount"), rs.getString("pending Amount"), rs.getString("Due On")
+					, rs.getString("Over Due Days"), rs.getString("OB"));
 
 			pendingInvoicesList.add(pendingInvoices);
 		}
 
 		return new BaseWrapper(pendingInvoicesList);
 	}
+	
+	
+	@Override
+	public BaseWrapper doGetCustomersAllInvoices(String custCode, String tillDate) throws ClassNotFoundException, SQLException, ParseException {
+
+		DateFormat dfYYYY_MM_DD = new SimpleDateFormat("yyyy-MM-dd");
+		dfYYYY_MM_DD.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+		DateFormat dfYYYYMMDD = new SimpleDateFormat("yyyyMMdd");
+		dfYYYYMMDD.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+		
+		String tillDateFormatted = dfYYYYMMDD.format(dfYYYY_MM_DD.parse(tillDate));
+
+		String custAllInvoicesQuery = "Select ISNULL(T5.DocNum, '0') As 'Invoice No.', T5.DocStatus As 'Invoice Status', "
+				+ "T0.TransId ,T0.RefDate As'Posting Date',T0.DueDate, "
+				+ "(Select  "
+				+ "(Case  "
+				+ "When T2.TransType=13 Then 'IN' " 
+				+ "When T2.TransType=-2 Then 'OB'  "
+				+ "When T2.TransType=24 Then 'RC'  "
+				+ "When T2.TransType=30 Then 'JE'  "
+				+ "When T2.TransType=321 Then 'M.Reco'  "
+				+ "When T2.TransType=18 Then 'CN'  "
+				+ "Else 'Other'  "
+				+ "End)  "
+				+ "From OJDT T2 Where T2.TransId =T0.TransId)As'Origin', " 
+				+ "T0.Ref1 As'Origin No', T0.Debit  As'Debit',T0.Credit  As'Credit', " 
+				+ "((select  "
+				+ "sum(T4.debit)-sum(T4.Credit) from OJDT T3 INNER JOIN JDT1 T4 on T3.TransId=T4.TransId " 
+				+ "WHERE  "
+				+ "T4.ShortName=T0.ShortName and " 
+				+ "T3.TransId<=T0.TransId "
+				+ ")) 'Cumulative Balance', "  
+				+ "(T0.BALDUEDEB - T0.BALDUECRED) as 'Balance Due' " 
+				+ "From JDT1 T0 INNER JOIN OCRD T1 ON T1.CardCode=T0.ShortName " 
+				+ "LEFT JOIN OINV T5 ON T0.Ref1=T5.DocNum  "
+				+ "WHere T0.RefDate <='" + tillDateFormatted + "' And T1.CardCode='"+custCode+"'"
+				+ " And T1.CardType ='C' order by [Posting Date],TransId";
+		
+		System.out.println("Final All Invoicees Query = " + custAllInvoicesQuery);
+		
+		Connection con = commonUtility.getDbConnection();
+		PreparedStatement ps = con.prepareStatement(custAllInvoicesQuery);
+		
+		ResultSet rs = ps.executeQuery();
+		
+		List<InvoiceDetailsNewTo> custAllInvociesList = new ArrayList<InvoiceDetailsNewTo>();
+		while (rs.next()) {
+			InvoiceDetailsNewTo invoiceDetailsNewTo = new InvoiceDetailsNewTo(rs.getInt("Invoice No."), rs.getString("Invoice Status"), 
+					rs.getString("TransId"), rs.getString("Posting Date"), 
+					rs.getString("DueDate"), rs.getString("Origin"), rs.getString("Origin No"), rs.getString("Debit"), 
+					rs.getString("Credit"), rs.getString("Cumulative Balance"), rs.getString("Balance Due"));
+			
+			custAllInvociesList.add(invoiceDetailsNewTo);
+		}
+		
+		return new BaseWrapper(custAllInvociesList);
+	}
+	
+	
+	@Override
+	public BaseWrapper doGetCustomerDataForSync() throws ClassNotFoundException, SQLException, ParseException {
+
+		List<Customers> customersList = customersRepository.findByCardType("C");
+
+		if (customersList.isEmpty())
+			customersList = new ArrayList<Customers>();
+
+		// Create Response And Send
+		List<CustomerDetailsWrapper> response = new ArrayList<CustomerDetailsWrapper>();
+
+		for (Customers customers : customersList) {
+			String custCode = customers.getCardCode();
+
+			List<CustomerAddresses> customerAddressesList = customersAddressesRepository.findByCardCode(custCode);
+
+			List<InvoicesDetails> customersInvoiceDetailsList = getCustomerAllInvoices(custCode, new Date());
+			
+			CustomerDetailsWrapper customerDetailsWrapper = new CustomerDetailsWrapper(customers,
+					customerAddressesList, customersInvoiceDetailsList);
+
+			response.add(customerDetailsWrapper);
+		}
+
+
+		return new BaseWrapper(response);
+	}
+
+	private List<InvoicesDetails> getCustomerAllInvoices(String custCode, Date tillDate) throws ClassNotFoundException, SQLException, ParseException {
+
+		DateFormat dfYYYYMMDD = new SimpleDateFormat("yyyyMMdd");
+		dfYYYYMMDD.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+		
+		String tillDateFormatted = dfYYYYMMDD.format(tillDate);
+
+		String custAllInvoicesQuery = "Select ISNULL(T5.DocEntry, '0') As 'DocEntry', ISNULL(T5.DocNum, '0') As 'Invoice No.', T5.DocStatus As 'Invoice Status', "
+				+ "T0.TransId ,T0.RefDate As'Posting Date',T0.DueDate, "
+				+ "(Select  "
+				+ "(Case  "
+				+ "When T2.TransType=13 Then 'IN' " 
+				+ "When T2.TransType=-2 Then 'OB'  "
+				+ "When T2.TransType=24 Then 'RC'  "
+				+ "When T2.TransType=30 Then 'JE'  "
+				+ "When T2.TransType=321 Then 'M.Reco'  "
+				+ "When T2.TransType=18 Then 'CN'  "
+				+ "Else 'Other'  "
+				+ "End)  "
+				+ "From OJDT T2 Where T2.TransId =T0.TransId) As 'Origin', " 
+				+ "T0.Ref1 As'Origin No', T0.Debit As 'Debit',T0.Credit As'Credit', " 
+				+ "((select  "
+				+ "sum(T4.debit)-sum(T4.Credit) from OJDT T3 INNER JOIN JDT1 T4 on T3.TransId=T4.TransId " 
+				+ "WHERE  "
+				+ "T4.ShortName=T0.ShortName and " 
+				+ "T3.TransId<=T0.TransId "
+				+ ")) 'Cumulative Balance', "  
+				+ "(T0.BALDUEDEB - T0.BALDUECRED) as 'Balance Due' " 
+				+ "From JDT1 T0 INNER JOIN OCRD T1 ON T1.CardCode=T0.ShortName " 
+				+ "LEFT JOIN OINV T5 ON T0.Ref1=T5.DocNum  "
+				+ "WHere T0.RefDate <='" + tillDateFormatted + "' And T1.CardCode='" + custCode + "'"
+				+ " And T1.CardType = 'C' order by [Posting Date],TransId";
+		
+		System.out.println("Final All Invoices Query = " + custAllInvoicesQuery);
+		
+		Connection con = commonUtility.getDbConnection();
+		PreparedStatement ps = con.prepareStatement(custAllInvoicesQuery);
+		
+		ResultSet rs = ps.executeQuery();
+		
+		List<InvoiceDetailsNewTo> custAllInvociesList = new ArrayList<InvoiceDetailsNewTo>();
+		List<Integer> invoiceDocEntriesList = new ArrayList<Integer>();
+		
+		while (rs.next()) {
+			String invoiceType = rs.getString("Origin");
+			int invoiceNo = rs.getInt("Invoice No.");
+			
+			InvoiceDetailsNewTo invoicesDetails = new InvoiceDetailsNewTo(invoiceNo, rs.getString("Invoice Status"), 
+					rs.getString("TransId"), rs.getString("Posting Date"), rs.getString("DueDate"), invoiceType, 
+					rs.getString("Origin No"), rs.getString("Debit"), rs.getString("Credit"), 
+					rs.getString("Cumulative Balance"), rs.getString("Balance Due"), rs.getInt("DocEntry"));
+			
+			if (invoiceType.equalsIgnoreCase("IN") && invoiceNo != 0) {
+				invoiceDocEntriesList.add(invoiceNo);
+			}
+			
+			custAllInvociesList.add(invoicesDetails);
+		}
+		
+		System.out.println(invoiceDocEntriesList.toString());
+
+		List<InvoiceItems> invoiceItemsList;
+		Map<Integer, List<InvoiceItems>> invoiceItemsMap;
+		List<InvoicesDetails> invoiceDetailsList = new ArrayList<InvoicesDetails>();
+		
+		if (invoiceDocEntriesList.size() > 0) {
+			invoiceItemsList = getInvoiceItemsListForDocEntries(invoiceDocEntriesList);
+
+			// Separate All Invoice Items As Per Invoice No (DocEntry)
+			invoiceItemsMap = new HashMap<Integer, List<InvoiceItems>>();
+
+			for (InvoiceItems invoiceItems : invoiceItemsList) {
+				int invoiceDocEntry = invoiceItems.getDocEntry();
+
+				List<InvoiceItems> invoiceItemMapList;
+				if (invoiceItemsMap.containsKey(invoiceDocEntry))
+					invoiceItemMapList = invoiceItemsMap.get(invoiceDocEntry);
+				else
+					invoiceItemMapList = new ArrayList<InvoiceItems>();
+
+				invoiceItemMapList.add(invoiceItems);
+
+				invoiceItemsMap.put(invoiceDocEntry, invoiceItemMapList);
+			}
+
+			System.out.println("Invoice Doc Entry Keys In Map = " + invoiceItemsMap.keySet().toString());
+
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+			df.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+
+			String currentDate = df.format(new Date());
+			NumberToWord numberToWord = new NumberToWord();
+			for (InvoiceDetailsNewTo custInvoice : custAllInvociesList) {
+
+				int invoiceDocEntry = custInvoice.getInvoiceDocEntry();
+				long paymentDueDays = 0L;
+				long dueDateInDays = 0L;
+				String invoiceAmountInWords = null;
+				String taxAmountInWords = null;
+				List<InvoiceItems> invoiceItemsListFromMap = null;
+				String invoiceDate = custInvoice.getPostingDate();
+				String invoiceDueDate = custInvoice.getDueDate();
+				
+				Float balanceAmt = Float.parseFloat(custInvoice.getBalance());
+				if (invoiceDocEntry != 0 && custInvoice.getOrigin().equalsIgnoreCase("IN")) {
+
+					System.out.println("Invoice Doc Entry In Iteration : " + invoiceDocEntry);
+					
+					paymentDueDays = commonUtility.getDaysDiffBetweenDates(invoiceDate, invoiceDueDate);
+					dueDateInDays = commonUtility.getDaysDiffBetweenDates(currentDate, invoiceDueDate);
+					
+					invoiceItemsListFromMap = invoiceItemsMap.get(invoiceDocEntry);
+					System.out.println("invoiceItemsListFromMap = " + invoiceItemsListFromMap);
+					
+					//TODO: Decide On invoice Amount from Invoice Object
+					invoiceAmountInWords = numberToWord.convert(Math.round(balanceAmt));
+					
+					float finalTaxAmount = 0F;
+					
+					if (null != invoiceItemsListFromMap) {
+						for (InvoiceItems invoiceItems : invoiceItemsListFromMap)
+							finalTaxAmount = finalTaxAmount + invoiceItems.getCgstTax() + invoiceItems.getSgstTax();
+					}
+					taxAmountInWords = numberToWord.convert((int) Math.floor(finalTaxAmount));
+					
+				}
+
+				InvoicesDetails invoicesDetails = new InvoicesDetails(invoiceDocEntry,
+						Integer.toString(custInvoice.getInvoiceNo()), invoiceDate, invoiceDueDate, paymentDueDays,
+						custInvoice.getInvoiceStatus(), balanceAmt, custCode, "", custInvoice.getOrigin(), 
+						invoiceItemsListFromMap, 0F, balanceAmt, "", dueDateInDays, invoiceAmountInWords, 
+						taxAmountInWords, custInvoice.getTransId(), custInvoice.getOriginNo(), custInvoice.getDebit(), 
+						custInvoice.getCredit(), custInvoice.getCumulativeBalance());
+
+				invoiceDetailsList.add(invoicesDetails);
+			}
+		}
+		
+		return invoiceDetailsList;
+	}
+	
 }
