@@ -2,7 +2,6 @@ package com.sapbasemodule.persitence;
 
 import java.util.List;
 
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,7 +13,8 @@ import com.sapbasemodule.model.AgingDetails;
 @Repository
 public interface CustomersRepository extends JpaRepository<Customers, String> {
 
-	@Query("select c from Customers c where c.cardType='C' and lower(c.cardCode) like %?1% or lower(c.cardName) like %?1% or c.phone1 like %?1% or c.phone2 like %?1%")
+//	@Query("select c from Customers c where c.cardType='C' and lower(c.cardCode) like ?1% or lower(c.cardName) like ?1% or c.phone1 like ?1% or c.phone2 like ?1%")
+	@Query("select c from Customers c where c.cardType='C' and lower(c.cardName) like ?1%")
 	List<Customers> findCustomerBySearchTerm(String searchTerm);
 
 	@Query(nativeQuery = true, value = "select T1.ShortName,(select a1.CardName from OCRD a1 where a1.CardCode=T1.ShortName)'CardName' ,"
