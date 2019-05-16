@@ -18,6 +18,8 @@ public class InvoiceDetailsNewTo {
 
 	private String originNo;
 
+	private String ref2;
+
 	private String debit;
 
 	private String credit;
@@ -31,7 +33,8 @@ public class InvoiceDetailsNewTo {
 
 	public InvoiceDetailsNewTo(int invoiceNo, String invoiceStatus, String transId, String postingDate, String dueDate,
 			String origin, String originNo, String debit, String credit, String cumulativeBalance, String balance,
-			int invoiceDocEntry) {
+			int invoiceDocEntry, String ref2) {
+		this.ref2 = ref2;
 		this.invoiceNo = invoiceNo;
 		this.invoiceStatus = invoiceStatus;
 		this.transId = transId;
@@ -59,6 +62,14 @@ public class InvoiceDetailsNewTo {
 		this.credit = credit;
 		this.cumulativeBalance = cumulativeBalance;
 		this.balance = balance;
+	}
+
+	public String getRef2() {
+		return ref2;
+	}
+
+	public void setRef2(String ref2) {
+		this.ref2 = ref2;
 	}
 
 	public int getInvoiceDocEntry() {

@@ -16,6 +16,9 @@ public class BaseWrapper {
 	@JsonProperty("paginationDetails")
 	private PaginationDetails paginationDetails;
 
+	@JsonProperty("metaData")
+	private Object metaData;
+
 	public BaseWrapper() {
 	}
 
@@ -28,9 +31,23 @@ public class BaseWrapper {
 		this.paginationDetails = paginationDetails;
 	}
 
+	public BaseWrapper(Object response, PaginationDetails paginationDetails, Object metaData) {
+		this.response = response;
+		this.paginationDetails = paginationDetails;
+		this.metaData = metaData;
+	}
+
 	public BaseWrapper(ResponseMessage responseMessage) {
 
 		this.responseMessage = responseMessage;
+	}
+
+	public Object getMetaData() {
+		return metaData;
+	}
+
+	public void setMetaData(Object metaData) {
+		this.metaData = metaData;
 	}
 
 	public PaginationDetails getPaginationDetails() {

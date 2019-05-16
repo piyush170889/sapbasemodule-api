@@ -62,6 +62,8 @@ public class InvoicesDetails {
 
 	private String cumulativeBalance;
 
+	private String ref2;
+
 	public InvoicesDetails() {
 	}
 
@@ -69,7 +71,8 @@ public class InvoicesDetails {
 			String isPaid, float amountDue, String cardCode, String cardName, String type,
 			List<InvoiceItems> invoiceItemsList, float netAmount, float grossTotal, String narration,
 			long dueDateInDays, String amountInWords, String taxAmountInWords, String transId, String originNo,
-			String debit, String credit, String cumulativeBalance) {
+			String debit, String credit, String cumulativeBalance, String ref2) {
+		this.ref2 = ref2;
 		this.invoiceDtlsId = invoiceDtlsId;
 		this.invoiceNo = invoiceNo;
 		this.invoiceDate = invoiceDate;
@@ -123,6 +126,14 @@ public class InvoicesDetails {
 		this.sgstTax = sgstTax;
 		this.amountInWords = amountInWords;
 		this.taxAmountInWords = taxAmountInWords;
+	}
+
+	public String getRef2() {
+		return ref2;
+	}
+
+	public void setRef2(String ref2) {
+		this.ref2 = ref2;
 	}
 
 	public String getTransId() {
