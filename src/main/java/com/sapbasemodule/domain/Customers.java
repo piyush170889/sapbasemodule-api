@@ -4,6 +4,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /*@SqlResultSetMapping(
 	    name="getAgingDetails", columns = {
@@ -33,6 +34,9 @@ public class Customers {
 	@Column(name = "CardType")
 	private String cardType;
 
+	@Column(name = "SlpCode")
+	private String slpCode;
+	
 	@Column(name = "GroupCode")
 	private Integer groupCode;
 
@@ -56,6 +60,12 @@ public class Customers {
 
 	@Column(name = "Balance")
 	private Float balance;
+
+	@Column(name = "CreditLine")
+	private Float creditLine;
+
+	@Transient
+	private Float creditDeviation;
 
 	@Column(name = "ChecksBal")
 	private Float checksBal;
@@ -87,7 +97,8 @@ public class Customers {
 	public Customers(String cardCode, String cardName, String cardType, Integer groupCode, String cmpPrivate,
 			String phone1, String phone2, String fax, String cntctPrsn, String notes, Float balance, Float checksBal,
 			Float dNotesBal, Float ordersBal, Integer groupNum, String deleted, Integer docEntry, String cellular,
-			String eMail) {
+			String eMail, Float creditLine) {
+		this.creditLine = creditLine;
 		this.cardCode = cardCode;
 		this.cardName = cardName;
 		this.cardType = cardType;
@@ -107,6 +118,14 @@ public class Customers {
 		this.docEntry = docEntry;
 		this.cellular = cellular;
 		this.eMail = eMail;
+	}
+
+	public Float getCreditLine() {
+		return creditLine;
+	}
+
+	public void setCreditLine(Float creditLine) {
+		this.creditLine = creditLine;
 	}
 
 	public String getCellular() {
@@ -261,6 +280,22 @@ public class Customers {
 		this.groupNum = groupNum;
 	}
 
+	public Float getCreditDeviation() {
+		return creditDeviation;
+	}
+
+	public void setCreditDeviation(Float creditDeviation) {
+		this.creditDeviation = creditDeviation;
+	}
+
+	public String getSlpCode() {
+		return slpCode;
+	}
+
+	public void setSlpCode(String slpCode) {
+		this.slpCode = slpCode;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -270,6 +305,8 @@ public class Customers {
 		builder.append(cardName);
 		builder.append(", cardType=");
 		builder.append(cardType);
+		builder.append(", slpCode=");
+		builder.append(slpCode);
 		builder.append(", groupCode=");
 		builder.append(groupCode);
 		builder.append(", cmpPrivate=");
@@ -286,6 +323,10 @@ public class Customers {
 		builder.append(notes);
 		builder.append(", balance=");
 		builder.append(balance);
+		builder.append(", creditLine=");
+		builder.append(creditLine);
+		builder.append(", creditDeviation=");
+		builder.append(creditDeviation);
 		builder.append(", checksBal=");
 		builder.append(checksBal);
 		builder.append(", dNotesBal=");
@@ -298,6 +339,10 @@ public class Customers {
 		builder.append(deleted);
 		builder.append(", docEntry=");
 		builder.append(docEntry);
+		builder.append(", cellular=");
+		builder.append(cellular);
+		builder.append(", eMail=");
+		builder.append(eMail);
 		builder.append("]");
 		return builder.toString();
 	}

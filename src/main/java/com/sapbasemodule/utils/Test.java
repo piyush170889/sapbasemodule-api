@@ -9,8 +9,9 @@ public class Test {
 	public static void main(String[] args) throws ParseException {
 
 //		int a = Integer.parseInt("70000");
-		int a = (int) 7000.02F;
-		System.out.println(a);
+		double a = 7000.212456789D;
+		CommonUtility commonUtility = new CommonUtility();
+		System.out.println(commonUtility.round(a, 2));
 	}
 
 }

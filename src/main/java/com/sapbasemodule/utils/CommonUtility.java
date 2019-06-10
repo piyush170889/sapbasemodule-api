@@ -630,7 +630,7 @@ public class CommonUtility {
 
 		long diff = secondDate.getTime() - firstDate.getTime();
 		long diffOfDays = diff / 1000 / 60 / 60 / 24;
-		System.out.println("Days: " + diffOfDays);
+//		System.out.println("Days: " + diffOfDays);
 
 		return diffOfDays;
 	}

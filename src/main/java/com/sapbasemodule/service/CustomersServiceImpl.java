@@ -42,10 +42,12 @@ import com.sapbasemodule.model.PaginationDetails;
 import com.sapbasemodule.model.PendingInvoicesTo;
 import com.sapbasemodule.persitence.CustomersAddressesRepository;
 import com.sapbasemodule.persitence.CustomersRepository;
+import com.sapbasemodule.persitence.OSLPRepository;
 import com.sapbasemodule.persitence.OrderItemsRepository;
 import com.sapbasemodule.persitence.OrdersRepository;
 import com.sapbasemodule.utils.CommonUtility;
 import com.sapbasemodule.utils.NumberToWord;
+import com.sapbasemodule.utils.RoleType;
 
 @Service
 @Transactional(rollbackFor = Throwable.class)
@@ -94,7 +96,7 @@ public class CustomersServiceImpl implements CustomersService {
 
 		Float totalOutstanding = customersRepository.getTotalCustomerOutstandingByType("C");
 		System.out.println("totalOutstanding = " + totalOutstanding);
-		
+
 		return new BaseWrapper(response, paginationDetails, totalOutstanding);
 	}
 
@@ -120,6 +122,11 @@ public class CustomersServiceImpl implements CustomersService {
 			String custCode = customers.getCardCode();
 
 			List<CustomerAddresses> customerAddressesList = customersAddressesRepository.findByCardCode(custCode);
+
+			Float creditLimit = customers.getCreditLine() == null ? 0F : customers.getCreditLine();
+
+			Float custBalance = customers.getBalance();
+			customers.setCreditDeviation(creditLimit < custBalance ? (creditLimit - custBalance) : 0F);
 
 			CustomerDetailsWrapper customerDetailsWrapper = new CustomerDetailsWrapper(customers,
 					customerAddressesList);
@@ -176,7 +183,7 @@ public class CustomersServiceImpl implements CustomersService {
 				+ "sub group by [BP Code],[BP Name],[t],[Posting date], [Due date],[Doc Date],[Ref1],Trans,[Invoice No.],[Invoice Status] "
 				+ "order by [BP Code]";
 
-		System.out.println("Final SQL = " + sqlQuery);
+//		System.out.println("Final SQL = " + sqlQuery);
 
 		PreparedStatement ps = conn.prepareStatement(sqlQuery);
 		ResultSet rs = ps.executeQuery();
@@ -554,7 +561,7 @@ public class CustomersServiceImpl implements CustomersService {
 				invoiceIdsInString += ",";
 		}
 
-		System.out.println("Invoice Id String = " + invoiceIdsInString);
+//		System.out.println("Invoice Id String = " + invoiceIdsInString);
 
 		String sqlQuery = "SELECT T0.DocEntry,T0.DocNum,T0.DocDate,T0.DocDueDate As'Due Date',T0.cardcode,T0.cardname, "
 				+ "T0.Address as 'Pay_To', T0.Address2 as 'Ship_To',T1.ItemCode,T1.Dscription,T0.RoundDif, T1.Quantity, T1.Price,T1.LineTotal,T0.DocTotal, "
@@ -862,25 +869,69 @@ public class CustomersServiceImpl implements CustomersService {
 		return new BaseWrapper(customersInvoiceDetailsList);
 	}
 
+	@Autowired
+	private OSLPRepository oslpRepository;
+	
 	@Override
 	public BaseWrapper doGetCustomerDataForSync() throws ClassNotFoundException, SQLException, ParseException {
 
-		List<Customers> customersList = customersRepository.findByCardType("C");
+		List<Customers> customersList = null;
 
+		if (commonUtility.hasRole(RoleType.ROLE_SALES.toString())) {
+//			System.out.println("Logged Users ID = " + commonUtility.getLoggedUser().getUsername());
+			String slpCode = oslpRepository.selectSlpCodeByMobil(commonUtility.getLoggedUser().getUsername());
+			customersList = customersRepository.findByCardTypeAndSlpCode("C", slpCode);
+		} else if (commonUtility.hasRole(RoleType.ROLE_ADMIN.toString())) {
+			customersList = customersRepository.findByCardType("C");
+		}
+		
 		if (customersList.isEmpty())
 			customersList = new ArrayList<Customers>();
 
+		//Get All Invoices Of Customers And Put them against each customer in a map
+		List<String> custIds = new ArrayList<String>();
+		for (Customers customers : customersList)
+			custIds.add(customers.getCardCode());
+		
+		Date tillDate = new Date();
+		
+		List<InvoicesDetails> allCustomersInvoiceDetailsList = getAllInvoicesForCustIds(custIds, tillDate);
+		
+		Map<String, List<InvoicesDetails>> customerWiseInvoicesMap = new HashMap<String, List<InvoicesDetails>>();
+		for (InvoicesDetails invoicesDetails : allCustomersInvoiceDetailsList) {
+			
+			String custCode = invoicesDetails.getCardCode();
+			List<InvoicesDetails> customersInvoicesList = null;
+			
+			if (customerWiseInvoicesMap.containsKey(custCode))
+				customersInvoicesList = customerWiseInvoicesMap.get(custCode);
+			else
+				customersInvoicesList = new ArrayList<InvoicesDetails>();
+			
+			customersInvoicesList.add(invoicesDetails);
+			
+			customerWiseInvoicesMap.put(custCode, customersInvoicesList);
+		}
+		
 		// Create Response And Send
 		List<CustomerDetailsWrapper> response = new ArrayList<CustomerDetailsWrapper>();
 
 		for (Customers customers : customersList) {
 			String custCode = customers.getCardCode();
 
-			List<CustomerAddresses> customerAddressesList = customersAddressesRepository.findByCardCode(custCode);
+//			List<CustomerAddresses> customerAddressesList = customersAddressesRepository.findByCardCode(custCode);
 
-			List<InvoicesDetails> customersInvoiceDetailsList = getCustomerAllInvoices(custCode, new Date());
+//			List<InvoicesDetails> customersInvoiceDetailsList = getCustomerAllInvoices(custCode, tillDate);
+			List<InvoicesDetails> customersInvoiceDetailsList = customerWiseInvoicesMap.get(custCode);
+			
+			Float creditLimit = customers.getCreditLine() == null ? 0F : customers.getCreditLine();
 
-			CustomerDetailsWrapper customerDetailsWrapper = new CustomerDetailsWrapper(customers, customerAddressesList,
+			Float custBalance = customers.getBalance();
+			customers.setCreditDeviation(creditLimit < custBalance ? (creditLimit - custBalance) : 0F);
+
+//			CustomerDetailsWrapper customerDetailsWrapper = new CustomerDetailsWrapper(customers, customerAddressesList,
+//					customersInvoiceDetailsList);
+			CustomerDetailsWrapper customerDetailsWrapper = new CustomerDetailsWrapper(customers, null,
 					customersInvoiceDetailsList);
 
 			response.add(customerDetailsWrapper);
@@ -911,7 +962,7 @@ public class CustomersServiceImpl implements CustomersService {
 				+ "LEFT JOIN OINV T5 ON T0.Ref1=T5.DocNum  " + "WHere T0.RefDate <='" + tillDateFormatted
 				+ "' And T1.CardCode='" + custCode + "'" + " And T1.CardType = 'C' order by [Posting Date],TransId";
 
-		System.out.println("Final All Invoices Query = " + custAllInvoicesQuery);
+//		System.out.println("Final All Invoices Query = " + custAllInvoicesQuery);
 
 		Connection con = commonUtility.getDbConnection();
 		PreparedStatement ps = con.prepareStatement(custAllInvoicesQuery);
@@ -930,7 +981,7 @@ public class CustomersServiceImpl implements CustomersService {
 					rs.getString("Origin No"), Double.toString(commonUtility.round(rs.getDouble("Debit"), 2)),
 					Double.toString(commonUtility.round(rs.getDouble("Credit"), 2)),
 					Double.toString(commonUtility.round(rs.getDouble("Cumulative Balance"), 2)),
-					rs.getString("Balance Due"), rs.getInt("DocEntry"), rs.getString("Ref2"));
+					rs.getString("Balance Due"), rs.getInt("DocEntry"), rs.getString("Ref2"), custCode);
 
 			if (invoiceType.equalsIgnoreCase("IN") && invoiceNo != 0) {
 				invoiceDocEntriesList.add(invoiceNo);
@@ -939,7 +990,7 @@ public class CustomersServiceImpl implements CustomersService {
 			custAllInvociesList.add(invoicesDetails);
 		}
 
-		System.out.println(invoiceDocEntriesList.toString());
+//		System.out.println(invoiceDocEntriesList.toString());
 
 		List<InvoiceItems> invoiceItemsList;
 		Map<Integer, List<InvoiceItems>> invoiceItemsMap;
@@ -965,7 +1016,8 @@ public class CustomersServiceImpl implements CustomersService {
 				invoiceItemsMap.put(invoiceDocEntry, invoiceItemMapList);
 			}
 
-//			System.out.println("Invoice Doc Entry Keys In Map = " + invoiceItemsMap.keySet().toString());
+			// System.out.println("Invoice Doc Entry Keys In Map = " +
+			// invoiceItemsMap.keySet().toString());
 
 			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 			df.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
@@ -986,13 +1038,15 @@ public class CustomersServiceImpl implements CustomersService {
 				Float balanceAmt = Float.parseFloat(custInvoice.getBalance());
 				if (invoiceDocEntry != 0 && custInvoice.getOrigin().equalsIgnoreCase("IN")) {
 
-//					System.out.println("Invoice Doc Entry In Iteration : " + invoiceDocEntry);
+					// System.out.println("Invoice Doc Entry In Iteration : " +
+					// invoiceDocEntry);
 
 					paymentDueDays = commonUtility.getDaysDiffBetweenDates(invoiceDate, invoiceDueDate);
 					dueDateInDays = commonUtility.getDaysDiffBetweenDates(currentDate, invoiceDueDate);
 
 					invoiceItemsListFromMap = invoiceItemsMap.get(invoiceDocEntry);
-//					System.out.println("invoiceItemsListFromMap = " + invoiceItemsListFromMap);
+					// System.out.println("invoiceItemsListFromMap = " +
+					// invoiceItemsListFromMap);
 
 					invoiceAmountInWords = numberToWord.convert(Math.round(balanceAmt));
 
@@ -1020,4 +1074,150 @@ public class CustomersServiceImpl implements CustomersService {
 		return invoiceDetailsList;
 	}
 
+	
+	private List<InvoicesDetails> getAllInvoicesForCustIds(List<String> custCodesList, Date tillDate)
+			throws ClassNotFoundException, SQLException, ParseException {
+
+		DateFormat dfYYYYMMDD = new SimpleDateFormat("yyyyMMdd");
+		dfYYYYMMDD.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+
+		String tillDateFormatted = dfYYYYMMDD.format(tillDate);
+
+		String custCodesCommaSeparated = "";
+		int custCodesListSize = custCodesList.size();
+		
+		for (int i=0 ; i<custCodesListSize; i++) {
+			
+			custCodesCommaSeparated = custCodesCommaSeparated + "'" + custCodesList.get(i) + "'";
+			
+			if ((i+1)<custCodesListSize)
+				custCodesCommaSeparated = custCodesCommaSeparated + ",";
+		}
+		
+		String custAllInvoicesQuery = "Select T1.CardCode As CardCode, ISNULL(T5.DocEntry, '0') As 'DocEntry', ISNULL(T5.DocNum, '0') As 'Invoice No.', T5.DocStatus As 'Invoice Status', "
+				+ "T0.TransId ,T0.RefDate As'Posting Date',T0.DueDate, " + "(Select  " + "(Case  "
+				+ "When T2.TransType=13 Then 'IN' " + "When T2.TransType=-2 Then 'OB'  "
+				+ "When T2.TransType=24 Then 'RC'  " + "When T2.TransType=30 Then 'JE'  "
+				+ "When T2.TransType=321 Then 'M.Reco'  " + "When T2.TransType=18 Then 'CN'  " + "Else 'Other'  "
+				+ "End)  " + "From OJDT T2 Where T2.TransId =T0.TransId) As 'Origin', "
+				+ "T0.Ref1 As'Origin No', T0.Ref2 As'Ref2', T0.Debit As 'Debit',T0.Credit As'Credit', " + "((select  "
+				+ "sum(T4.debit)-sum(T4.Credit) from OJDT T3 INNER JOIN JDT1 T4 on T3.TransId=T4.TransId " + "WHERE  "
+				+ "T4.ShortName=T0.ShortName and " + "T3.TransId<=T0.TransId " + ")) 'Cumulative Balance', "
+				+ "(T0.BALDUEDEB - T0.BALDUECRED) as 'Balance Due' "
+				+ "From JDT1 T0 INNER JOIN OCRD T1 ON T1.CardCode=T0.ShortName "
+				+ "LEFT JOIN OINV T5 ON T0.Ref1=T5.DocNum  " + "WHere T0.RefDate <='" + tillDateFormatted
+				+ "' And T1.CardCode IN (" + custCodesCommaSeparated + ")" + " And T1.CardType = 'C' order by [Posting Date],TransId";
+
+		System.out.println("Final All Invoices Query = " + custAllInvoicesQuery);
+
+		Connection con = commonUtility.getDbConnection();
+		PreparedStatement ps = con.prepareStatement(custAllInvoicesQuery);
+
+		ResultSet rs = ps.executeQuery();
+
+		List<InvoiceDetailsNewTo> custAllInvociesList = new ArrayList<InvoiceDetailsNewTo>();
+		List<Integer> invoiceDocEntriesList = new ArrayList<Integer>();
+
+		while (rs.next()) {
+			String invoiceType = rs.getString("Origin");
+			int invoiceNo = rs.getInt("Invoice No.");
+
+			InvoiceDetailsNewTo invoicesDetails = new InvoiceDetailsNewTo(invoiceNo, rs.getString("Invoice Status"),
+					rs.getString("TransId"), rs.getString("Posting Date"), rs.getString("DueDate"), invoiceType,
+					rs.getString("Origin No"), Double.toString(commonUtility.round(rs.getDouble("Debit"), 2)),
+					Double.toString(commonUtility.round(rs.getDouble("Credit"), 2)),
+					Double.toString(commonUtility.round(rs.getDouble("Cumulative Balance"), 2)),
+					rs.getString("Balance Due"), rs.getInt("DocEntry"), rs.getString("Ref2"), rs.getString("CardCode"));
+
+			if (invoiceType.equalsIgnoreCase("IN") && invoiceNo != 0) {
+				invoiceDocEntriesList.add(invoiceNo);
+			}
+
+			custAllInvociesList.add(invoicesDetails);
+		}
+
+//		System.out.println(invoiceDocEntriesList.toString());
+
+		List<InvoiceItems> invoiceItemsList;
+		Map<Integer, List<InvoiceItems>> invoiceItemsMap;
+		List<InvoicesDetails> invoiceDetailsList = new ArrayList<InvoicesDetails>();
+
+		if (invoiceDocEntriesList.size() > 0) {
+			invoiceItemsList = getInvoiceItemsListForDocEntries(invoiceDocEntriesList);
+
+			// Separate All Invoice Items As Per Invoice No (DocEntry)
+			invoiceItemsMap = new HashMap<Integer, List<InvoiceItems>>();
+
+			for (InvoiceItems invoiceItems : invoiceItemsList) {
+				int invoiceDocEntry = invoiceItems.getDocEntry();
+
+				List<InvoiceItems> invoiceItemMapList;
+				if (invoiceItemsMap.containsKey(invoiceDocEntry))
+					invoiceItemMapList = invoiceItemsMap.get(invoiceDocEntry);
+				else
+					invoiceItemMapList = new ArrayList<InvoiceItems>();
+
+				invoiceItemMapList.add(invoiceItems);
+
+				invoiceItemsMap.put(invoiceDocEntry, invoiceItemMapList);
+			}
+
+			// System.out.println("Invoice Doc Entry Keys In Map = " +
+			// invoiceItemsMap.keySet().toString());
+
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+			df.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+
+			String currentDate = df.format(new Date());
+			NumberToWord numberToWord = new NumberToWord();
+			for (InvoiceDetailsNewTo custInvoice : custAllInvociesList) {
+
+				int invoiceDocEntry = custInvoice.getInvoiceDocEntry();
+				long paymentDueDays = 0L;
+				long dueDateInDays = 0L;
+				String invoiceAmountInWords = null;
+				String taxAmountInWords = null;
+				List<InvoiceItems> invoiceItemsListFromMap = null;
+				String invoiceDate = custInvoice.getPostingDate();
+				String invoiceDueDate = custInvoice.getDueDate();
+
+				Float balanceAmt = Float.parseFloat(custInvoice.getBalance());
+				if (invoiceDocEntry != 0 && custInvoice.getOrigin().equalsIgnoreCase("IN")) {
+
+					// System.out.println("Invoice Doc Entry In Iteration : " +
+					// invoiceDocEntry);
+
+					paymentDueDays = commonUtility.getDaysDiffBetweenDates(invoiceDate, invoiceDueDate);
+					dueDateInDays = commonUtility.getDaysDiffBetweenDates(currentDate, invoiceDueDate);
+
+					invoiceItemsListFromMap = invoiceItemsMap.get(invoiceDocEntry);
+					// System.out.println("invoiceItemsListFromMap = " +
+					// invoiceItemsListFromMap);
+
+					invoiceAmountInWords = numberToWord.convert(Math.round(balanceAmt));
+
+					float finalTaxAmount = 0F;
+
+					if (null != invoiceItemsListFromMap) {
+						for (InvoiceItems invoiceItems : invoiceItemsListFromMap)
+							finalTaxAmount = finalTaxAmount + invoiceItems.getCgstTax() + invoiceItems.getSgstTax();
+					}
+					taxAmountInWords = numberToWord.convert((int) Math.floor(finalTaxAmount));
+
+				}
+
+				String custCode = custInvoice.getCustCode();
+				InvoicesDetails invoicesDetails = new InvoicesDetails(invoiceDocEntry,
+						Integer.toString(custInvoice.getInvoiceNo()), invoiceDate, invoiceDueDate, paymentDueDays,
+						custInvoice.getInvoiceStatus(), balanceAmt, custCode, "", custInvoice.getOrigin(),
+						invoiceItemsListFromMap, 0F, balanceAmt, "", dueDateInDays, invoiceAmountInWords,
+						taxAmountInWords, custInvoice.getTransId(), custInvoice.getOriginNo(), custInvoice.getDebit(),
+						custInvoice.getCredit(), custInvoice.getCumulativeBalance(), custInvoice.getRef2());
+
+				invoiceDetailsList.add(invoicesDetails);
+			}
+		}
+
+		return invoiceDetailsList;
+	}
 }

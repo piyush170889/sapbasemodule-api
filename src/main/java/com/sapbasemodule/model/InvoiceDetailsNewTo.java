@@ -28,12 +28,14 @@ public class InvoiceDetailsNewTo {
 
 	private String balance;
 
+	private String custCode;
+
 	public InvoiceDetailsNewTo() {
 	}
 
 	public InvoiceDetailsNewTo(int invoiceNo, String invoiceStatus, String transId, String postingDate, String dueDate,
 			String origin, String originNo, String debit, String credit, String cumulativeBalance, String balance,
-			int invoiceDocEntry, String ref2) {
+			int invoiceDocEntry, String ref2, String custCode) {
 		this.ref2 = ref2;
 		this.invoiceNo = invoiceNo;
 		this.invoiceStatus = invoiceStatus;
@@ -47,6 +49,7 @@ public class InvoiceDetailsNewTo {
 		this.cumulativeBalance = cumulativeBalance;
 		this.balance = balance;
 		this.invoiceDocEntry = invoiceDocEntry;
+		this.custCode = custCode;
 	}
 
 	public InvoiceDetailsNewTo(int invoiceNo, String invoiceStatus, String transId, String postingDate, String dueDate,
@@ -62,6 +65,14 @@ public class InvoiceDetailsNewTo {
 		this.credit = credit;
 		this.cumulativeBalance = cumulativeBalance;
 		this.balance = balance;
+	}
+
+	public String getCustCode() {
+		return custCode;
+	}
+
+	public void setCustCode(String custCode) {
+		this.custCode = custCode;
 	}
 
 	public String getRef2() {

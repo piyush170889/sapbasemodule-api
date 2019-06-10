@@ -37,6 +37,8 @@ public interface CustomersRepository extends JpaRepository<Customers, String> {
 	@Query("select SUM(c.balance) from Customers c where c.cardType=?1")
 	Float getTotalCustomerOutstandingByType(String type);
 
+	List<Customers> findByCardTypeAndSlpCode(String string, String slpCode);
+
 	// List<Customers> findByCardCodeOrCardNameOrPhone1OrPhone2Containing(String
 	// searchTerm);
 
