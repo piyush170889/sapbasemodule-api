@@ -1,5 +1,6 @@
 package com.sapbasemodule.service;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -69,7 +70,7 @@ public class UsersServiceImpl implements UsersService {
 
 			List<String> userDtlsIdList = new ArrayList<String>();
 			for (UserLoginDtl customer : sortedCustomersList)
-				userDtlsIdList.add(customer.getUserDtl().getUserDtlsId());
+				userDtlsIdList.add(customer.getUsername());
 
 			List<FirebaseIdDtls> firebaseIdDtlsList = firebaseIdDtlsRepository.findByImeiNoIn(userDtlsIdList);
 			Map<String, String> userDtlsIdAndFirebaseIdMap = new HashMap<String, String>();
@@ -79,8 +80,9 @@ public class UsersServiceImpl implements UsersService {
 			int sortedCustomersListSize = sortedCustomersList.size();
 			for (int i = 0; i < sortedCustomersListSize; i++) {
 				UserLoginDtl customer = sortedCustomersList.get(i);
-				String userDtlsId = customer.getUserDtl().getUserDtlsId();
-
+//				String userDtlsId = customer.getUserDtl().getUserDtlsId();
+				String userDtlsId = customer.getUsername();
+				
 				String firebaseId = userDtlsIdAndFirebaseIdMap.get(userDtlsId);
 				String distanceTravelledString = "NA";
 
@@ -95,7 +97,7 @@ public class UsersServiceImpl implements UsersService {
 						double distanceTravelled = commonUtility
 								.calculateDistanceFromLatLongList(normalPacketDescDtlsList);
 						distanceTravelledString = Double.toString(commonUtility.round(distanceTravelled, 2));
-					} else 
+					} else
 						distanceTravelledString = "0";
 				}
 
@@ -154,7 +156,8 @@ public class UsersServiceImpl implements UsersService {
 
 		// Store UserDtls
 		UserDtl userDtl = new UserDtl(userDtlsId, request.getFirstName().trim(), request.getLastName().trim(),
-				null == request.getEmailId() ? "" : request.getEmailId().trim(), (byte) 1, loggedInUserId, loggedInUserId);
+				null == request.getEmailId() ? "" : request.getEmailId().trim(), (byte) 1, loggedInUserId,
+				loggedInUserId);
 		userDtlRepository.save(userDtl);
 
 		// Store User Login Details
@@ -272,7 +275,13 @@ public class UsersServiceImpl implements UsersService {
 		if (null != imeiNo) {
 
 			// Get Tracking Data for the given track date
-			normalPacketDescDtlsList = normalPacketDescDtlsRepository.findTrackingDataByDateAndImei(trackDate, imeiNo);
+			DateFormat df = new SimpleDateFormat("ddMMyy");
+			DateFormat df2 = new SimpleDateFormat("yyyy-MM-dd");
+			String trackDateFormatted = df.format(df2.parse(trackDate));
+			System.out.println("trackDateFormatted = " + trackDateFormatted);
+
+			normalPacketDescDtlsList = normalPacketDescDtlsRepository.findTrackingDataByDateAndImei(trackDateFormatted,
+					imeiNo);
 
 			int normalPacketDescDtlsListSize = normalPacketDescDtlsList.size();
 			List<Integer> indexToRemoveFromNormalPacketDtlsList = new ArrayList<>();
@@ -285,7 +294,8 @@ public class UsersServiceImpl implements UsersService {
 
 				if (lat != 0 && lon != 0 && lat != 0.0 && lon != 0.0) {
 					TrackingData trackingData = new TrackingData(
-							commonUtility.getISTTimeFromUTCTime12HourFormat(normalPacketDescDtls.getUtcTm()), "",
+							commonUtility.getTime12HourFormat(normalPacketDescDtls.getUtcTm()), "",
+//							commonUtility.getISTTimeFromUTCTime12HourFormat(normalPacketDescDtls.getUtcTm()), "",
 							(null == normalPacketDescDtls.getDigitalInputStatus()) ? "N/A"
 									: normalPacketDescDtls.getDigitalInputStatus().substring(0, 1),
 							lat, lon, normalPacketDescDtls.getUtcDt(), normalPacketDescDtls.getUtcTm());

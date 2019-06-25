@@ -49,8 +49,11 @@ public class LocationMgmtServiceImpl implements LocationMgmtService {
 			String utcDt, String utcTm) throws Exception {
 
 		CommonUtility commonUtility = new CommonUtility();
-		Date istDate = commonUtility.getISTDateFromUtcDtAndTmFromTln(utcDt, utcTm);
+//		Date istDate = commonUtility.getISTDateFromUtcDtAndTmFromTln(utcDt, utcTm);
+		Date istDate = commonUtility.getISTDateFromDdMmYyISTString((utcDt+utcTm));
+
 		String updatedTs = commonUtility.getISTDateStringFromISTDate(istDate);
+		
 		boolean isTodaysPacket = commonUtility.checkIfISTDateIsOfToday(istDate);
 		System.out.println("updatedTs = " + updatedTs + ", isTodaysPacket = " + isTodaysPacket);
 

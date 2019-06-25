@@ -400,6 +400,22 @@ public class CommonUtility {
 		return ((subTotal) + (subTotal / 100) * taxPercentage) - discount;
 	}
 
+	public String getTime12HourFormat(String time) throws ParseException {
+
+		System.out.println("Time String = " + time);
+
+		DateFormat sdf = new SimpleDateFormat("hh:mm a");
+		// sdf.setTimeZone(TimeZone.getTimeZone("IST"));
+		DateFormat df = new SimpleDateFormat("HHmmss");
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(df.parse(time));
+
+		String time12HourFormat = sdf.format(cal.getTime());
+		
+		return time12HourFormat;
+	}
+	
 	public String getISTTimeFromUTCTime12HourFormat(String utcTime) throws ParseException {
 
 		System.out.println("UTC Time String = " + utcTime);
@@ -633,6 +649,18 @@ public class CommonUtility {
 //		System.out.println("Days: " + diffOfDays);
 
 		return diffOfDays;
+	}
+
+	public Date getISTDateFromDdMmYyISTString(String istDateInDdMmYyHhMmSsFormat) throws ParseException {
+		
+		DateFormat dfDdMmYyHhMmSs = new SimpleDateFormat("ddMMyyHHmmss");
+		dfDdMmYyHhMmSs.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+
+		DateFormat dfYyyyMmDdHhMmSs = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		dfYyyyMmDdHhMmSs.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+
+		Date convertedDate = dfYyyyMmDdHhMmSs.parse(dfYyyyMmDdHhMmSs.format(dfDdMmYyHhMmSs.parse(istDateInDdMmYyHhMmSsFormat)));
+		return convertedDate;
 	}
 
 }
