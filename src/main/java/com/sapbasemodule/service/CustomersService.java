@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Optional;
 
+import com.sapbasemodule.domain.InvoicesAcknowledgementDetails;
 import com.sapbasemodule.model.BaseWrapper;
 
 public interface CustomersService {
@@ -27,5 +28,7 @@ public interface CustomersService {
 	BaseWrapper doGetCustomersAllInvoices(String custCode, String tillDate) throws ClassNotFoundException, SQLException, ParseException;
 
 	BaseWrapper doGetCustomerDataForSync() throws ClassNotFoundException, SQLException, ParseException;
+
+	BaseWrapper doSaveInvoiceAcknowledgement(int invoiceNo, InvoicesAcknowledgementDetails invoiceAcknowledgementDetails);
 
 }

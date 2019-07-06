@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sapbasemodule.constants.Constants;
 import com.sapbasemodule.domain.CustomerAddresses;
 import com.sapbasemodule.domain.Customers;
+import com.sapbasemodule.domain.InvoicesAcknowledgementDetails;
 import com.sapbasemodule.domain.OINV;
 import com.sapbasemodule.domain.OrderItems;
 import com.sapbasemodule.domain.Orders;
@@ -42,6 +43,7 @@ import com.sapbasemodule.model.PaginationDetails;
 import com.sapbasemodule.model.PendingInvoicesTo;
 import com.sapbasemodule.persitence.CustomersAddressesRepository;
 import com.sapbasemodule.persitence.CustomersRepository;
+import com.sapbasemodule.persitence.InvoiceAcknowledgementDetailsRepository;
 import com.sapbasemodule.persitence.OSLPRepository;
 import com.sapbasemodule.persitence.OrderItemsRepository;
 import com.sapbasemodule.persitence.OrdersRepository;
@@ -183,7 +185,7 @@ public class CustomersServiceImpl implements CustomersService {
 				+ "sub group by [BP Code],[BP Name],[t],[Posting date], [Due date],[Doc Date],[Ref1],Trans,[Invoice No.],[Invoice Status] "
 				+ "order by [BP Code]";
 
-//		System.out.println("Final SQL = " + sqlQuery);
+		// System.out.println("Final SQL = " + sqlQuery);
 
 		PreparedStatement ps = conn.prepareStatement(sqlQuery);
 		ResultSet rs = ps.executeQuery();
@@ -553,15 +555,9 @@ public class CustomersServiceImpl implements CustomersService {
 
 		Connection conn = commonUtility.getDbConnection();
 
-		String invoiceIdsInString = "";
-		int size = invoiceDocEntriesList.size();
-		for (int i = 0; i < size; i++) {
-			invoiceIdsInString += invoiceDocEntriesList.get(i);
-			if ((i + 1) < size)
-				invoiceIdsInString += ",";
-		}
+		String invoiceIdsInString = getInvoiceDocIdsInString(invoiceDocEntriesList);
 
-//		System.out.println("Invoice Id String = " + invoiceIdsInString);
+		// System.out.println("Invoice Id String = " + invoiceIdsInString);
 
 		String sqlQuery = "SELECT T0.DocEntry,T0.DocNum,T0.DocDate,T0.DocDueDate As'Due Date',T0.cardcode,T0.cardname, "
 				+ "T0.Address as 'Pay_To', T0.Address2 as 'Ship_To',T1.ItemCode,T1.Dscription,T0.RoundDif, T1.Quantity, T1.Price,T1.LineTotal,T0.DocTotal, "
@@ -604,6 +600,20 @@ public class CustomersServiceImpl implements CustomersService {
 		}
 
 		return invoicesItemsDetailsList;
+	}
+
+	private String getInvoiceDocIdsInString(List<Integer> invoiceDocEntriesList) {
+
+		int size = invoiceDocEntriesList.size();
+
+		String invoiceIdsInString = "";
+		for (int i = 0; i < size; i++) {
+			invoiceIdsInString += invoiceDocEntriesList.get(i);
+			if ((i + 1) < size)
+				invoiceIdsInString += ",";
+		}
+
+		return invoiceIdsInString;
 	}
 
 	@Override
@@ -871,66 +881,71 @@ public class CustomersServiceImpl implements CustomersService {
 
 	@Autowired
 	private OSLPRepository oslpRepository;
-	
+
 	@Override
 	public BaseWrapper doGetCustomerDataForSync() throws ClassNotFoundException, SQLException, ParseException {
 
 		List<Customers> customersList = null;
 
 		if (commonUtility.hasRole(RoleType.ROLE_SALES.toString())) {
-//			System.out.println("Logged Users ID = " + commonUtility.getLoggedUser().getUsername());
+			// System.out.println("Logged Users ID = " +
+			// commonUtility.getLoggedUser().getUsername());
 			String slpCode = oslpRepository.selectSlpCodeByMobil(commonUtility.getLoggedUser().getUsername());
 			customersList = customersRepository.findByCardTypeAndSlpCode("C", slpCode);
 		} else if (commonUtility.hasRole(RoleType.ROLE_ADMIN.toString())) {
 			customersList = customersRepository.findByCardType("C");
 		}
-		
+
 		if (customersList.isEmpty())
 			customersList = new ArrayList<Customers>();
 
-		//Get All Invoices Of Customers And Put them against each customer in a map
+		// Get All Invoices Of Customers And Put them against each customer in a
+		// map
 		List<String> custIds = new ArrayList<String>();
 		for (Customers customers : customersList)
 			custIds.add(customers.getCardCode());
-		
+
 		Date tillDate = new Date();
-		
+
 		List<InvoicesDetails> allCustomersInvoiceDetailsList = getAllInvoicesForCustIds(custIds, tillDate);
-		
+
 		Map<String, List<InvoicesDetails>> customerWiseInvoicesMap = new HashMap<String, List<InvoicesDetails>>();
 		for (InvoicesDetails invoicesDetails : allCustomersInvoiceDetailsList) {
-			
+
 			String custCode = invoicesDetails.getCardCode();
 			List<InvoicesDetails> customersInvoicesList = null;
-			
+
 			if (customerWiseInvoicesMap.containsKey(custCode))
 				customersInvoicesList = customerWiseInvoicesMap.get(custCode);
 			else
 				customersInvoicesList = new ArrayList<InvoicesDetails>();
-			
+
 			customersInvoicesList.add(invoicesDetails);
-			
+
 			customerWiseInvoicesMap.put(custCode, customersInvoicesList);
 		}
-		
+
 		// Create Response And Send
 		List<CustomerDetailsWrapper> response = new ArrayList<CustomerDetailsWrapper>();
 
 		for (Customers customers : customersList) {
 			String custCode = customers.getCardCode();
 
-//			List<CustomerAddresses> customerAddressesList = customersAddressesRepository.findByCardCode(custCode);
+			// List<CustomerAddresses> customerAddressesList =
+			// customersAddressesRepository.findByCardCode(custCode);
 
-//			List<InvoicesDetails> customersInvoiceDetailsList = getCustomerAllInvoices(custCode, tillDate);
+			// List<InvoicesDetails> customersInvoiceDetailsList =
+			// getCustomerAllInvoices(custCode, tillDate);
 			List<InvoicesDetails> customersInvoiceDetailsList = customerWiseInvoicesMap.get(custCode);
-			
+
 			Float creditLimit = customers.getCreditLine() == null ? 0F : customers.getCreditLine();
 
 			Float custBalance = customers.getBalance();
 			customers.setCreditDeviation(creditLimit < custBalance ? (creditLimit - custBalance) : 0F);
 
-//			CustomerDetailsWrapper customerDetailsWrapper = new CustomerDetailsWrapper(customers, customerAddressesList,
-//					customersInvoiceDetailsList);
+			// CustomerDetailsWrapper customerDetailsWrapper = new
+			// CustomerDetailsWrapper(customers, customerAddressesList,
+			// customersInvoiceDetailsList);
 			CustomerDetailsWrapper customerDetailsWrapper = new CustomerDetailsWrapper(customers, null,
 					customersInvoiceDetailsList);
 
@@ -962,7 +977,8 @@ public class CustomersServiceImpl implements CustomersService {
 				+ "LEFT JOIN OINV T5 ON T0.Ref1=T5.DocNum  " + "WHere T0.RefDate <='" + tillDateFormatted
 				+ "' And T1.CardCode='" + custCode + "'" + " And T1.CardType = 'C' order by [Posting Date],TransId";
 
-//		System.out.println("Final All Invoices Query = " + custAllInvoicesQuery);
+		// System.out.println("Final All Invoices Query = " +
+		// custAllInvoicesQuery);
 
 		Connection con = commonUtility.getDbConnection();
 		PreparedStatement ps = con.prepareStatement(custAllInvoicesQuery);
@@ -990,7 +1006,7 @@ public class CustomersServiceImpl implements CustomersService {
 			custAllInvociesList.add(invoicesDetails);
 		}
 
-//		System.out.println(invoiceDocEntriesList.toString());
+		// System.out.println(invoiceDocEntriesList.toString());
 
 		List<InvoiceItems> invoiceItemsList;
 		Map<Integer, List<InvoiceItems>> invoiceItemsMap;
@@ -1016,8 +1032,15 @@ public class CustomersServiceImpl implements CustomersService {
 				invoiceItemsMap.put(invoiceDocEntry, invoiceItemMapList);
 			}
 
-			// System.out.println("Invoice Doc Entry Keys In Map = " +
-			// invoiceItemsMap.keySet().toString());
+			// Get Acknowledgement Details Of All Invoices Ids and set signature
+			// of each against their invoice id
+			List<InvoicesAcknowledgementDetails> invoicesAcknowledgementDetailsList = invoiceAcknowledgementDetailsRepository
+					.selectByInvoiceNos(invoiceDocEntriesList);
+
+			Map<Integer, String> invoiceAcknowledgementMap = new HashMap<Integer, String>();
+			for (InvoicesAcknowledgementDetails invoicesAcknowledgementDetails : invoicesAcknowledgementDetailsList)
+				invoiceAcknowledgementMap.put(invoicesAcknowledgementDetails.getInvoiceNo(),
+						invoicesAcknowledgementDetails.getSignature());
 
 			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 			df.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
@@ -1065,7 +1088,8 @@ public class CustomersServiceImpl implements CustomersService {
 						custInvoice.getInvoiceStatus(), balanceAmt, custCode, "", custInvoice.getOrigin(),
 						invoiceItemsListFromMap, 0F, balanceAmt, "", dueDateInDays, invoiceAmountInWords,
 						taxAmountInWords, custInvoice.getTransId(), custInvoice.getOriginNo(), custInvoice.getDebit(),
-						custInvoice.getCredit(), custInvoice.getCumulativeBalance(), custInvoice.getRef2());
+						custInvoice.getCredit(), custInvoice.getCumulativeBalance(), custInvoice.getRef2(),
+						invoiceAcknowledgementMap.get(invoiceDocEntry));
 
 				invoiceDetailsList.add(invoicesDetails);
 			}
@@ -1074,7 +1098,6 @@ public class CustomersServiceImpl implements CustomersService {
 		return invoiceDetailsList;
 	}
 
-	
 	private List<InvoicesDetails> getAllInvoicesForCustIds(List<String> custCodesList, Date tillDate)
 			throws ClassNotFoundException, SQLException, ParseException {
 
@@ -1085,15 +1108,15 @@ public class CustomersServiceImpl implements CustomersService {
 
 		String custCodesCommaSeparated = "";
 		int custCodesListSize = custCodesList.size();
-		
-		for (int i=0 ; i<custCodesListSize; i++) {
-			
+
+		for (int i = 0; i < custCodesListSize; i++) {
+
 			custCodesCommaSeparated = custCodesCommaSeparated + "'" + custCodesList.get(i) + "'";
-			
-			if ((i+1)<custCodesListSize)
+
+			if ((i + 1) < custCodesListSize)
 				custCodesCommaSeparated = custCodesCommaSeparated + ",";
 		}
-		
+
 		String custAllInvoicesQuery = "Select T1.CardCode As CardCode, ISNULL(T5.DocEntry, '0') As 'DocEntry', ISNULL(T5.DocNum, '0') As 'Invoice No.', T5.DocStatus As 'Invoice Status', "
 				+ "T0.TransId ,T0.RefDate As'Posting Date',T0.DueDate, " + "(Select  " + "(Case  "
 				+ "When T2.TransType=13 Then 'IN' " + "When T2.TransType=-2 Then 'OB'  "
@@ -1106,7 +1129,8 @@ public class CustomersServiceImpl implements CustomersService {
 				+ "(T0.BALDUEDEB - T0.BALDUECRED) as 'Balance Due' "
 				+ "From JDT1 T0 INNER JOIN OCRD T1 ON T1.CardCode=T0.ShortName "
 				+ "LEFT JOIN OINV T5 ON T0.Ref1=T5.DocNum  " + "WHere T0.RefDate <='" + tillDateFormatted
-				+ "' And T1.CardCode IN (" + custCodesCommaSeparated + ")" + " And T1.CardType = 'C' order by [Posting Date],TransId";
+				+ "' And T1.CardCode IN (" + custCodesCommaSeparated + ")"
+				+ " And T1.CardType = 'C' order by [Posting Date],TransId";
 
 		System.out.println("Final All Invoices Query = " + custAllInvoicesQuery);
 
@@ -1136,11 +1160,12 @@ public class CustomersServiceImpl implements CustomersService {
 			custAllInvociesList.add(invoicesDetails);
 		}
 
-//		System.out.println(invoiceDocEntriesList.toString());
+		// System.out.println(invoiceDocEntriesList.toString());
 
 		List<InvoiceItems> invoiceItemsList;
 		Map<Integer, List<InvoiceItems>> invoiceItemsMap;
 		List<InvoicesDetails> invoiceDetailsList = new ArrayList<InvoicesDetails>();
+		List<InvoicesAcknowledgementDetails> invoicesAcknowledgementDetailsList;
 
 		if (invoiceDocEntriesList.size() > 0) {
 			invoiceItemsList = getInvoiceItemsListForDocEntries(invoiceDocEntriesList);
@@ -1162,8 +1187,15 @@ public class CustomersServiceImpl implements CustomersService {
 				invoiceItemsMap.put(invoiceDocEntry, invoiceItemMapList);
 			}
 
-			// System.out.println("Invoice Doc Entry Keys In Map = " +
-			// invoiceItemsMap.keySet().toString());
+			// Get Acknowledgement Details Of All Invoices Ids and set signature
+			// of each against their invoice id
+			invoicesAcknowledgementDetailsList = invoiceAcknowledgementDetailsRepository
+					.selectByInvoiceNos(invoiceDocEntriesList);
+
+			Map<Integer, String> invoiceAcknowledgementMap = new HashMap<Integer, String>();
+			for (InvoicesAcknowledgementDetails invoicesAcknowledgementDetails : invoicesAcknowledgementDetailsList)
+				invoiceAcknowledgementMap.put(invoicesAcknowledgementDetails.getInvoiceNo(),
+						invoicesAcknowledgementDetails.getSignature());
 
 			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 			df.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
@@ -1212,7 +1244,8 @@ public class CustomersServiceImpl implements CustomersService {
 						custInvoice.getInvoiceStatus(), balanceAmt, custCode, "", custInvoice.getOrigin(),
 						invoiceItemsListFromMap, 0F, balanceAmt, "", dueDateInDays, invoiceAmountInWords,
 						taxAmountInWords, custInvoice.getTransId(), custInvoice.getOriginNo(), custInvoice.getDebit(),
-						custInvoice.getCredit(), custInvoice.getCumulativeBalance(), custInvoice.getRef2());
+						custInvoice.getCredit(), custInvoice.getCumulativeBalance(), custInvoice.getRef2(),
+						invoiceAcknowledgementMap.get(invoiceDocEntry));
 
 				invoiceDetailsList.add(invoicesDetails);
 			}
@@ -1220,4 +1253,48 @@ public class CustomersServiceImpl implements CustomersService {
 
 		return invoiceDetailsList;
 	}
+
+	// private List<InvoicesAcknowledgementDetails>
+	// getInvoicesAcknowledgementListForDocEntries(
+	// List<Integer> invoiceDocEntriesList) {
+	//
+	// String invoiceIdsInString =
+	// getInvoiceDocIdsInString(invoiceDocEntriesList);
+	//
+	//
+	// }
+
+	@Autowired
+	private InvoiceAcknowledgementDetailsRepository invoiceAcknowledgementDetailsRepository;
+
+	@Override
+	public BaseWrapper doSaveInvoiceAcknowledgement(int invoiceNo,
+			InvoicesAcknowledgementDetails invoiceAcknowledgementDetails) {
+
+		InvoicesAcknowledgementDetails invoicesAcknowledgementDetailsByInvoiceNo = invoiceAcknowledgementDetailsRepository
+				.findByInvoiceNo(invoiceNo);
+
+		if (null != invoicesAcknowledgementDetailsByInvoiceNo)
+			invoiceAcknowledgementDetails.setInvoicesAcknowledgementDtlsId(
+					invoicesAcknowledgementDetailsByInvoiceNo.getInvoicesAcknowledgementDtlsId());
+
+		invoiceAcknowledgementDetails.setInvoiceNo(invoiceNo);
+
+		Date currentDate = new Date();
+
+		DateFormat sdfDt = new SimpleDateFormat("ddMMYY");
+		sdfDt.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+		String currentDt = sdfDt.format(currentDate);
+		invoiceAcknowledgementDetails.setCreatedDt(currentDt);
+
+		DateFormat sdfTm = new SimpleDateFormat("HHmmss");
+		sdfTm.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+		String currentTm = sdfTm.format(currentDate);
+		invoiceAcknowledgementDetails.setCreatedTime(currentTm);
+
+		invoiceAcknowledgementDetails = invoiceAcknowledgementDetailsRepository.save(invoiceAcknowledgementDetails);
+
+		return new BaseWrapper(invoiceAcknowledgementDetails.getInvoicesAcknowledgementDtlsId());
+	}
+
 }

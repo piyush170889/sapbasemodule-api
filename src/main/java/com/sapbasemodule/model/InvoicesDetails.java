@@ -64,6 +64,8 @@ public class InvoicesDetails {
 
 	private String ref2;
 
+	private String signature;
+
 	public InvoicesDetails() {
 	}
 
@@ -71,7 +73,7 @@ public class InvoicesDetails {
 			String isPaid, float amountDue, String cardCode, String cardName, String type,
 			List<InvoiceItems> invoiceItemsList, float netAmount, float grossTotal, String narration,
 			long dueDateInDays, String amountInWords, String taxAmountInWords, String transId, String originNo,
-			String debit, String credit, String cumulativeBalance, String ref2) {
+			String debit, String credit, String cumulativeBalance, String ref2, String signature) {
 		this.ref2 = ref2;
 		this.invoiceDtlsId = invoiceDtlsId;
 		this.invoiceNo = invoiceNo;
@@ -95,6 +97,7 @@ public class InvoicesDetails {
 		this.debit = debit;
 		this.credit = credit;
 		this.cumulativeBalance = cumulativeBalance;
+		this.signature = signature;
 	}
 
 	public InvoicesDetails(int invoiceDtlsId, String invoiceNo, String invoiceDate, String dueDate, long paymentDueDays,
@@ -126,6 +129,14 @@ public class InvoicesDetails {
 		this.sgstTax = sgstTax;
 		this.amountInWords = amountInWords;
 		this.taxAmountInWords = taxAmountInWords;
+	}
+
+	public String getSignature() {
+		return signature;
+	}
+
+	public void setSignature(String signature) {
+		this.signature = signature;
 	}
 
 	public String getRef2() {
