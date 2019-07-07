@@ -3,6 +3,7 @@ package com.sapbasemodule.service;
 import java.text.ParseException;
 import java.util.List;
 
+import com.sapbasemodule.domain.SiteVisitHistory;
 import com.sapbasemodule.domain.UserLoginDtl;
 import com.sapbasemodule.exception.ServicesException;
 import com.sapbasemodule.model.AdminUserDetails;
@@ -27,4 +28,10 @@ public interface UsersService {
 	BaseWrapper doChangePasswordOfUserFromAdmin(UserLoginDtl request);
 
 	BaseWrapper doGetUserHistoryWithTrackData(String userDtlsId, String trackDate) throws ParseException;
+
+	BaseWrapper doGetLoggedInUsersVisitHistory();
+
+	BaseWrapper doPunchUsersVisitEntry(SiteVisitHistory request);
+
+	BaseWrapper doPunchUsersVisitExit(SiteVisitHistory request) throws ServicesException;
 }

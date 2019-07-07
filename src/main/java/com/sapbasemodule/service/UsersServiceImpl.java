@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sapbasemodule.domain.FirebaseIdDtls;
 import com.sapbasemodule.domain.NormalPacketDescDtls;
+import com.sapbasemodule.domain.SiteVisitHistory;
 import com.sapbasemodule.domain.UserDtl;
 import com.sapbasemodule.domain.UserLoginDtl;
 import com.sapbasemodule.domain.UserRoleDtl;
@@ -26,13 +27,14 @@ import com.sapbasemodule.exception.ServicesException;
 import com.sapbasemodule.model.AdminUserDetails;
 import com.sapbasemodule.model.BaseWrapper;
 import com.sapbasemodule.model.CompleteUserDtlsWrapper;
+import com.sapbasemodule.model.LocationTrackingData;
 import com.sapbasemodule.model.LoggedInUserDetailsWrapper;
 import com.sapbasemodule.model.PaginationDetails;
 import com.sapbasemodule.model.TrackingData;
 import com.sapbasemodule.model.UsersDetailsWrapper;
-import com.sapbasemodule.model.LocationTrackingData;
 import com.sapbasemodule.persitence.FirebaseIdDtlsRepository;
 import com.sapbasemodule.persitence.NormalPacketDescDtlsRepository;
+import com.sapbasemodule.persitence.SiteVisitHistoryRepository;
 import com.sapbasemodule.persitence.UserDtlRepository;
 import com.sapbasemodule.persitence.UserLoginDtlRepository;
 import com.sapbasemodule.persitence.UserRoleDtlRepository;
@@ -80,9 +82,9 @@ public class UsersServiceImpl implements UsersService {
 			int sortedCustomersListSize = sortedCustomersList.size();
 			for (int i = 0; i < sortedCustomersListSize; i++) {
 				UserLoginDtl customer = sortedCustomersList.get(i);
-//				String userDtlsId = customer.getUserDtl().getUserDtlsId();
+				// String userDtlsId = customer.getUserDtl().getUserDtlsId();
 				String userDtlsId = customer.getUsername();
-				
+
 				String firebaseId = userDtlsIdAndFirebaseIdMap.get(userDtlsId);
 				String distanceTravelledString = "NA";
 
@@ -295,7 +297,8 @@ public class UsersServiceImpl implements UsersService {
 				if (lat != 0 && lon != 0 && lat != 0.0 && lon != 0.0) {
 					TrackingData trackingData = new TrackingData(
 							commonUtility.getTime12HourFormat(normalPacketDescDtls.getUtcTm()), "",
-//							commonUtility.getISTTimeFromUTCTime12HourFormat(normalPacketDescDtls.getUtcTm()), "",
+							// commonUtility.getISTTimeFromUTCTime12HourFormat(normalPacketDescDtls.getUtcTm()),
+							// "",
 							(null == normalPacketDescDtls.getDigitalInputStatus()) ? "N/A"
 									: normalPacketDescDtls.getDigitalInputStatus().substring(0, 1),
 							lat, lon, normalPacketDescDtls.getUtcDt(), normalPacketDescDtls.getUtcTm());
@@ -322,5 +325,46 @@ public class UsersServiceImpl implements UsersService {
 				distanceTravelledString);
 
 		return new BaseWrapper(vehicleTrackingData);
+	}
+
+	@Autowired
+	private SiteVisitHistoryRepository siteVisitHistoryRepository;
+
+	@Override
+	public BaseWrapper doGetLoggedInUsersVisitHistory() {
+
+		List<SiteVisitHistory> siteVisitHistoriesList = siteVisitHistoryRepository
+				.findByVisitorId(commonUtility.getLoggedUserId());
+
+		return new BaseWrapper(siteVisitHistoriesList);
+	}
+
+	@Override
+	public BaseWrapper doPunchUsersVisitEntry(SiteVisitHistory request) {
+
+		request.setVisitorId(commonUtility.getLoggedUserId());
+		request.setEntryDt(commonUtility.getDtInDDMMYYFormatIST());
+		request.setEntryTm(commonUtility.getTsInHHmmssFormatIST());
+
+		request = siteVisitHistoryRepository.save(request);
+
+		return new BaseWrapper(request);
+	}
+
+	@Override
+	public BaseWrapper doPunchUsersVisitExit(SiteVisitHistory request) throws ServicesException {
+
+		SiteVisitHistory siteVisitHistory = siteVisitHistoryRepository.findOne(request.getSiteVisitHistoryId());
+
+		if (null == siteVisitHistory)
+			throw new ServicesException("802");
+
+		siteVisitHistory.setRemarks(request.getRemarks());
+		siteVisitHistory.setExitDt(commonUtility.getDtInDDMMYYFormatIST());
+		siteVisitHistory.setExitTm(commonUtility.getTsInHHmmssFormatIST());
+
+		siteVisitHistory = siteVisitHistoryRepository.save(siteVisitHistory);
+
+		return new BaseWrapper(siteVisitHistory);
 	}
 }

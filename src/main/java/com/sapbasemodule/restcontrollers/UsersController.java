@@ -8,12 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sapbasemodule.domain.SiteVisitHistory;
 import com.sapbasemodule.domain.UserLoginDtl;
 import com.sapbasemodule.exception.ServicesException;
 import com.sapbasemodule.model.AdminUserDetails;
@@ -76,27 +78,44 @@ public class UsersController {
 
 		return usersService.doValidatePassword(request);
 	}
-	
+
 	@PostMapping("change-password")
 	public Object forceChangePassword(@RequestBody UserLoginDtl request) throws ServicesException {
 
 		return usersService.doForceChangePassword(request);
 	}
-	
+
 	@PostMapping("user-change-password")
 	public Object changePasswordOfUserFromAdmin(@RequestBody UserLoginDtl request) throws ServicesException {
 
 		return usersService.doChangePasswordOfUserFromAdmin(request);
 	}
-	
-	
-	@GetMapping(value="/{user-dtls-id}/tracking-history")
-	public Object getUserHistoryWithTrackingData(@PathVariable(value="user-dtls-id") String userDtlsId, 
-			@RequestParam(value="track-date", required=true) String trackDate) throws ParseException {
-		
-		System.out.println("Request User Details - " + userDtlsId + " And Tracking Data for Date " +
-		trackDate);
+
+	@GetMapping(value = "/{user-dtls-id}/tracking-history")
+	public Object getUserHistoryWithTrackingData(@PathVariable(value = "user-dtls-id") String userDtlsId,
+			@RequestParam(value = "track-date", required = true) String trackDate) throws ParseException {
+
+		System.out.println("Request User Details - " + userDtlsId + " And Tracking Data for Date " + trackDate);
 		return usersService.doGetUserHistoryWithTrackData(userDtlsId, trackDate);
+	}
+
+	@GetMapping("/admin-users/visits-sync")
+	public Object getLoggedInUsersVisitHistory() {
+
+		return usersService.doGetLoggedInUsersVisitHistory();
+	}
+	
+	
+	@PostMapping("/admin-users/punch-visit-entry")
+	public Object punchUsersVisitEntry(@RequestBody SiteVisitHistory request) {
+
+		return usersService.doPunchUsersVisitEntry(request);
+	}
+
+	@PutMapping("/admin-users/punch-visit-exit")
+	public Object punchUsersVisitExit(@RequestBody SiteVisitHistory request) throws ServicesException {
+
+		return usersService.doPunchUsersVisitExit(request);
 	}
 	
 }

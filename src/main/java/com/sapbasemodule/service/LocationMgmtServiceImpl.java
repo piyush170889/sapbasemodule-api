@@ -1,6 +1,7 @@
 package com.sapbasemodule.service;
 
 import java.util.Date;
+import java.util.List;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sapbasemodule.constants.Constants;
 import com.sapbasemodule.domain.FirebaseIdDtls;
 import com.sapbasemodule.domain.NormalPacketDescDtls;
+import com.sapbasemodule.domain.SiteDtls;
 import com.sapbasemodule.model.BaseWrapper;
 import com.sapbasemodule.model.LocationDetails;
 import com.sapbasemodule.persitence.FirebaseIdDtlsRepository;
 import com.sapbasemodule.persitence.NormalPacketDescDtlsRepository;
+import com.sapbasemodule.persitence.SiteDtlsRepository;
 import com.sapbasemodule.utils.CommonUtility;
 import com.sapbasemodule.utils.FCMUtil;
 
@@ -49,11 +52,12 @@ public class LocationMgmtServiceImpl implements LocationMgmtService {
 			String utcDt, String utcTm) throws Exception {
 
 		CommonUtility commonUtility = new CommonUtility();
-//		Date istDate = commonUtility.getISTDateFromUtcDtAndTmFromTln(utcDt, utcTm);
-		Date istDate = commonUtility.getISTDateFromDdMmYyISTString((utcDt+utcTm));
+		// Date istDate = commonUtility.getISTDateFromUtcDtAndTmFromTln(utcDt,
+		// utcTm);
+		Date istDate = commonUtility.getISTDateFromDdMmYyISTString((utcDt + utcTm));
 
 		String updatedTs = commonUtility.getISTDateStringFromISTDate(istDate);
-		
+
 		boolean isTodaysPacket = commonUtility.checkIfISTDateIsOfToday(istDate);
 		System.out.println("updatedTs = " + updatedTs + ", isTodaysPacket = " + isTodaysPacket);
 
@@ -98,4 +102,28 @@ public class LocationMgmtServiceImpl implements LocationMgmtService {
 		}
 	}
 
+	@Autowired
+	private SiteDtlsRepository siteDtlsRepository;
+
+	@Autowired
+	private CommonUtility commonUtility;
+	
+	@Override
+	public BaseWrapper doAddUpdateSiteLocation(SiteDtls request) {
+
+		request.setUpdatedDt(commonUtility.getDtInDDMMYYFormatIST());
+		request.setUpdatedTs(commonUtility.getTsInHHmmssFormatIST());
+		
+		request = siteDtlsRepository.save(request);
+
+		return new BaseWrapper(request);
+	}
+
+	@Override
+	public BaseWrapper doGetSiteLocations() {
+
+		List<SiteDtls> siteDtlsList = siteDtlsRepository.findAll();
+
+		return new BaseWrapper(siteDtlsList);
+	}
 }

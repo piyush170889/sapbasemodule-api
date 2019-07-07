@@ -412,10 +412,10 @@ public class CommonUtility {
 		cal.setTime(df.parse(time));
 
 		String time12HourFormat = sdf.format(cal.getTime());
-		
+
 		return time12HourFormat;
 	}
-	
+
 	public String getISTTimeFromUTCTime12HourFormat(String utcTime) throws ParseException {
 
 		System.out.println("UTC Time String = " + utcTime);
@@ -511,7 +511,6 @@ public class CommonUtility {
 
 		return dfYyyyMmDdHhMmSs.format(new Date());
 	}
-
 
 	@Autowired
 	private EmailUtility emailUtility;
@@ -630,7 +629,8 @@ public class CommonUtility {
 	public Connection getDbConnection() throws ClassNotFoundException, SQLException {
 
 		Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-		Connection conn = DriverManager.getConnection("jdbc:sqlserver://" + Constants.DB_SERVER_IP + ":1433;databaseName=" + Constants.DB_NAME,
+		Connection conn = DriverManager.getConnection(
+				"jdbc:sqlserver://" + Constants.DB_SERVER_IP + ":1433;databaseName=" + Constants.DB_NAME,
 				Constants.DB_USERNM, Constants.DB_PASS);
 
 		return conn;
@@ -646,21 +646,38 @@ public class CommonUtility {
 
 		long diff = secondDate.getTime() - firstDate.getTime();
 		long diffOfDays = diff / 1000 / 60 / 60 / 24;
-//		System.out.println("Days: " + diffOfDays);
+		// System.out.println("Days: " + diffOfDays);
 
 		return diffOfDays;
 	}
 
 	public Date getISTDateFromDdMmYyISTString(String istDateInDdMmYyHhMmSsFormat) throws ParseException {
-		
+
 		DateFormat dfDdMmYyHhMmSs = new SimpleDateFormat("ddMMyyHHmmss");
 		dfDdMmYyHhMmSs.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
 
 		DateFormat dfYyyyMmDdHhMmSs = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		dfYyyyMmDdHhMmSs.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
 
-		Date convertedDate = dfYyyyMmDdHhMmSs.parse(dfYyyyMmDdHhMmSs.format(dfDdMmYyHhMmSs.parse(istDateInDdMmYyHhMmSsFormat)));
+		Date convertedDate = dfYyyyMmDdHhMmSs
+				.parse(dfYyyyMmDdHhMmSs.format(dfDdMmYyHhMmSs.parse(istDateInDdMmYyHhMmSsFormat)));
 		return convertedDate;
+	}
+
+	public String getDtInDDMMYYFormatIST() {
+
+		DateFormat dfDDMMYYIst = new SimpleDateFormat("ddMMyy");
+		dfDDMMYYIst.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+
+		return dfDDMMYYIst.format(new Date());
+	}
+
+	public String getTsInHHmmssFormatIST() {
+
+		DateFormat dfHHmmssIst = new SimpleDateFormat("HHmmss");
+		dfHHmmssIst.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+
+		return dfHHmmssIst.format(new Date());
 	}
 
 }
