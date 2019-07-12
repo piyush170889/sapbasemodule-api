@@ -17,4 +17,7 @@ public interface InvoiceAcknowledgementDetailsRepository
 	@Query("select iad from InvoicesAcknowledgementDetails iad where iad.invoiceNo IN ?1")
 	List<InvoicesAcknowledgementDetails> selectByInvoiceNos(List<Integer> invoiceDocEntriesList);
 
+	@Query("select iad.invoiceNo from InvoicesAcknowledgementDetails iad where iad.invoiceNo IN ?1")
+	List<Integer> selectExistingInvoiceFrom(List<Integer> invoiceNosList);
+
 }

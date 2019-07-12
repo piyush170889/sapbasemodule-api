@@ -2,17 +2,20 @@ package com.sapbasemodule.restcontrollers;
 
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sapbasemodule.domain.CustomerPin;
 import com.sapbasemodule.domain.InvoicesAcknowledgementDetails;
 import com.sapbasemodule.service.CustomersService;
 
@@ -109,5 +112,27 @@ public class CustomersController {
 			@RequestBody InvoicesAcknowledgementDetails invoiceAcknowledgementDetails) throws SQLException {
 
 		return customersService.doSaveInvoiceAcknowledgement(invoiceNo, invoiceAcknowledgementDetails);
+	}
+
+	@PutMapping(value = "/invoice-acknowledgement")
+	public Object saveOfflineInvoiceAcknowledgement(
+			@RequestBody List<InvoicesAcknowledgementDetails> invoiceAcknowledgementDetailsList) throws SQLException {
+
+		return customersService.doSaveOfflineInvoiceAcknowledgement(invoiceAcknowledgementDetailsList);
+	}
+
+	@GetMapping(value = "/{cust-code}/generate-pin/{contact-no}")
+	public Object generateCustomerPin(@PathVariable("cust-code") String custCode, @PathVariable("contact-no") String contactNo)
+			throws NumberFormatException, Exception {
+
+		System.out.println("Cust Code = " + custCode + ", contactNo = " + contactNo);
+		return customersService.doGenerateCustomerPin(custCode, contactNo);
+	}
+
+	@PostMapping(value = "/verify-pin")
+	public Object verifyCustomerPin(@RequestBody CustomerPin customerPin) throws NumberFormatException, Exception {
+
+		System.out.println("Customer Pin Details = " + customerPin.toString());
+		return customersService.doVerifyCustomerPin(customerPin);
 	}
 }

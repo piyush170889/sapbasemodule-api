@@ -25,11 +25,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sapbasemodule.constants.Constants;
 import com.sapbasemodule.domain.CustomerAddresses;
+import com.sapbasemodule.domain.CustomerPin;
 import com.sapbasemodule.domain.Customers;
 import com.sapbasemodule.domain.InvoicesAcknowledgementDetails;
 import com.sapbasemodule.domain.OINV;
 import com.sapbasemodule.domain.OrderItems;
 import com.sapbasemodule.domain.Orders;
+import com.sapbasemodule.exception.ServicesException;
 import com.sapbasemodule.model.AgingDetails;
 import com.sapbasemodule.model.AgingReportTo;
 import com.sapbasemodule.model.BaseWrapper;
@@ -42,12 +44,14 @@ import com.sapbasemodule.model.OrderMgmtWrapper;
 import com.sapbasemodule.model.PaginationDetails;
 import com.sapbasemodule.model.PendingInvoicesTo;
 import com.sapbasemodule.persitence.CustomersAddressesRepository;
+import com.sapbasemodule.persitence.CustomersPinRepository;
 import com.sapbasemodule.persitence.CustomersRepository;
 import com.sapbasemodule.persitence.InvoiceAcknowledgementDetailsRepository;
 import com.sapbasemodule.persitence.OSLPRepository;
 import com.sapbasemodule.persitence.OrderItemsRepository;
 import com.sapbasemodule.persitence.OrdersRepository;
 import com.sapbasemodule.utils.CommonUtility;
+import com.sapbasemodule.utils.MessageUtility;
 import com.sapbasemodule.utils.NumberToWord;
 import com.sapbasemodule.utils.RoleType;
 
@@ -925,11 +929,20 @@ public class CustomersServiceImpl implements CustomersService {
 			customerWiseInvoicesMap.put(custCode, customersInvoicesList);
 		}
 
+		// Get Pins For All Cust IDs
+		List<CustomerPin> customerPinsList = customersPinRepository.findAll();
+		Map<String, String> customerPinForCardCodeMap = new HashMap<String, String>();
+
+		for (CustomerPin customerPin : customerPinsList)
+			customerPinForCardCodeMap.put(customerPin.getCardCode(), customerPin.getCustomersPin());
+
 		// Create Response And Send
 		List<CustomerDetailsWrapper> response = new ArrayList<CustomerDetailsWrapper>();
 
 		for (Customers customers : customersList) {
 			String custCode = customers.getCardCode();
+
+			customers.setPin(customerPinForCardCodeMap.get(custCode));
 
 			// List<CustomerAddresses> customerAddressesList =
 			// customersAddressesRepository.findByCardCode(custCode);
@@ -1295,6 +1308,83 @@ public class CustomersServiceImpl implements CustomersService {
 		invoiceAcknowledgementDetails = invoiceAcknowledgementDetailsRepository.save(invoiceAcknowledgementDetails);
 
 		return new BaseWrapper(invoiceAcknowledgementDetails.getInvoicesAcknowledgementDtlsId());
+	}
+
+	@Autowired
+	private CustomersPinRepository customersPinRepository;
+
+	@Autowired
+	private MessageUtility messageUtility;
+
+	@Override
+	public BaseWrapper doGenerateCustomerPin(String custCode, String contactNo) throws NumberFormatException, Exception {
+
+		CustomerPin customerPin = customersPinRepository.findByCardCode(custCode);
+		String pin = "";
+
+		if (null == customerPin) {
+			pin = commonUtility.getOTP();
+
+			customerPin = new CustomerPin(custCode, pin, commonUtility.getDtInDDMMYYFormatIST(),
+					commonUtility.getTsInHHmmssFormatIST());
+
+			customerPin = customersPinRepository.save(customerPin);
+		}
+
+		pin = customerPin.getCustomersPin();
+
+		contactNo = commonUtility.formatMobileNoToSendOtp(contactNo, true);
+		if (messageUtility.sendOTP(pin, contactNo))
+			return new BaseWrapper(customerPin);
+		else
+			throw new ServicesException("804");
+	}
+
+	@Override
+	public BaseWrapper doVerifyCustomerPin(CustomerPin customerPin) throws ServicesException {
+
+		CustomerPin customerPin2 = customersPinRepository
+				.findByCardCodeAndCustomersPin(customerPin.getCardCode().trim(), customerPin.getCustomersPin().trim());
+
+		if (null == customerPin2)
+			throw new ServicesException("803");
+
+		return new BaseWrapper();
+	}
+
+	@Override
+	public BaseWrapper doSaveOfflineInvoiceAcknowledgement(
+			List<InvoicesAcknowledgementDetails> invoiceAcknowledgementDetailsList) {
+
+		if (invoiceAcknowledgementDetailsList.size() > 0) {
+
+			List<Integer> invoiceNosList = new ArrayList<Integer>();
+			for (InvoicesAcknowledgementDetails invoicesAcknowledgementDetails : invoiceAcknowledgementDetailsList)
+				invoiceNosList.add(invoicesAcknowledgementDetails.getInvoiceNo());
+
+			List<Integer> existingInvoiceNosList = invoiceAcknowledgementDetailsRepository
+					.selectExistingInvoiceFrom(invoiceNosList);
+
+			List<InvoicesAcknowledgementDetails> invoiceAcknowledgementDetailsListFinal = new ArrayList<InvoicesAcknowledgementDetails>();
+			String createdDt = commonUtility.getDtInDDMMYYFormatIST();
+			String createdTs = commonUtility.getTsInHHmmssFormatIST();
+
+			for (InvoicesAcknowledgementDetails invoicesAcknowledgementDetails : invoiceAcknowledgementDetailsList) {
+
+				if (!existingInvoiceNosList.contains(invoicesAcknowledgementDetails.getInvoiceNo())) {
+					invoicesAcknowledgementDetails.setCreatedDt(createdDt);
+					invoicesAcknowledgementDetails.setCreatedTime(createdTs);
+
+					invoiceAcknowledgementDetailsListFinal.add(invoicesAcknowledgementDetails);
+				}
+			}
+
+			if (invoiceAcknowledgementDetailsListFinal.size() > 0) {
+				invoiceAcknowledgementDetailsRepository.save(invoiceAcknowledgementDetailsListFinal);
+			}
+		}
+
+		return new BaseWrapper();
 	}
 
 }

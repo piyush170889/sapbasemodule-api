@@ -362,6 +362,9 @@ public class UsersServiceImpl implements UsersService {
 		siteVisitHistory.setRemarks(request.getRemarks());
 		siteVisitHistory.setExitDt(commonUtility.getDtInDDMMYYFormatIST());
 		siteVisitHistory.setExitTm(commonUtility.getTsInHHmmssFormatIST());
+		siteVisitHistory.setExitLatitude(request.getExitLatitude());
+		siteVisitHistory.setExitLongitude(request.getLongitude());
+		siteVisitHistory.setExitLocation(request.getExitLocation());
 
 		siteVisitHistory = siteVisitHistoryRepository.save(siteVisitHistory);
 

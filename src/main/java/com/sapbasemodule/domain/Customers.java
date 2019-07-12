@@ -36,7 +36,7 @@ public class Customers {
 
 	@Column(name = "SlpCode")
 	private String slpCode;
-	
+
 	@Column(name = "GroupCode")
 	private Integer groupCode;
 
@@ -91,6 +91,9 @@ public class Customers {
 	@Column(name = "E_Mail")
 	private String eMail;
 
+	@Transient
+	private String pin;
+
 	public Customers() {
 	}
 
@@ -118,6 +121,14 @@ public class Customers {
 		this.docEntry = docEntry;
 		this.cellular = cellular;
 		this.eMail = eMail;
+	}
+
+	public String getPin() {
+		return pin;
+	}
+
+	public void setPin(String pin) {
+		this.pin = pin;
 	}
 
 	public Float getCreditLine() {

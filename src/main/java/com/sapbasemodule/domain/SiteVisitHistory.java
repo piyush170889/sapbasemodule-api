@@ -49,7 +49,40 @@ public class SiteVisitHistory {
 	@Column(name = "LONGITUDE")
 	private String longitude;
 
+	@Column(name = "EXIT_LATITUDE")
+	private String exitLatitude;
+
+	@Column(name = "EXIT_LONGITUDE")
+	private String exitLongitude;
+
+	@Column(name = "EXIT_LOCATION")
+	private String exitLocation;
+
 	public SiteVisitHistory() {
+	}
+
+	public String getExitLatitude() {
+		return exitLatitude;
+	}
+
+	public void setExitLatitude(String exitLatitude) {
+		this.exitLatitude = exitLatitude;
+	}
+
+	public String getExitLongitude() {
+		return exitLongitude;
+	}
+
+	public void setExitLongitude(String exitLongitude) {
+		this.exitLongitude = exitLongitude;
+	}
+
+	public String getExitLocation() {
+		return exitLocation;
+	}
+
+	public void setExitLocation(String exitLocation) {
+		this.exitLocation = exitLocation;
 	}
 
 	public String getLatitude() {
@@ -155,6 +188,25 @@ public class SiteVisitHistory {
 		this.longitude = longitude;
 	}
 
+	public SiteVisitHistory(int siteVisitHistoryId, SiteDtls siteDtls, String visitorId, String entryDt, String entryTm,
+			String visitPurpose, String exitDt, String exitTm, String remarks, String latitude, String longitude,
+			String exitLatitude, String exitLongitude, String exitLocation) {
+		this.siteVisitHistoryId = siteVisitHistoryId;
+		this.siteDtls = siteDtls;
+		this.visitorId = visitorId;
+		this.entryDt = entryDt;
+		this.entryTm = entryTm;
+		this.visitPurpose = visitPurpose;
+		this.exitDt = exitDt;
+		this.exitTm = exitTm;
+		this.remarks = remarks;
+		this.latitude = latitude;
+		this.longitude = longitude;
+		this.exitLatitude = exitLatitude;
+		this.exitLongitude = exitLongitude;
+		this.exitLocation = exitLocation;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -180,6 +232,12 @@ public class SiteVisitHistory {
 		builder.append(latitude);
 		builder.append(", longitude=");
 		builder.append(longitude);
+		builder.append(", exitLatitude=");
+		builder.append(exitLatitude);
+		builder.append(", exitLongitude=");
+		builder.append(exitLongitude);
+		builder.append(", exitLocation=");
+		builder.append(exitLocation);
 		builder.append("]");
 		return builder.toString();
 	}

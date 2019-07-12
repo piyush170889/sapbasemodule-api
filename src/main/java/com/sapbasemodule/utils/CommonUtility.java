@@ -680,4 +680,31 @@ public class CommonUtility {
 		return dfHHmmssIst.format(new Date());
 	}
 
+	public String formatMobileNoToSendOtp(String phoneNumber, boolean doAppendExtension) {
+
+		String result = null;
+		phoneNumber = phoneNumber.trim();
+
+		if (doAppendExtension) {
+			if (phoneNumber.length() > 10 && phoneNumber.charAt(0) == '9' && phoneNumber.charAt(1) == '1') {
+				result = phoneNumber;
+			} else if (phoneNumber.length() > 10 && phoneNumber.charAt(0) == '+') {
+				result = phoneNumber.substring(1, phoneNumber.length());
+			} else {
+				result = "91" + phoneNumber;
+			}
+		} else {
+			if (phoneNumber.charAt(0) == '+') {
+				result = phoneNumber.substring(3, 13);
+			} else {
+				result = phoneNumber;
+			}
+		}
+
+		result = result.replace(" ", "");
+		System.out.println("Resulting Formatted Contact Number = " + result);
+
+		return result;
+	}
+
 }
