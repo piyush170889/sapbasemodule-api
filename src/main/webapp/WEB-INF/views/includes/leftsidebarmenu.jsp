@@ -33,9 +33,13 @@
 
 		<!-- Sidebar Menu -->
 		<ul class="sidebar-menu">
-			<!-- Dashboard -->
+			<!-- Acknowledgements -->
 			<li class="active"><a href="invoice-acknowledgement"><i class="fa fa-home"></i> <span>Acknowledgments</span></a></li>
-			<!-- ./Dashboard -->
+			<!-- ./Acknowledgements -->
+			
+			<!-- Recordings -->
+			<li><a href="recordings"><i class="fa fa-home"></i> <span>Recordings</span></a></li>
+			<!-- ./Recordings -->
 			
 			<!-- Invoices Management -->
 			<!-- <li class="treeview"><a href="#"><i class="fa fa-copy"></i>

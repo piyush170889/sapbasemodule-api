@@ -12,6 +12,7 @@ import com.sapbasemodule.constants.Constants;
 import com.sapbasemodule.domain.FirebaseIdDtls;
 import com.sapbasemodule.domain.NormalPacketDescDtls;
 import com.sapbasemodule.domain.SiteDtls;
+import com.sapbasemodule.exception.ServicesException;
 import com.sapbasemodule.model.BaseWrapper;
 import com.sapbasemodule.model.LocationDetails;
 import com.sapbasemodule.persitence.FirebaseIdDtlsRepository;
@@ -109,13 +110,17 @@ public class LocationMgmtServiceImpl implements LocationMgmtService {
 	private CommonUtility commonUtility;
 	
 	@Override
-	public BaseWrapper doAddUpdateSiteLocation(SiteDtls request) {
+	public BaseWrapper doAddUpdateSiteLocation(SiteDtls request) throws ServicesException {
 
+		SiteDtls siteDtls = siteDtlsRepository.findByCardCode(request.getCardCode());
+		if (null == siteDtls) {
 		request.setUpdatedDt(commonUtility.getDtInDDMMYYFormatIST());
 		request.setUpdatedTs(commonUtility.getTsInHHmmssFormatIST());
 		
 		request = siteDtlsRepository.save(request);
-
+		} else 
+			throw new ServicesException("805");
+		
 		return new BaseWrapper(request);
 	}
 

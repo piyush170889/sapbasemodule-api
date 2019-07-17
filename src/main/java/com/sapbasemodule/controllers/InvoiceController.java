@@ -39,22 +39,36 @@ public class InvoiceController {
 
 	@Autowired
 	private CustomersRepository customersRepository;
-	
-	
+
 	@GetMapping("ext/invoice-details/{invoice-no}")
 	public ModelAndView showInvoiceDetails(@PathVariable("invoice-no") String invoiceNo, ModelAndView modelAndView) {
 
 		try {
 			InvoicesDetails invoicesDetails = customerService.getInvoiceDetailsByInvoiceId(invoiceNo);
 			String cardCode = invoicesDetails.getCardCode();
-			
+
 			System.out.println("tax Amount totoal = " + invoicesDetails.getTotalTax());
 			String cardName = customersRepository.findCardNameByCardCode(cardCode);
-			
+
 			modelAndView.addObject("invoice", invoicesDetails);
 			modelAndView.addObject("cardName", cardName);
-			
+
 			modelAndView.setViewName("invoices/invoice-details");
+		} catch (Exception e) {
+			e.printStackTrace();
+			modelAndView.addObject("errorMssg", "Unable to retreive Invoice Details");
+			modelAndView.setViewName("invoices/invoice-acknowledgment");
+		}
+
+		return modelAndView;
+	}
+
+	@GetMapping("ext/recordings")
+	public ModelAndView getRecordingsView(ModelAndView modelAndView) {
+
+		try {
+
+			modelAndView.setViewName("invoices/recordings");
 		} catch (Exception e) {
 			e.printStackTrace();
 			modelAndView.addObject("errorMssg", "Unable to retreive Invoice Details");

@@ -8,4 +8,7 @@ import com.sapbasemodule.domain.SiteDtls;
 @Repository
 public interface SiteDtlsRepository extends JpaRepository<SiteDtls, Integer> {
 
+	
+	SiteDtls findByCardCode(String cardCode);
+
 }
