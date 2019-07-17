@@ -39,6 +39,7 @@ import com.sapbasemodule.persitence.UserDtlRepository;
 import com.sapbasemodule.persitence.UserLoginDtlRepository;
 import com.sapbasemodule.persitence.UserRoleDtlRepository;
 import com.sapbasemodule.utils.CommonUtility;
+import com.sapbasemodule.utils.RoleType;
 
 @Service
 @Transactional(rollbackFor = Throwable.class)
@@ -333,8 +334,13 @@ public class UsersServiceImpl implements UsersService {
 	@Override
 	public BaseWrapper doGetLoggedInUsersVisitHistory() {
 
-		List<SiteVisitHistory> siteVisitHistoriesList = siteVisitHistoryRepository
-				.findByVisitorId(commonUtility.getLoggedUserId());
+		List<SiteVisitHistory> siteVisitHistoriesList;
+
+		if (commonUtility.hasRole(RoleType.ROLE_ADMIN.toString())) {
+			siteVisitHistoriesList = siteVisitHistoryRepository.findAll();
+		} else {
+			siteVisitHistoriesList = siteVisitHistoryRepository.findByVisitorId(commonUtility.getLoggedUserId());
+		}
 
 		return new BaseWrapper(siteVisitHistoriesList);
 	}
@@ -342,6 +348,8 @@ public class UsersServiceImpl implements UsersService {
 	@Override
 	public BaseWrapper doPunchUsersVisitEntry(SiteVisitHistory request) {
 
+		UserDtl userDtl = commonUtility.getLoggedUser().getUserDtl();
+		request.setVisitorNm((userDtl.getFirstName() + " " + userDtl.getLastName()).trim());
 		request.setVisitorId(commonUtility.getLoggedUserId());
 		request.setEntryDt(commonUtility.getDtInDDMMYYFormatIST());
 		request.setEntryTm(commonUtility.getTsInHHmmssFormatIST());

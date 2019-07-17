@@ -49,7 +49,6 @@ public class Constants {
 //	public static final String DB_USERNM = "sa";
 //	public static final String DB_PASS = "jbsadmin@123";
 
-	
 	// Other
 	 public static final String DB_SERVER_IP = "localhost";
 	 public static final String DB_NAME = "Jagtap";

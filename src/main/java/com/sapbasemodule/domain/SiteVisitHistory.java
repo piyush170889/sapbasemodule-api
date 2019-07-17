@@ -25,6 +25,9 @@ public class SiteVisitHistory {
 	@Column(name = "VISITOR_ID")
 	private String visitorId;
 
+	@Column(name = "VISITOR_NM")
+	private String visitorNm;
+
 	@Column(name = "ENTRY_DT")
 	private String entryDt;
 
@@ -59,6 +62,14 @@ public class SiteVisitHistory {
 	private String exitLocation;
 
 	public SiteVisitHistory() {
+	}
+
+	public String getVisitorNm() {
+		return visitorNm;
+	}
+
+	public void setVisitorNm(String visitorNm) {
+		this.visitorNm = visitorNm;
 	}
 
 	public String getExitLatitude() {
@@ -216,6 +227,8 @@ public class SiteVisitHistory {
 		builder.append(siteDtls);
 		builder.append(", visitorId=");
 		builder.append(visitorId);
+		builder.append(", visitorNm=");
+		builder.append(visitorNm);
 		builder.append(", entryDt=");
 		builder.append(entryDt);
 		builder.append(", entryTm=");

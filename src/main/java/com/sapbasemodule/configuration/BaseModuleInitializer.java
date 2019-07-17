@@ -31,7 +31,7 @@ public class BaseModuleInitializer extends AbstractAnnotationConfigDispatcherSer
 		super.onStartup(servletContext);
 		// servletContext.addListener(new SessionListener());
 
-		System.out.println("Initializing Cors Filter");
+		System.out.println("Initializing Cors Filter 1");
 		FilterRegistration.Dynamic corsFilter = servletContext.addFilter("corsFilter", new CORSFilter());
 		corsFilter.addMappingForUrlPatterns(null, false, "/*");
 		corsFilter.setAsyncSupported(true);

@@ -13,6 +13,8 @@ public class CustomerDetailsWrapper {
 
 	private List<InvoicesDetails> customerInvoicesList;
 
+	private List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsList;
+
 	public CustomerDetailsWrapper() {
 	}
 
@@ -22,10 +24,20 @@ public class CustomerDetailsWrapper {
 	}
 
 	public CustomerDetailsWrapper(Customers customers, List<CustomerAddresses> customerAddressesList,
-			List<InvoicesDetails> customerInvoicesList) {
+			List<InvoicesDetails> customerInvoicesList,
+			List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsList) {
 		this.customerDetails = customers;
 		this.customerAddressesList = customerAddressesList;
 		this.customerInvoicesList = customerInvoicesList;
+		this.cutomerSummaryReportDetailsList = cutomerSummaryReportDetailsList;
+	}
+
+	public List<CutomerSummaryReportDetails> getCutomerSummaryReportDetailsList() {
+		return cutomerSummaryReportDetailsList;
+	}
+
+	public void setCutomerSummaryReportDetailsList(List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsList) {
+		this.cutomerSummaryReportDetailsList = cutomerSummaryReportDetailsList;
 	}
 
 	public List<InvoicesDetails> getCustomerInvoicesList() {

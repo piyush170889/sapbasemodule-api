@@ -66,6 +66,8 @@ public class InvoicesDetails {
 
 	private String signature;
 
+	private String totalTax;
+
 	public InvoicesDetails() {
 	}
 
@@ -129,6 +131,14 @@ public class InvoicesDetails {
 		this.sgstTax = sgstTax;
 		this.amountInWords = amountInWords;
 		this.taxAmountInWords = taxAmountInWords;
+	}
+
+	public String getTotalTax() {
+		return totalTax;
+	}
+
+	public void setTotalTax(String totalTax) {
+		this.totalTax = totalTax;
 	}
 
 	public String getSignature() {

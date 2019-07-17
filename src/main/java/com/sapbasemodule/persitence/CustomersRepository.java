@@ -13,7 +13,9 @@ import com.sapbasemodule.model.AgingDetails;
 @Repository
 public interface CustomersRepository extends JpaRepository<Customers, String> {
 
-//	@Query("select c from Customers c where c.cardType='C' and lower(c.cardCode) like ?1% or lower(c.cardName) like ?1% or c.phone1 like ?1% or c.phone2 like ?1%")
+	// @Query("select c from Customers c where c.cardType='C' and
+	// lower(c.cardCode) like ?1% or lower(c.cardName) like ?1% or c.phone1 like
+	// ?1% or c.phone2 like ?1%")
 	@Query("select c from Customers c where c.cardType='C' and lower(c.cardName) like ?1%")
 	List<Customers> findCustomerBySearchTerm(String searchTerm);
 
@@ -39,8 +41,10 @@ public interface CustomersRepository extends JpaRepository<Customers, String> {
 
 	List<Customers> findByCardTypeAndSlpCode(String string, String slpCode);
 
+	@Query("select c.cardName from Customers c where c.cardCode=?1")
+	String findCardNameByCardCode(String cardCode);
+
 	// List<Customers> findByCardCodeOrCardNameOrPhone1OrPhone2Containing(String
 	// searchTerm);
 
 }
-

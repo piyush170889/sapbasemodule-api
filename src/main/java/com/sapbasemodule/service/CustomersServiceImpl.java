@@ -36,6 +36,7 @@ import com.sapbasemodule.model.AgingDetails;
 import com.sapbasemodule.model.AgingReportTo;
 import com.sapbasemodule.model.BaseWrapper;
 import com.sapbasemodule.model.CustomerDetailsWrapper;
+import com.sapbasemodule.model.CutomerSummaryReportDetails;
 import com.sapbasemodule.model.InvoiceDetailsNewTo;
 import com.sapbasemodule.model.InvoiceItems;
 import com.sapbasemodule.model.InvoicesDetails;
@@ -911,7 +912,13 @@ public class CustomersServiceImpl implements CustomersService {
 
 		Date tillDate = new Date();
 
-		List<InvoicesDetails> allCustomersInvoiceDetailsList = getAllInvoicesForCustIds(custIds, tillDate);
+		List<InvoicesDetails> allCustomersInvoiceDetailsList = null;
+
+		// All Invoices Query
+		if (custIds.size() > 0)
+			allCustomersInvoiceDetailsList = getAllInvoicesForCustIds(custIds, tillDate);
+		else
+			allCustomersInvoiceDetailsList = new ArrayList<InvoicesDetails>();
 
 		Map<String, List<InvoicesDetails>> customerWiseInvoicesMap = new HashMap<String, List<InvoicesDetails>>();
 		for (InvoicesDetails invoicesDetails : allCustomersInvoiceDetailsList) {
@@ -936,6 +943,26 @@ public class CustomersServiceImpl implements CustomersService {
 		for (CustomerPin customerPin : customerPinsList)
 			customerPinForCardCodeMap.put(customerPin.getCardCode(), customerPin.getCustomersPin());
 
+		// Prepare Summary Report Details Map For All Customers
+		Map<String, List<CutomerSummaryReportDetails>> customerSummaryReportByCardCodeMap = new HashMap<String, List<CutomerSummaryReportDetails>>();
+
+		List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsList = getCustomerSummaryReportDetails();
+
+		for (CutomerSummaryReportDetails cutomerSummaryReportDetails : cutomerSummaryReportDetailsList) {
+
+			String cardCode = cutomerSummaryReportDetails.getCardCode();
+
+			List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsListInMap = null;
+			if (customerSummaryReportByCardCodeMap.containsKey(cardCode)) {
+				cutomerSummaryReportDetailsListInMap = customerSummaryReportByCardCodeMap.get(cardCode);
+			} else
+				cutomerSummaryReportDetailsListInMap = new ArrayList<CutomerSummaryReportDetails>();
+
+			cutomerSummaryReportDetailsListInMap.add(cutomerSummaryReportDetails);
+
+			customerSummaryReportByCardCodeMap.put(cardCode, cutomerSummaryReportDetailsListInMap);
+		}
+
 		// Create Response And Send
 		List<CustomerDetailsWrapper> response = new ArrayList<CustomerDetailsWrapper>();
 
@@ -959,13 +986,58 @@ public class CustomersServiceImpl implements CustomersService {
 			// CustomerDetailsWrapper customerDetailsWrapper = new
 			// CustomerDetailsWrapper(customers, customerAddressesList,
 			// customersInvoiceDetailsList);
+
+			// Customer Summary Report List
+			List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsListFromMap = customerSummaryReportByCardCodeMap
+					.get(custCode);
+
 			CustomerDetailsWrapper customerDetailsWrapper = new CustomerDetailsWrapper(customers, null,
-					customersInvoiceDetailsList);
+					customersInvoiceDetailsList, cutomerSummaryReportDetailsListFromMap);
 
 			response.add(customerDetailsWrapper);
 		}
 
 		return new BaseWrapper(response);
+	}
+
+	private List<CutomerSummaryReportDetails> getCustomerSummaryReportDetails()
+			throws ClassNotFoundException, SQLException {
+
+		String fromDate = "20190401";
+
+		DateFormat dfYYYYMMDD = new SimpleDateFormat("yyyyMMdd");
+		dfYYYYMMDD.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+
+		String tillDate = dfYYYYMMDD.format(new Date());
+
+		String custSummaryReportQuery = "SELECT  CardCode,Name,[Sales Emp Name],Brand ,[4] as [Apr],[5] as [May],[6] as [Jun],[7] as [Jul],[8] as [Aug],[9] as [Sep],[10] as [Oct],[11] as [Nov],[12] as [Dec],[1] as [Jan],[2] as [Feb],[3] as [Mar] FROM("
+				+ " SELECT  T0.CardCode As 'CardCode',T0.CardName As'Name',(Sum(T1.Quantity))/20 as 'Qty', month(t0.docdate) as 'Month',T1.Dscription As'Brand',T4.SlpName As'Sales Emp Name' FROM OINV T0 INNER JOIN INV1 T1 ON T0.Docentry=T1.DocEntry"
+				+ " INNER JOIN OSLP T4 ON T4.SlpCode =T0.SlpCode WHERE T0.[DocDate]  >='" + fromDate
+				+ "' AND  T0.[DocDate] <='" + tillDate
+				+ "' And T1.Dscription In ('Birla Super','Ultratech PPC','Rajashree Plus Cement') And T1.TargetType <>14"
+				+ " Group By T0.CardCode,t0.docdate,T0.CardName,T1.Dscription,T4.SlpName) S"
+				+ " PIVOT  (Sum(S.Qty) FOR [month] IN ([4],[5],[6],[7],[8],[9],[10],[11],[12],[1],[2],[3])) P";
+
+		System.out.println("custSummaryReportQuery = " + custSummaryReportQuery);
+
+		Connection con = commonUtility.getDbConnection();
+		PreparedStatement ps = con.prepareStatement(custSummaryReportQuery);
+
+		ResultSet rs = ps.executeQuery();
+
+		List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsList = new ArrayList<CutomerSummaryReportDetails>();
+
+		while (rs.next()) {
+			CutomerSummaryReportDetails cutomerSummaryReportDetails = new CutomerSummaryReportDetails(
+					rs.getString("CardCode"), rs.getString("Name"), rs.getString("Sales Emp Name"),
+					rs.getString("Brand"), rs.getString("Apr"), rs.getString("May"), rs.getString("Jun"),
+					rs.getString("Jul"), rs.getString("Aug"), rs.getString("Sep"), rs.getString("Oct"),
+					rs.getString("Nov"), rs.getString("Dec"), rs.getString("Jan"), rs.getString("Feb"),
+					rs.getString("Mar"));
+			cutomerSummaryReportDetailsList.add(cutomerSummaryReportDetails);
+		}
+
+		return cutomerSummaryReportDetailsList;
 	}
 
 	private List<InvoicesDetails> getCustomerAllInvoices(String custCode, Date tillDate)
@@ -1317,7 +1389,8 @@ public class CustomersServiceImpl implements CustomersService {
 	private MessageUtility messageUtility;
 
 	@Override
-	public BaseWrapper doGenerateCustomerPin(String custCode, String contactNo) throws NumberFormatException, Exception {
+	public BaseWrapper doGenerateCustomerPin(String custCode, String contactNo)
+			throws NumberFormatException, Exception {
 
 		CustomerPin customerPin = customersPinRepository.findByCardCode(custCode);
 		String pin = "";
@@ -1387,4 +1460,344 @@ public class CustomersServiceImpl implements CustomersService {
 		return new BaseWrapper();
 	}
 
+	@Override
+	public List<InvoicesDetails> getInvoiceAcknowledgments()
+			throws ParseException, ClassNotFoundException, SQLException {
+
+		List<Integer> invoiceIdsList = invoiceAcknowledgementDetailsRepository.selectAcknowledgedInvoiceNos();
+
+		List<InvoicesDetails> invoiceDetailsList;
+
+		if (invoiceIdsList.size() > 0) {
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+			Date fromDate = df.parse("2019-04-01");
+			invoiceDetailsList = getInvoiceDetailsByInvoiceIds(invoiceIdsList, fromDate, new Date());
+		} else {
+			invoiceDetailsList = new ArrayList<InvoicesDetails>();
+		}
+
+		return invoiceDetailsList;
+	}
+
+	public List<InvoicesDetails> getInvoiceDetailsByInvoiceIds(List<Integer> invoiceIdsList, Date fromDate,
+			Date tillDate) throws ClassNotFoundException, SQLException, ParseException {
+
+		DateFormat dfYYYYMMDD = new SimpleDateFormat("yyyy-MM-dd");
+		dfYYYYMMDD.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+
+		String tillDateFormatted = dfYYYYMMDD.format(tillDate);
+		String fromDateFormatted = dfYYYYMMDD.format(fromDate);
+
+		String invoiceIdCommaSeparated = "";
+		int invoiceIdListSize = invoiceIdsList.size();
+
+		for (int i = 0; i < invoiceIdListSize; i++) {
+
+			invoiceIdCommaSeparated = invoiceIdCommaSeparated + "'" + invoiceIdsList.get(i) + "'";
+
+			if ((i + 1) < invoiceIdListSize)
+				invoiceIdCommaSeparated = invoiceIdCommaSeparated + ",";
+		}
+
+		String custAllInvoicesQuery = "Select T1.CardCode As CardCode, ISNULL(T5.DocEntry, '0') As 'DocEntry', ISNULL(T5.DocNum, '0') As 'Invoice No.', T5.DocStatus As 'Invoice Status', "
+				+ "T0.TransId ,T0.RefDate As'Posting Date',T0.DueDate, " + "(Select  " + "(Case  "
+				+ "When T2.TransType=13 Then 'IN' " + "When T2.TransType=-2 Then 'OB'  "
+				+ "When T2.TransType=24 Then 'RC'  " + "When T2.TransType=30 Then 'JE'  "
+				+ "When T2.TransType=321 Then 'M.Reco'  " + "When T2.TransType=18 Then 'CN'  " + "Else 'Other'  "
+				+ "End)  " + "From OJDT T2 Where T2.TransId =T0.TransId) As 'Origin', "
+				+ "T0.Ref1 As'Origin No', T0.Ref2 As'Ref2', T0.Debit As 'Debit',T0.Credit As'Credit', " + "((select  "
+				+ "sum(T4.debit)-sum(T4.Credit) from OJDT T3 INNER JOIN JDT1 T4 on T3.TransId=T4.TransId " + "WHERE  "
+				+ "T4.ShortName=T0.ShortName and " + "T3.TransId<=T0.TransId " + ")) 'Cumulative Balance', "
+				+ "(T0.BALDUEDEB - T0.BALDUECRED) as 'Balance Due' "
+				+ "From JDT1 T0 INNER JOIN OCRD T1 ON T1.CardCode=T0.ShortName "
+				+ "LEFT JOIN OINV T5 ON T0.Ref1=T5.DocNum  " + "Where T0.RefDate >='" + fromDateFormatted
+				+ "' and T0.RefDate <='" + tillDateFormatted + "' And T5.DocNum IN (" + invoiceIdCommaSeparated + ")"
+				+ "  And T1.CardType = 'C' order by [Posting Date],TransId";
+
+		System.out.println("Final All Invoices Query = " + custAllInvoicesQuery);
+
+		Connection con = commonUtility.getDbConnection();
+		PreparedStatement ps = con.prepareStatement(custAllInvoicesQuery);
+
+		ResultSet rs = ps.executeQuery();
+
+		List<InvoiceDetailsNewTo> custAllInvociesList = new ArrayList<InvoiceDetailsNewTo>();
+		List<Integer> invoiceDocEntriesList = new ArrayList<Integer>();
+
+		while (rs.next()) {
+			String invoiceType = rs.getString("Origin");
+			int invoiceNo = rs.getInt("Invoice No.");
+
+			InvoiceDetailsNewTo invoicesDetails = new InvoiceDetailsNewTo(invoiceNo, rs.getString("Invoice Status"),
+					rs.getString("TransId"), rs.getString("Posting Date"), rs.getString("DueDate"), invoiceType,
+					rs.getString("Origin No"), Double.toString(commonUtility.round(rs.getDouble("Debit"), 2)),
+					Double.toString(commonUtility.round(rs.getDouble("Credit"), 2)),
+					Double.toString(commonUtility.round(rs.getDouble("Cumulative Balance"), 2)),
+					rs.getString("Balance Due"), rs.getInt("DocEntry"), rs.getString("Ref2"), rs.getString("CardCode"));
+
+			if (invoiceType.equalsIgnoreCase("IN") && invoiceNo != 0) {
+				invoiceDocEntriesList.add(invoiceNo);
+			}
+
+			custAllInvociesList.add(invoicesDetails);
+		}
+
+		// System.out.println(invoiceDocEntriesList.toString());
+
+		List<InvoiceItems> invoiceItemsList;
+		Map<Integer, List<InvoiceItems>> invoiceItemsMap;
+		List<InvoicesDetails> invoiceDetailsList = new ArrayList<InvoicesDetails>();
+		List<InvoicesAcknowledgementDetails> invoicesAcknowledgementDetailsList;
+
+		if (invoiceDocEntriesList.size() > 0) {
+			invoiceItemsList = getInvoiceItemsListForDocEntries(invoiceDocEntriesList);
+
+			// Separate All Invoice Items As Per Invoice No (DocEntry)
+			invoiceItemsMap = new HashMap<Integer, List<InvoiceItems>>();
+
+			for (InvoiceItems invoiceItems : invoiceItemsList) {
+				int invoiceDocEntry = invoiceItems.getDocEntry();
+
+				List<InvoiceItems> invoiceItemMapList;
+				if (invoiceItemsMap.containsKey(invoiceDocEntry))
+					invoiceItemMapList = invoiceItemsMap.get(invoiceDocEntry);
+				else
+					invoiceItemMapList = new ArrayList<InvoiceItems>();
+
+				invoiceItemMapList.add(invoiceItems);
+
+				invoiceItemsMap.put(invoiceDocEntry, invoiceItemMapList);
+			}
+
+			// Get Acknowledgement Details Of All Invoices Ids and set signature
+			// of each against their invoice id
+			invoicesAcknowledgementDetailsList = invoiceAcknowledgementDetailsRepository
+					.selectByInvoiceNos(invoiceDocEntriesList);
+
+			Map<Integer, String> invoiceAcknowledgementMap = new HashMap<Integer, String>();
+			for (InvoicesAcknowledgementDetails invoicesAcknowledgementDetails : invoicesAcknowledgementDetailsList)
+				invoiceAcknowledgementMap.put(invoicesAcknowledgementDetails.getInvoiceNo(),
+						invoicesAcknowledgementDetails.getSignature());
+
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+			df.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+
+			DateFormat dfDDMMMYYY = new SimpleDateFormat("dd MMM yyyy");
+			df.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+
+			String currentDate = df.format(new Date());
+			NumberToWord numberToWord = new NumberToWord();
+			for (InvoiceDetailsNewTo custInvoice : custAllInvociesList) {
+
+				int invoiceDocEntry = custInvoice.getInvoiceDocEntry();
+				long paymentDueDays = 0L;
+				long dueDateInDays = 0L;
+				String invoiceAmountInWords = null;
+				String taxAmountInWords = null;
+				List<InvoiceItems> invoiceItemsListFromMap = null;
+				String invoiceDate = custInvoice.getPostingDate();
+				String invoiceDueDate = custInvoice.getDueDate();
+
+				Float balanceAmt = Float.parseFloat(custInvoice.getBalance());
+				if (invoiceDocEntry != 0 && custInvoice.getOrigin().equalsIgnoreCase("IN")) {
+
+					// System.out.println("Invoice Doc Entry In Iteration : " +
+					// invoiceDocEntry);
+
+					paymentDueDays = commonUtility.getDaysDiffBetweenDates(invoiceDate, invoiceDueDate);
+					dueDateInDays = commonUtility.getDaysDiffBetweenDates(currentDate, invoiceDueDate);
+
+					invoiceItemsListFromMap = invoiceItemsMap.get(invoiceDocEntry);
+					// System.out.println("invoiceItemsListFromMap = " +
+					// invoiceItemsListFromMap);
+
+					invoiceAmountInWords = numberToWord.convert(Math.round(balanceAmt));
+
+					float finalTaxAmount = 0F;
+
+					if (null != invoiceItemsListFromMap) {
+						for (InvoiceItems invoiceItems : invoiceItemsListFromMap)
+							finalTaxAmount = finalTaxAmount + invoiceItems.getCgstTax() + invoiceItems.getSgstTax();
+					}
+					taxAmountInWords = numberToWord.convert((int) Math.floor(finalTaxAmount));
+
+				}
+
+				String custCode = custInvoice.getCustCode();
+				InvoicesDetails invoicesDetails = new InvoicesDetails(invoiceDocEntry,
+						Integer.toString(custInvoice.getInvoiceNo()), dfDDMMMYYY.format(df.parse(invoiceDate)),
+						dfDDMMMYYY.format(df.parse(invoiceDueDate)), paymentDueDays, custInvoice.getInvoiceStatus(),
+						balanceAmt, custCode, "", custInvoice.getOrigin(), invoiceItemsListFromMap, 0F, balanceAmt, "",
+						dueDateInDays, invoiceAmountInWords, taxAmountInWords, custInvoice.getTransId(),
+						custInvoice.getOriginNo(), custInvoice.getDebit(), custInvoice.getCredit(),
+						custInvoice.getCumulativeBalance(), custInvoice.getRef2(),
+						invoiceAcknowledgementMap.get(invoiceDocEntry));
+
+				invoiceDetailsList.add(invoicesDetails);
+			}
+		}
+
+		return invoiceDetailsList;
+	}
+
+	@Override
+	public InvoicesDetails getInvoiceDetailsByInvoiceId(String invoiceId)
+			throws ServicesException, ClassNotFoundException, SQLException, ParseException {
+
+		String custInvoicesDetailsQuery = "Select T1.CardCode As CardCode, ISNULL(T5.DocEntry, '0') As 'DocEntry', ISNULL(T5.DocNum, '0') As 'Invoice No.', T5.DocStatus As 'Invoice Status', "
+				+ "T0.TransId ,T0.RefDate As'Posting Date',T0.DueDate, " + "(Select  " + "(Case  "
+				+ "When T2.TransType=13 Then 'IN' " + "When T2.TransType=-2 Then 'OB'  "
+				+ "When T2.TransType=24 Then 'RC'  " + "When T2.TransType=30 Then 'JE'  "
+				+ "When T2.TransType=321 Then 'M.Reco'  " + "When T2.TransType=18 Then 'CN'  " + "Else 'Other'  "
+				+ "End)  " + "From OJDT T2 Where T2.TransId =T0.TransId) As 'Origin', "
+				+ "T0.Ref1 As'Origin No', T0.Ref2 As'Ref2', T0.Debit As 'Debit',T0.Credit As'Credit', " + "((select  "
+				+ "sum(T4.debit)-sum(T4.Credit) from OJDT T3 INNER JOIN JDT1 T4 on T3.TransId=T4.TransId " + "WHERE  "
+				+ "T4.ShortName=T0.ShortName and " + "T3.TransId<=T0.TransId " + ")) 'Cumulative Balance', "
+				+ "(T0.BALDUEDEB - T0.BALDUECRED) as 'Balance Due' "
+				+ "From JDT1 T0 INNER JOIN OCRD T1 ON T1.CardCode=T0.ShortName "
+				+ "LEFT JOIN OINV T5 ON T0.Ref1=T5.DocNum Where T5.DocNum=" + invoiceId + " And T1.CardType = 'C'";
+
+		System.out.println("Final custInvoicesDetailsQuery = " + custInvoicesDetailsQuery);
+
+		Connection con = commonUtility.getDbConnection();
+		PreparedStatement ps = con.prepareStatement(custInvoicesDetailsQuery);
+
+		ResultSet rs = ps.executeQuery();
+
+		InvoiceDetailsNewTo invoicesDetailsNewTo = null;
+
+		if (rs.next()) {
+			String invoiceType = rs.getString("Origin");
+			int invoiceNo = rs.getInt("Invoice No.");
+
+			invoicesDetailsNewTo = new InvoiceDetailsNewTo(invoiceNo, rs.getString("Invoice Status"),
+					rs.getString("TransId"), rs.getString("Posting Date"), rs.getString("DueDate"), invoiceType,
+					rs.getString("Origin No"), Double.toString(commonUtility.round(rs.getDouble("Debit"), 2)),
+					Double.toString(commonUtility.round(rs.getDouble("Credit"), 2)),
+					Double.toString(commonUtility.round(rs.getDouble("Cumulative Balance"), 2)),
+					rs.getString("Balance Due"), rs.getInt("DocEntry"), rs.getString("Ref2"), rs.getString("CardCode"));
+		} else
+			throw new ServicesException("Error Finding Invoice");
+
+		List<InvoiceItems> invoiceItemsList;
+		Map<Integer, List<InvoiceItems>> invoiceItemsMap;
+		List<InvoicesAcknowledgementDetails> invoicesAcknowledgementDetailsList;
+
+		List<Integer> invoiceDocEntriesList = new ArrayList<Integer>();
+		invoiceDocEntriesList.add(invoicesDetailsNewTo.getInvoiceNo());
+
+		InvoicesDetails invoicesDetails = null;
+		if (invoiceDocEntriesList.size() > 0) {
+			invoiceItemsList = getInvoiceItemsListForDocEntries(invoiceDocEntriesList);
+
+			// Separate All Invoice Items As Per Invoice No (DocEntry)
+			invoiceItemsMap = new HashMap<Integer, List<InvoiceItems>>();
+
+			for (InvoiceItems invoiceItems : invoiceItemsList) {
+				int invoiceDocEntry = invoiceItems.getDocEntry();
+
+				List<InvoiceItems> invoiceItemMapList;
+				if (invoiceItemsMap.containsKey(invoiceDocEntry))
+					invoiceItemMapList = invoiceItemsMap.get(invoiceDocEntry);
+				else
+					invoiceItemMapList = new ArrayList<InvoiceItems>();
+
+				invoiceItemMapList.add(invoiceItems);
+
+				invoiceItemsMap.put(invoiceDocEntry, invoiceItemMapList);
+			}
+
+			// Get Acknowledgement Details Of All Invoices Ids and set signature
+			// of each against their invoice id
+			invoicesAcknowledgementDetailsList = invoiceAcknowledgementDetailsRepository
+					.selectByInvoiceNos(invoiceDocEntriesList);
+
+			Map<Integer, String> invoiceAcknowledgementMap = new HashMap<Integer, String>();
+			for (InvoicesAcknowledgementDetails invoicesAcknowledgementDetails : invoicesAcknowledgementDetailsList)
+				invoiceAcknowledgementMap.put(invoicesAcknowledgementDetails.getInvoiceNo(),
+						invoicesAcknowledgementDetails.getSignature());
+
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+			df.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+
+			DateFormat dfDDMMMYYY = new SimpleDateFormat("dd MMM yyyy");
+			df.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+
+			String currentDate = df.format(new Date());
+			NumberToWord numberToWord = new NumberToWord();
+
+			int invoiceDocEntry = invoicesDetailsNewTo.getInvoiceDocEntry();
+			long paymentDueDays = 0L;
+			long dueDateInDays = 0L;
+			String invoiceAmountInWords = null;
+			String taxAmountInWords = null;
+			List<InvoiceItems> invoiceItemsListFromMap = null;
+			String invoiceDate = invoicesDetailsNewTo.getPostingDate();
+			String invoiceDueDate = invoicesDetailsNewTo.getDueDate();
+
+			Float balanceAmt = Float.parseFloat(invoicesDetailsNewTo.getBalance());
+			if (invoiceDocEntry != 0 && invoicesDetailsNewTo.getOrigin().equalsIgnoreCase("IN")) {
+
+				// System.out.println("Invoice Doc Entry In Iteration : " +
+				// invoiceDocEntry);
+
+				paymentDueDays = commonUtility.getDaysDiffBetweenDates(invoiceDate, invoiceDueDate);
+				dueDateInDays = commonUtility.getDaysDiffBetweenDates(currentDate, invoiceDueDate);
+
+				invoiceItemsListFromMap = invoiceItemsMap.get(invoiceDocEntry);
+				// System.out.println("invoiceItemsListFromMap = " +
+				// invoiceItemsListFromMap);
+
+				invoiceAmountInWords = numberToWord.convert(Math.round(balanceAmt));
+
+				float finalTaxAmount = 0F;
+
+				if (null != invoiceItemsListFromMap) {
+					for (InvoiceItems invoiceItems : invoiceItemsListFromMap)
+						finalTaxAmount = finalTaxAmount + invoiceItems.getCgstTax() + invoiceItems.getSgstTax();
+				}
+				taxAmountInWords = numberToWord.convert((int) Math.floor(finalTaxAmount));
+
+			}
+
+			String custCode = invoicesDetailsNewTo.getCustCode();
+			invoicesDetails = new InvoicesDetails(invoiceDocEntry,
+					Integer.toString(invoicesDetailsNewTo.getInvoiceNo()), dfDDMMMYYY.format(df.parse(invoiceDate)),
+					dfDDMMMYYY.format(df.parse(invoiceDueDate)), paymentDueDays,
+					invoicesDetailsNewTo.getInvoiceStatus(), balanceAmt, custCode, "", invoicesDetailsNewTo.getOrigin(),
+					invoiceItemsListFromMap, 0F, balanceAmt, "", dueDateInDays, invoiceAmountInWords, taxAmountInWords,
+					invoicesDetailsNewTo.getTransId(), invoicesDetailsNewTo.getOriginNo(),
+					invoicesDetailsNewTo.getDebit(), invoicesDetailsNewTo.getCredit(),
+					invoicesDetailsNewTo.getCumulativeBalance(), invoicesDetailsNewTo.getRef2(),
+					invoiceAcknowledgementMap.get(invoiceDocEntry));
+
+			float invoiceItemTotal = 0F;
+			float invoiceItemCgstTotal = 0F;
+			float invoiceItemSgstTotal = 0F;
+			float invoiceItemRoundOffTotal = 0F;
+			float totalTax = 0F;
+
+			List<InvoiceItems> invoiceItemsList1 = invoicesDetails.getInvoiceItemsList();
+
+			for (InvoiceItems invoiceItems : invoiceItemsList1) {
+				invoiceItemTotal = invoiceItemTotal + invoiceItems.getTotal();
+				invoiceItemCgstTotal = invoiceItemCgstTotal + invoiceItems.getCgstTax();
+				invoiceItemSgstTotal = invoiceItemSgstTotal + invoiceItems.getSgstTax();
+				invoiceItemRoundOffTotal = invoiceItemRoundOffTotal + invoiceItems.getRoundDif();
+			}
+
+			totalTax = invoiceItemCgstTotal + invoiceItemSgstTotal;
+
+			if (invoicesDetails.getGrossTotal() == 0F) {
+				invoicesDetails.setGrossTotal(
+						invoiceItemTotal + invoiceItemCgstTotal + invoiceItemSgstTotal + invoiceItemRoundOffTotal);
+			}
+
+			invoicesDetails.setTotalTax(Float.toString(totalTax));
+		} else {
+			invoicesDetails = new InvoicesDetails();
+		}
+
+		return invoicesDetails;
+	}
 }

@@ -15,6 +15,7 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
@@ -31,29 +32,43 @@ public class BaseModuleConfiguration extends WebMvcConfigurerAdapter {
 		matcher.setUseRegisteredSuffixPatternMatch(false);
 	}
 
-	
-	/*@Override
-	public void addCorsMappings(CorsRegistry registry) {
-		System.out.println("Adding COrs Registry");
-		registry.addMapping("/v1/**").allowedMethods("OPTIONS","HEAD", "GET", "PUT", "POST", "DELETE", "PATCH");
-	}*/
+	@Override
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 
-//	@Bean
-//    public FilterRegistrationBean corsFilter() {
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        CorsConfiguration config = new CorsConfiguration();
-//        config.setAllowCredentials(true);
-//        config.addAllowedOrigin("*");
-//        config.setAllowedMethods(Arrays.asList("POST", "OPTIONS", "GET", "DELETE", "PUT"));
-//        config.setAllowedHeaders(Arrays.asList("X-Requested-With", "Origin", "Content-Type", "Accept", "Authorization"));
-//        source.registerCorsConfiguration("/**", config);
-//        FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
-//        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-//        return bean;
-        
-//        return source
-//	}
-	
+		registry.addResourceHandler("/ext/bootstrap/**").addResourceLocations("classpath:bootstrap/");
+		registry.addResourceHandler("/ext/dist/**").addResourceLocations("classpath:dist/");
+		registry.addResourceHandler("/ext/plugins/**").addResourceLocations("classpath:plugins/");
+		registry.addResourceHandler("/ext/js/**").addResourceLocations("classpath:js/");
+		registry.addResourceHandler("/ext/img/**").addResourceLocations("classpath:img/");
+	}
+
+	/*
+	 * @Override public void addCorsMappings(CorsRegistry registry) {
+	 * System.out.println("Adding COrs Registry");
+	 * registry.addMapping("/v1/**").allowedMethods("OPTIONS","HEAD", "GET",
+	 * "PUT", "POST", "DELETE", "PATCH"); }
+	 */
+
+	// @Bean
+	// public FilterRegistrationBean corsFilter() {
+	// UrlBasedCorsConfigurationSource source = new
+	// UrlBasedCorsConfigurationSource();
+	// CorsConfiguration config = new CorsConfiguration();
+	// config.setAllowCredentials(true);
+	// config.addAllowedOrigin("*");
+	// config.setAllowedMethods(Arrays.asList("POST", "OPTIONS", "GET",
+	// "DELETE", "PUT"));
+	// config.setAllowedHeaders(Arrays.asList("X-Requested-With", "Origin",
+	// "Content-Type", "Accept", "Authorization"));
+	// source.registerCorsConfiguration("/**", config);
+	// FilterRegistrationBean bean = new FilterRegistrationBean(new
+	// CorsFilter(source));
+	// bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+	// return bean;
+
+	// return source
+	// }
+
 	@Bean(name = "responseMessageProperties")
 	public Properties getResponseMessagePropertiesFile() throws IOException {
 		Resource resource = new ClassPathResource("responseMessages.properties");
