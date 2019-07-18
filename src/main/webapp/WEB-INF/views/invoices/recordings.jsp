@@ -33,20 +33,33 @@
 		<div class="content-wrapper">
 
 			<!-- Main content -->
-			<section class="content">
-			
-			<!-- Success Or Error Message -->
+			<section class="content"> <!-- Success Or Error Message -->
 			<jsp:include page="../includes/successorerrormessage.jsp"></jsp:include>
-			<!-- Success Or Error Message --> 
-			
-			<!-- Drive Folder Embedded --> 
-			<iframe
+			<!-- Success Or Error Message --> <!-- User Info -->
+
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="box">
+						<!-- /.Box-Header -->
+						<div class="box-header">
+							<h3 class="box-title">Sales Executive Details</h3>
+						</div>
+						<!-- /.Box-Header -->
+						<div class="box-body">
+							<div class="row">
+								<div class="col-md-6">Sales Executive Name:</div>
+								<div class="col-md-6">${ userDtl.firstName }${ userDtl.lastName }</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- ./User Info --> <!-- Drive Folder Embedded --> <iframe
 				src="https://drive.google.com/embeddedfolderview?id=1D49BwAj6XgF_5vt_MhNGOTNTW1WvbjZf#list"
-				style="width: 100%; height: 600px; border: 0;"></iframe> 
-			<!-- ./ Drive Folder Embedded -->
+				style="width: 100%; height: 600px; border: 0;"></iframe> <!-- ./ Drive Folder Embedded -->
 
 			</section>
-			
+
 		</div>
 		<!-- ./Content Wrapper. Contains page content -->
 

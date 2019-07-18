@@ -25,6 +25,11 @@ public interface UserRoleDtlRepository extends JpaRepository<UserRoleDtl, Intege
 			+ "urd.id.rolesMasterDtlsId IN (?1) and urd.userLoginDtl.isActive=1")
 	List<UserRoleDtl> selectAllActiveUsersByRoles(List<String> roles, Pageable pageRequest);
 
+	@Query("select new UserRoleDtl(urd.userLoginDtl.userDtl.userDtlsId,urd.userLoginDtl.userDtl.firstName,urd.userLoginDtl.userDtl.lastName,"
+			+ "urd.userLoginDtl.contactNum,urd.userLoginDtl.userDtl.emailId,urd.userLoginDtl.roles) from UserRoleDtl urd where "
+			+ "urd.id.rolesMasterDtlsId IN (?1) and urd.userLoginDtl.isActive=1")
+	List<UserRoleDtl> selectAllActiveUsersByRoles(List<String> roles);
+	
 	/*@Query("select urd.userLoginDtl.userLoginDtlsId from UserRoleDtl urd where "
 			+ "urd.id.rolesMasterDtlsId IN (?1) and urd.userLoginDtl.isActive=1 order by "
 			+ "urd.userLoginDtl.createdTs desc")*/
@@ -32,6 +37,10 @@ public interface UserRoleDtlRepository extends JpaRepository<UserRoleDtl, Intege
 			+ "urd.id.rolesMasterDtlsId IN (?1) and urd.userLoginDtl.isActive=1")
 	List<String> selectUserLoginDtlsIdByRoles(List<String> roles, Pageable pageRequest);
 
+	@Query("select urd.userLoginDtl.userLoginDtlsId from UserRoleDtl urd where "
+			+ "urd.id.rolesMasterDtlsId IN (?1) and urd.userLoginDtl.isActive=1")
+	List<String> selectUserLoginDtlsIdByRoles(List<String> roles);
+	
 	@Query("select urd from UserRoleDtl urd where urd.id.rolesMasterDtlsId=?1")
 	List<UserRoleDtl> selectAllActiveUsersByRole(String role, Pageable pageRequest);
 

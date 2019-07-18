@@ -34,22 +34,23 @@
 		<!-- Sidebar Menu -->
 		<ul class="sidebar-menu">
 			<!-- Acknowledgements -->
-			<li class="active"><a href="invoice-acknowledgement"><i class="fa fa-home"></i> <span>Acknowledgments</span></a></li>
+			<li class="active"><a href="invoice-acknowledgement"><i
+					class="fa fa-home"></i> <span>Acknowledgments</span></a></li>
 			<!-- ./Acknowledgements -->
-			
+
 			<!-- Recordings -->
-			<li><a href="recordings"><i class="fa fa-home"></i> <span>Recordings</span></a></li>
+			<li class="active"><a href="sales-executive"><i class="fa fa-home"></i> <span>Recordings</span></a></li>
 			<!-- ./Recordings -->
-			
+
 			<!-- Invoices Management -->
 			<!-- <li class="treeview"><a href="#"><i class="fa fa-copy"></i>
 					<span>Invoices</span> <i class="fa fa-angle-left pull-right"></i></a>
 				<ul class="treeview-menu">
 					<li><a href="sales-order">Acknowledgments</a></li>
 				</ul>
-			</li> --> 
+			</li> -->
 			<!-- ./Invoices Management -->
-			
+
 		</ul>
 		<!-- /.sidebar-menu -->
 	</section>
