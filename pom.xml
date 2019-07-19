@@ -98,43 +98,30 @@
 			<artifactId>javax.servlet.jsp-api</artifactId>
 			<version>${jsp.version}</version>
 		</dependency>
-		<!-- <dependency>
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>jstl</artifactId>
 			<version>${jstl.version}</version>
-		</dependency> -->
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/javax.el/el-api -->
-		<!-- <dependency>
+		<dependency>
 			<groupId>javax.el</groupId>
 			<artifactId>el-api</artifactId>
 			<version>2.2.1-b04</version>
-		</dependency> -->
+		</dependency>
 
 		<!-- <dependency> <groupId>org.springframework</groupId> <artifactId>spring-orm</artifactId> 
 			<version>${springframework.version}</version> <type>jar</type> </dependency> -->
 
 
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>${mysqlconnector.version}</version>
-		</dependency>
-		<!-- <dependency> 
-				<groupId>org.hibernate</groupId> 
-				<artifactId>hibernate-core</artifactId> 
-				<version>${hibernate.version}</version> 
-			</dependency> 
-			<dependency> 
-				<groupId>org.aspectj</groupId> 
-				<artifactId>aspectjrt</artifactId> 
-				<version>${aspectj.version}</version> 
-			</dependency> 
-			<dependency> 
-				<groupId>aspectj</groupId> 
-				<artifactId>aspectj-tools</artifactId> 
-				<version>${aspectjtools.version}</version> 
-			</dependency> -->
-			
+		<!-- <dependency> <groupId>mysql</groupId> <artifactId>mysql-connector-java</artifactId> 
+			<version>${mysqlconnector.version}</version> </dependency> -->
+		<!-- <dependency> <groupId>org.hibernate</groupId> <artifactId>hibernate-core</artifactId> 
+			<version>${hibernate.version}</version> </dependency> <dependency> <groupId>org.aspectj</groupId> 
+			<artifactId>aspectjrt</artifactId> <version>${aspectj.version}</version> 
+			</dependency> <dependency> <groupId>aspectj</groupId> <artifactId>aspectj-tools</artifactId> 
+			<version>${aspectjtools.version}</version> </dependency> -->
+
 		<!-- Hibernate Validator -->
 		<dependency>
 			<groupId>org.hibernate</groupId>
@@ -244,17 +231,11 @@
 			<artifactId>standard</artifactId>
 			<version>1.1.2</version>
 		</dependency>
-		<!-- <dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi</artifactId>
-			<version>3.11</version>
-		</dependency> -->
+		<!-- <dependency> <groupId>org.apache.poi</groupId> <artifactId>poi</artifactId> 
+			<version>3.11</version> </dependency> -->
 		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
-		<!-- <dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi-ooxml</artifactId>
-			<version>3.11</version>
-		</dependency> -->
+		<!-- <dependency> <groupId>org.apache.poi</groupId> <artifactId>poi-ooxml</artifactId> 
+			<version>3.11</version> </dependency> -->
 
 		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
 		<dependency>
@@ -281,14 +262,21 @@
 			<artifactId>httpcore</artifactId>
 			<version>4.4.5</version>
 		</dependency>
-		
+
 		<!-- Sql Server JAR -->
 		<dependency>
-		    <groupId>com.microsoft.sqlserver</groupId>
-		    <artifactId>mssql-jdbc</artifactId>
-		    <version>6.1.0.jre8</version>
-  		</dependency>
-  		
+			<groupId>com.microsoft.sqlserver</groupId>
+			<artifactId>mssql-jdbc</artifactId>
+			<version>6.1.0.jre8</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3 -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>3.6.1</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
