@@ -1512,7 +1512,7 @@ public class CustomersServiceImpl implements CustomersService {
 				+ "From JDT1 T0 INNER JOIN OCRD T1 ON T1.CardCode=T0.ShortName "
 				+ "LEFT JOIN OINV T5 ON T0.Ref1=T5.DocNum  " + "Where T0.RefDate >='" + fromDateFormatted
 				+ "' and T0.RefDate <='" + tillDateFormatted + "' And T5.DocNum IN (" + invoiceIdCommaSeparated + ")"
-				+ "  And T1.CardType = 'C' order by [Posting Date],TransId";
+				+ "  And T1.CardType = 'C' And T0.TransType = 13 order by [Posting Date],TransId";
 
 		System.out.println("Final All Invoices Query = " + custAllInvoicesQuery);
 
@@ -1799,5 +1799,13 @@ public class CustomersServiceImpl implements CustomersService {
 		}
 
 		return invoicesDetails;
+	}
+
+	@Override
+	public BaseWrapper doGetCustomersSummaryReport() throws ClassNotFoundException, SQLException {
+
+		List<CutomerSummaryReportDetails> customerSummaryReport = getCustomerSummaryReportDetails();
+
+		return new BaseWrapper(customerSummaryReport);
 	}
 }

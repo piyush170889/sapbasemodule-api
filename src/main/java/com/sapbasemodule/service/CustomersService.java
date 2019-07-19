@@ -51,4 +51,6 @@ public interface CustomersService {
 
 	InvoicesDetails getInvoiceDetailsByInvoiceId(String invoiceId)
 			throws ServicesException, ClassNotFoundException, SQLException, ParseException;
+
+	BaseWrapper doGetCustomersSummaryReport() throws ClassNotFoundException, SQLException;
 }

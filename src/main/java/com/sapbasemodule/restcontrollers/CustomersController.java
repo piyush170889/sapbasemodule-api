@@ -122,8 +122,8 @@ public class CustomersController {
 	}
 
 	@GetMapping(value = "/{cust-code}/generate-pin/{contact-no}")
-	public Object generateCustomerPin(@PathVariable("cust-code") String custCode, @PathVariable("contact-no") String contactNo)
-			throws NumberFormatException, Exception {
+	public Object generateCustomerPin(@PathVariable("cust-code") String custCode,
+			@PathVariable("contact-no") String contactNo) throws NumberFormatException, Exception {
 
 		System.out.println("Cust Code = " + custCode + ", contactNo = " + contactNo);
 		return customersService.doGenerateCustomerPin(custCode, contactNo);
@@ -134,5 +134,11 @@ public class CustomersController {
 
 		System.out.println("Customer Pin Details = " + customerPin.toString());
 		return customersService.doVerifyCustomerPin(customerPin);
+	}
+
+	@GetMapping(value = "/summary-report")
+	public Object getCustomersSummaryReport() throws ClassNotFoundException, SQLException, ParseException {
+
+		return customersService.doGetCustomersSummaryReport();
 	}
 }
