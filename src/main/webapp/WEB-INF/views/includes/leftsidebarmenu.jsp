@@ -42,6 +42,10 @@
 			<li class="active"><a href="sales-executive"><i class="fa fa-home"></i> <span>Recordings</span></a></li>
 			<!-- ./Recordings -->
 
+			<!-- Visits History -->
+			<li class="active"><a href="visit-history"><i class="fa fa-home"></i> <span>Visit History</span></a></li>
+			<!-- ./Visits History -->
+
 			<!-- Invoices Management -->
 			<!-- <li class="treeview"><a href="#"><i class="fa fa-copy"></i>
 					<span>Invoices</span> <i class="fa fa-angle-left pull-right"></i></a>

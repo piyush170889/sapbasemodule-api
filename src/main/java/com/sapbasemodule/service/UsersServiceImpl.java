@@ -8,16 +8,22 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sapbasemodule.domain.Customers;
 import com.sapbasemodule.domain.FirebaseIdDtls;
 import com.sapbasemodule.domain.NormalPacketDescDtls;
+import com.sapbasemodule.domain.SiteDtls;
 import com.sapbasemodule.domain.SiteVisitHistory;
 import com.sapbasemodule.domain.UserDtl;
 import com.sapbasemodule.domain.UserLoginDtl;
@@ -32,8 +38,10 @@ import com.sapbasemodule.model.LoggedInUserDetailsWrapper;
 import com.sapbasemodule.model.PaginationDetails;
 import com.sapbasemodule.model.TrackingData;
 import com.sapbasemodule.model.UsersDetailsWrapper;
+import com.sapbasemodule.persitence.CustomersRepository;
 import com.sapbasemodule.persitence.FirebaseIdDtlsRepository;
 import com.sapbasemodule.persitence.NormalPacketDescDtlsRepository;
+import com.sapbasemodule.persitence.SiteDtlsRepository;
 import com.sapbasemodule.persitence.SiteVisitHistoryRepository;
 import com.sapbasemodule.persitence.UserDtlRepository;
 import com.sapbasemodule.persitence.UserLoginDtlRepository;
@@ -346,6 +354,16 @@ public class UsersServiceImpl implements UsersService {
 	}
 
 	@Override
+	public List<SiteVisitHistory> doGetUsersVisitHistory() {
+
+		// Sort sort = new Sort(Direction.DESC, "siteVisitHistoryId");
+		Pageable pageable = new PageRequest(0, 100, Direction.DESC, "siteVisitHistoryId");
+		List<SiteVisitHistory> siteVisitHistoriesList = siteVisitHistoryRepository.findAll(pageable).getContent();
+
+		return siteVisitHistoriesList;
+	}
+
+	@Override
 	public BaseWrapper doPunchUsersVisitEntry(SiteVisitHistory request) {
 
 		UserDtl userDtl = commonUtility.getLoggedUser().getUserDtl();
@@ -371,11 +389,47 @@ public class UsersServiceImpl implements UsersService {
 		siteVisitHistory.setExitDt(commonUtility.getDtInDDMMYYFormatIST());
 		siteVisitHistory.setExitTm(commonUtility.getTsInHHmmssFormatIST());
 		siteVisitHistory.setExitLatitude(request.getExitLatitude());
-		siteVisitHistory.setExitLongitude(request.getLongitude());
+		siteVisitHistory.setExitLongitude(request.getExitLongitude());
 		siteVisitHistory.setExitLocation(request.getExitLocation());
 
 		siteVisitHistory = siteVisitHistoryRepository.save(siteVisitHistory);
 
 		return new BaseWrapper(siteVisitHistory);
+	}
+
+	@Override
+	public SiteVisitHistory findVisitSiteById(Integer siteVisitHistoryId) {
+
+		return siteVisitHistoryRepository.findOne(siteVisitHistoryId);
+	}
+
+	@Override
+	public List<SiteVisitHistory> findVisitSitesByIds(Set<Integer> siteVisitHistoryIdsSet) {
+
+		return siteVisitHistoryRepository.findBySiteVisitHistoryIdIn(siteVisitHistoryIdsSet);
+	}
+
+	@Override
+	public void saveVisitSites(List<SiteVisitHistory> siteVisitHistoryList) {
+
+		siteVisitHistoryRepository.save(siteVisitHistoryList);
+	}
+
+	@Autowired
+	private CustomersRepository customersRepository;
+
+	@Override
+	public List<Customers> doGetCustomersListToPopulateDD() {
+
+		return customersRepository.selectCustomersForPopulatingDD();
+	}
+
+	@Autowired
+	private SiteDtlsRepository siteDtlsRepository;
+
+	@Override
+	public List<SiteDtls> doGetLocationsListToPopulateDD() {
+
+		return siteDtlsRepository.selectLocationsForPopulatingDD();
 	}
 }

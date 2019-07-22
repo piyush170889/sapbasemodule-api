@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Table(name = "site_visit_history")
@@ -61,7 +62,29 @@ public class SiteVisitHistory {
 	@Column(name = "EXIT_LOCATION")
 	private String exitLocation;
 
+	@Transient
+	private String entryTs;
+
+	@Transient
+	private String exitTs;
+
 	public SiteVisitHistory() {
+	}
+
+	public String getEntryTs() {
+		return entryTs;
+	}
+
+	public void setEntryTs(String entryTs) {
+		this.entryTs = entryTs;
+	}
+
+	public String getExitTs() {
+		return exitTs;
+	}
+
+	public void setExitTs(String exitTs) {
+		this.exitTs = exitTs;
 	}
 
 	public String getVisitorNm() {
@@ -216,6 +239,26 @@ public class SiteVisitHistory {
 		this.exitLatitude = exitLatitude;
 		this.exitLongitude = exitLongitude;
 		this.exitLocation = exitLocation;
+	}
+
+	public SiteVisitHistory(int siteVisitHistoryId, SiteDtls siteDtls, String visitorId, String entryDt, String entryTm,
+			String visitPurpose, String exitDt, String exitTm, String remarks, String latitude, String longitude,
+			String exitLatitude, String exitLongitude, String exitLocation, String visitorNm) {
+		this.siteVisitHistoryId = siteVisitHistoryId;
+		this.siteDtls = siteDtls;
+		this.visitorId = visitorId;
+		this.entryDt = entryDt;
+		this.entryTm = entryTm;
+		this.visitPurpose = visitPurpose;
+		this.exitDt = exitDt;
+		this.exitTm = exitTm;
+		this.remarks = remarks;
+		this.latitude = latitude;
+		this.longitude = longitude;
+		this.exitLatitude = exitLatitude;
+		this.exitLongitude = exitLongitude;
+		this.exitLocation = exitLocation;
+		this.visitorNm = visitorNm;
 	}
 
 	@Override

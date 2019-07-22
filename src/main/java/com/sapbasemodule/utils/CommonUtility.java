@@ -1,5 +1,6 @@
 package com.sapbasemodule.utils;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -29,11 +30,20 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.codehaus.jackson.annotate.JsonAutoDetect.Visibility;
+import org.codehaus.jackson.annotate.JsonMethod;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -707,4 +717,45 @@ public class CommonUtility {
 		return result;
 	}
 
+	public String executeRESTCallByPost(String urlToHit, Object valueToWrite) throws Exception {
+
+		String response = "";
+		ObjectMapper mapper = new ObjectMapper();
+		HttpPost post = null;
+
+		try {
+			post = new HttpPost(urlToHit);
+
+			mapper.setVisibility(JsonMethod.FIELD, Visibility.ANY);
+			mapper.setSerializationInclusion(Inclusion.NON_NULL);
+
+			if (valueToWrite != null) {
+				post.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+
+				StringEntity entity = new StringEntity(mapper.writeValueAsString(valueToWrite));
+				post.setEntity(entity);
+			}
+
+			HttpClient http = HttpClientBuilder.create().build();
+			InputStream stream = http.execute(post).getEntity().getContent();
+
+			int c;
+			while ((c = stream.read()) != -1)
+				response += ((char) c);
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			if (null != post)
+				post.releaseConnection();
+		}
+
+		return response;
+	}
+
+	public boolean isEmpty(String valToCheck) {
+		if (null == valToCheck || valToCheck.isEmpty())
+			return true;
+		else
+			return false;
+	}
 }

@@ -44,6 +44,9 @@ public interface CustomersRepository extends JpaRepository<Customers, String> {
 	@Query("select c.cardName from Customers c where c.cardCode=?1")
 	String findCardNameByCardCode(String cardCode);
 
+	@Query("select new Customers(c.cardCode, c.cardName) from Customers c where c.cardType='C'")
+	List<Customers> selectCustomersForPopulatingDD();
+
 	// List<Customers> findByCardCodeOrCardNameOrPhone1OrPhone2Containing(String
 	// searchTerm);
 

@@ -40,6 +40,11 @@ public class SiteDtls {
 	public SiteDtls() {
 	}
 
+	public SiteDtls(String cardCode, String geofenceName) {
+		this.cardCode = cardCode;
+		this.geofenceName = geofenceName;
+	}
+
 	public SiteDtls(int geofencingDtlsId, String geofenceName, String cardCode, String geofenceAddr, String latitude,
 			String longitude, String updatedDt, String updatedTs) {
 		this.geofencingDtlsId = geofencingDtlsId;

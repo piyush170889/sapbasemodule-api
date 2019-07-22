@@ -97,6 +97,11 @@ public class Customers {
 	public Customers() {
 	}
 
+	public Customers(String cardCode, String cardName) {
+		this.cardCode = cardCode;
+		this.cardName = cardName;
+	}
+
 	public Customers(String cardCode, String cardName, String cardType, Integer groupCode, String cmpPrivate,
 			String phone1, String phone2, String fax, String cntctPrsn, String notes, Float balance, Float checksBal,
 			Float dNotesBal, Float ordersBal, Integer groupNum, String deleted, Integer docEntry, String cellular,
