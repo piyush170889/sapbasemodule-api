@@ -1252,87 +1252,109 @@ public class CustomersServiceImpl implements CustomersService {
 		List<InvoicesDetails> invoiceDetailsList = new ArrayList<InvoicesDetails>();
 		List<InvoicesAcknowledgementDetails> invoicesAcknowledgementDetailsList;
 
+		int invoiceDocEntriesListSize = invoiceDocEntriesList.size();
 		if (invoiceDocEntriesList.size() > 0) {
-			invoiceItemsList = getInvoiceItemsListForDocEntries(invoiceDocEntriesList);
 
-			// Separate All Invoice Items As Per Invoice No (DocEntry)
-			invoiceItemsMap = new HashMap<Integer, List<InvoiceItems>>();
+			int recordCount = 0;
+			int loopLimit = 0;
 
-			for (InvoiceItems invoiceItems : invoiceItemsList) {
-				int invoiceDocEntry = invoiceItems.getDocEntry();
+			while (recordCount < invoiceDocEntriesListSize) {
 
-				List<InvoiceItems> invoiceItemMapList;
-				if (invoiceItemsMap.containsKey(invoiceDocEntry))
-					invoiceItemMapList = invoiceItemsMap.get(invoiceDocEntry);
-				else
-					invoiceItemMapList = new ArrayList<InvoiceItems>();
+				loopLimit = loopLimit + ((invoiceDocEntriesListSize - recordCount > 2095) ? 2095
+						: (invoiceDocEntriesListSize - recordCount));
+				List<Integer> invoiceDocEntriesBatchList = new ArrayList<Integer>();
+//				System.out.println("recordCount = " + recordCount + ", loopLimit = " + loopLimit);
+				for (; recordCount < loopLimit; recordCount++) {
+					invoiceDocEntriesBatchList.add(invoiceDocEntriesList.get(recordCount));
+				}
+//				System.out.println("invoiceDocEntriesBatchListSize = " + invoiceDocEntriesBatchList.size());
 
-				invoiceItemMapList.add(invoiceItems);
+//				invoiceItemsList = getInvoiceItemsListForDocEntries(invoiceDocEntriesList);
+				invoiceItemsList = getInvoiceItemsListForDocEntries(invoiceDocEntriesBatchList);
+				
+				// Separate All Invoice Items As Per Invoice No (DocEntry)
+				invoiceItemsMap = new HashMap<Integer, List<InvoiceItems>>();
 
-				invoiceItemsMap.put(invoiceDocEntry, invoiceItemMapList);
-			}
+				for (InvoiceItems invoiceItems : invoiceItemsList) {
+					int invoiceDocEntry = invoiceItems.getDocEntry();
 
-			// Get Acknowledgement Details Of All Invoices Ids and set signature
-			// of each against their invoice id
-			invoicesAcknowledgementDetailsList = invoiceAcknowledgementDetailsRepository
-					.selectByInvoiceNos(invoiceDocEntriesList);
+					List<InvoiceItems> invoiceItemMapList;
+					if (invoiceItemsMap.containsKey(invoiceDocEntry))
+						invoiceItemMapList = invoiceItemsMap.get(invoiceDocEntry);
+					else
+						invoiceItemMapList = new ArrayList<InvoiceItems>();
 
-			Map<Integer, String> invoiceAcknowledgementMap = new HashMap<Integer, String>();
-			for (InvoicesAcknowledgementDetails invoicesAcknowledgementDetails : invoicesAcknowledgementDetailsList)
-				invoiceAcknowledgementMap.put(invoicesAcknowledgementDetails.getInvoiceNo(),
-						invoicesAcknowledgementDetails.getSignature());
+					invoiceItemMapList.add(invoiceItems);
 
-			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-			df.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
-
-			String currentDate = df.format(new Date());
-			NumberToWord numberToWord = new NumberToWord();
-			for (InvoiceDetailsNewTo custInvoice : custAllInvociesList) {
-
-				int invoiceDocEntry = custInvoice.getInvoiceDocEntry();
-				long paymentDueDays = 0L;
-				long dueDateInDays = 0L;
-				String invoiceAmountInWords = null;
-				String taxAmountInWords = null;
-				List<InvoiceItems> invoiceItemsListFromMap = null;
-				String invoiceDate = custInvoice.getPostingDate();
-				String invoiceDueDate = custInvoice.getDueDate();
-
-				Float balanceAmt = Float.parseFloat(custInvoice.getBalance());
-				if (invoiceDocEntry != 0 && custInvoice.getOrigin().equalsIgnoreCase("IN")) {
-
-					// System.out.println("Invoice Doc Entry In Iteration : " +
-					// invoiceDocEntry);
-
-					paymentDueDays = commonUtility.getDaysDiffBetweenDates(invoiceDate, invoiceDueDate);
-					dueDateInDays = commonUtility.getDaysDiffBetweenDates(currentDate, invoiceDueDate);
-
-					invoiceItemsListFromMap = invoiceItemsMap.get(invoiceDocEntry);
-					// System.out.println("invoiceItemsListFromMap = " +
-					// invoiceItemsListFromMap);
-
-					invoiceAmountInWords = numberToWord.convert(Math.round(balanceAmt));
-
-					float finalTaxAmount = 0F;
-
-					if (null != invoiceItemsListFromMap) {
-						for (InvoiceItems invoiceItems : invoiceItemsListFromMap)
-							finalTaxAmount = finalTaxAmount + invoiceItems.getCgstTax() + invoiceItems.getSgstTax();
-					}
-					taxAmountInWords = numberToWord.convert((int) Math.floor(finalTaxAmount));
-
+					invoiceItemsMap.put(invoiceDocEntry, invoiceItemMapList);
 				}
 
-				String custCode = custInvoice.getCustCode();
-				InvoicesDetails invoicesDetails = new InvoicesDetails(invoiceDocEntry,
-						Integer.toString(custInvoice.getInvoiceNo()), invoiceDate, invoiceDueDate, paymentDueDays,
-						custInvoice.getInvoiceStatus(), balanceAmt, custCode, "", custInvoice.getOrigin(),
-						invoiceItemsListFromMap, 0F, balanceAmt, "", dueDateInDays, invoiceAmountInWords,
-						taxAmountInWords, custInvoice.getTransId(), custInvoice.getOriginNo(), custInvoice.getDebit(),
-						custInvoice.getCredit(), custInvoice.getCumulativeBalance(), custInvoice.getRef2(),
-						invoiceAcknowledgementMap.get(invoiceDocEntry));
+				// Get Acknowledgement Details Of All Invoices Ids and set
+				// signature
+				// of each against their invoice id
+//				invoicesAcknowledgementDetailsList = invoiceAcknowledgementDetailsRepository
+//						.selectByInvoiceNos(invoiceDocEntriesList);
+				invoicesAcknowledgementDetailsList = invoiceAcknowledgementDetailsRepository
+						.selectByInvoiceNos(invoiceDocEntriesBatchList);
 
-				invoiceDetailsList.add(invoicesDetails);
+				Map<Integer, String> invoiceAcknowledgementMap = new HashMap<Integer, String>();
+				for (InvoicesAcknowledgementDetails invoicesAcknowledgementDetails : invoicesAcknowledgementDetailsList)
+					invoiceAcknowledgementMap.put(invoicesAcknowledgementDetails.getInvoiceNo(),
+							invoicesAcknowledgementDetails.getSignature());
+
+				DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+				df.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+
+				String currentDate = df.format(new Date());
+				NumberToWord numberToWord = new NumberToWord();
+				for (InvoiceDetailsNewTo custInvoice : custAllInvociesList) {
+
+					int invoiceDocEntry = custInvoice.getInvoiceDocEntry();
+					long paymentDueDays = 0L;
+					long dueDateInDays = 0L;
+					String invoiceAmountInWords = null;
+					String taxAmountInWords = null;
+					List<InvoiceItems> invoiceItemsListFromMap = null;
+					String invoiceDate = custInvoice.getPostingDate();
+					String invoiceDueDate = custInvoice.getDueDate();
+
+					Float balanceAmt = Float.parseFloat(custInvoice.getBalance());
+					if (invoiceDocEntry != 0 && custInvoice.getOrigin().equalsIgnoreCase("IN")) {
+
+						// System.out.println("Invoice Doc Entry In Iteration :
+						// " +
+						// invoiceDocEntry);
+
+						paymentDueDays = commonUtility.getDaysDiffBetweenDates(invoiceDate, invoiceDueDate);
+						dueDateInDays = commonUtility.getDaysDiffBetweenDates(currentDate, invoiceDueDate);
+
+						invoiceItemsListFromMap = invoiceItemsMap.get(invoiceDocEntry);
+						// System.out.println("invoiceItemsListFromMap = " +
+						// invoiceItemsListFromMap);
+
+						invoiceAmountInWords = numberToWord.convert(Math.round(balanceAmt));
+
+						float finalTaxAmount = 0F;
+
+						if (null != invoiceItemsListFromMap) {
+							for (InvoiceItems invoiceItems : invoiceItemsListFromMap)
+								finalTaxAmount = finalTaxAmount + invoiceItems.getCgstTax() + invoiceItems.getSgstTax();
+						}
+						taxAmountInWords = numberToWord.convert((int) Math.floor(finalTaxAmount));
+
+					}
+
+					String custCode = custInvoice.getCustCode();
+					InvoicesDetails invoicesDetails = new InvoicesDetails(invoiceDocEntry,
+							Integer.toString(custInvoice.getInvoiceNo()), invoiceDate, invoiceDueDate, paymentDueDays,
+							custInvoice.getInvoiceStatus(), balanceAmt, custCode, "", custInvoice.getOrigin(),
+							invoiceItemsListFromMap, 0F, balanceAmt, "", dueDateInDays, invoiceAmountInWords,
+							taxAmountInWords, custInvoice.getTransId(), custInvoice.getOriginNo(),
+							custInvoice.getDebit(), custInvoice.getCredit(), custInvoice.getCumulativeBalance(),
+							custInvoice.getRef2(), invoiceAcknowledgementMap.get(invoiceDocEntry));
+
+					invoiceDetailsList.add(invoicesDetails);
+				}
 			}
 		}
 
