@@ -79,6 +79,8 @@ public class OrdersServiceImpl implements OrdersService {
 			for (Orders orders : ordersList)
 				orderIdsList.add(orders.getDocNum());
 
+			System.out.println("orderIdsList = " + orderIdsList.toString());
+			
 			// Get All Order Items Associated with Orders
 			List<OrderItems> orderItemsList = orderItemsRepository.findByDocEntryIn(orderIdsList);
 
@@ -101,7 +103,7 @@ public class OrdersServiceImpl implements OrdersService {
 			// orderQtyMap
 			for (Orders orders : ordersList) {
 				float orderQty = 0F;
-				orderQty = orderQtyMap.get(orders.getDocNum());
+				orderQty = orderQtyMap.get(orders.getDocNum()) == null ? orderQty : orderQtyMap.get(orders.getDocNum());
 				orders.setQuantity(orderQty);
 
 				finalOrdersList.add(orders);
