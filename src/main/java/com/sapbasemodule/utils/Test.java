@@ -1,6 +1,5 @@
 package com.sapbasemodule.utils;
 
-import java.text.ParseException;
 import java.util.Arrays;
 
 import org.apache.commons.math3.stat.correlation.Covariance;
@@ -10,19 +9,14 @@ import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 
 public class Test {
 
-	public static void main(String[] args) throws ParseException {
+	public static void main(String[] args) throws Exception {
 
-		double[] a = { 29.6, 29.6, 33.0, 34.1, 33.8, 29.8, 29.7, 34.4, 34.7, 33.3, 33.6, 33.4, 33.8, 33.8, 34.7, 33.6,
-				33.9, 34.3, 34.0, 34.0, 34.1, 34.3 };
-		double[] b = { 70.4, 70.4, 67.0, 65.9, 66.2, 70.2, 70.3, 65.5, 65.3, 66.7, 66.4, 66.6, 66.2, 66.2, 65.3, 66.4,
-				66.1, 65.7, 66.0, 66.1, 65.9, 65.7 };
-		double[] c = { 451.6, 452.0, 454.0, 454.5, 453.6, 449.8, 449.4, 454.1, 453.2, 456.6, 458.5, 455.8, 456.0, 453.0,
-				454.6, 456.8, 455.3, 455.6, 453.0, 452.8, 455.0, 454.9 };
-		double[] d = { 399.0, 401.4, 401.4, 400.3, 396.6, 391.9, 397.4, 400.9, 400.7, 405.3, 406.9, 402.9, 410.7, 399.9,
-				404.8, 402.9, 399.9, 405.0, 403.0, 399.0, 412.0, 405.0 };
-
-		double[] selectedFirstValueToCompare = a;
-		double[] selectedSecondValueToCompare = d;
+		double[] a = { 2000, 2000 };
+		double[] b = { 33.0, 34.1 };
+		double[] c = { -0.5, 5.0 };
+		
+		double[] selectedFirstValueToCompare = c;
+		double[] selectedSecondValueToCompare = c;
 
 		System.out.println("firstArray: " + Arrays.toString(selectedFirstValueToCompare));
 		System.out.println("secondArray: " + Arrays.toString(selectedSecondValueToCompare));
@@ -35,6 +29,266 @@ public class Test {
 				+ new SpearmansCorrelation().correlation(selectedFirstValueToCompare, selectedSecondValueToCompare));
 		System.out.println("Kendall's Correlation: "
 				+ new KendallsCorrelation().correlation(selectedFirstValueToCompare, selectedSecondValueToCompare));
+		//
+		// Test test = new Test();
+		//
+		// String primaryVar = "A";
+		// String[] otherVarArray = { "B", "C" };
+		//
+		// String[] allVarArray = new String[otherVarArray.length + 1];
+		// int allVarArrayLength = allVarArray.length;
+		//
+		// allVarArray[0] = primaryVar;
+		// for (int i = 1; i < allVarArrayLength; i++) {
+		// allVarArray[i] = otherVarArray[i - 1];
+		// }
+		// System.out.println("allVarArray = " + allVarArray);
+		//
+		// String startTs = "2019-07-29 10:01:00";
+		// String endTs = "2019-07-29 10:03:00";
+		// String filterVar = "A";
+		// // For `true` or `false` this value will be "=" and for other
+		// conditions
+		// // it can be any of the one : ">", ">=", "<", "<="
+		// String condition = ">=";
+		// // For `true` or `false` this value will be
+		// // `true` or `false` And for other conditions it will be a number or
+		// // float
+		// String filterVal = "2";
+		//
+		// List<Test.THistoricData> tHistoricDataList =
+		// test.getHistoricData(startTs, endTs, filterVar, condition,
+		// filterVal, allVarArray);
+		//
+		// System.out.println("tHistoricDataList = " +
+		// tHistoricDataList.toString());
+		//
+		// Map<String, List<Test.THistoricData>> varWiseListValuesHashMap = new
+		// HashMap<String, List<THistoricData>>();
+		//
+		// for (Test.THistoricData tHistoricData : tHistoricDataList) {
+		// String paramNm = tHistoricData.getHdTagName();
+		//
+		// List<Test.THistoricData> thistoricDataListFromMap = null;
+		//
+		// if (varWiseListValuesHashMap.containsKey(paramNm))
+		// thistoricDataListFromMap = varWiseListValuesHashMap.get(paramNm);
+		// else
+		// thistoricDataListFromMap = new ArrayList<Test.THistoricData>();
+		//
+		// thistoricDataListFromMap.add(tHistoricData);
+		//
+		// varWiseListValuesHashMap.put(paramNm, thistoricDataListFromMap);
+		// }
+		//
+		// Map<String, double[]> varWiseArrayValuesMap = new HashMap<String,
+		// double[]>();
+		// // TODO: Convert varWiseListValuesHashMap to varWiseArrayValuesMap
+		//
+		// double[][] correlationMatrix = new
+		// double[allVarArrayLength][allVarArrayLength];
+		// List<Test.BarChartVarValues> barChartVarValuesList = new
+		// ArrayList<Test.BarChartVarValues>();
+		//
+		// for (int i = 0; i < allVarArrayLength; i++) {
+		//
+		// double[] varArrayToCompare =
+		// varWiseArrayValuesMap.get(allVarArray[i]);
+		//
+		// for (int j = 0; j <= i; j++) {
+		// double[] varArrayInIteration =
+		// varWiseArrayValuesMap.get(allVarArray[j]);
+		//
+		// double correlationImpactFactor = new
+		// PearsonsCorrelation().correlation(varArrayToCompare,
+		// varArrayInIteration);
+		// System.out.println(allVarArray[i] + " ---> " + allVarArray[j] + " = "
+		// + correlationImpactFactor);
+		//
+		// correlationMatrix[i][j] = test.round(correlationImpactFactor, 2);
+		//
+		// if (j == 0) {
+		// Test.BarChartVarValues barChartVarValues = test.new
+		// BarChartVarValues(allVarArray[j],
+		// test.round(correlationImpactFactor, 2));
+		// barChartVarValuesList.add(barChartVarValues);
+		// }
+		// }
+		// }
+		//
+		// // Display Correlation matrix
+		// System.out.println("================================ CORRELATION
+		// MATRIX ================================");
+		// for (int i = 0; i < allVarArrayLength; i++) {
+		//
+		// System.out.print("\n");
+		//
+		// for (int j = 0; j <= i; j++) {
+		// System.out.print(correlationMatrix[i][j] + "\t");
+		// }
+		// }
+		//
+		// // Display Bar Chart Values
+		// System.out.println("================================ BAR CHART VALUES
+		// ================================");
+		// System.out.println(barChartVarValuesList.toString());
+		// }
+		//
+		// public List<Test.THistoricData> getHistoricData(String startTs,
+		// String endTs, String filterVar, String condition,
+		// String filterVal, String... allVariables) throws Exception {
+		//
+		// if (allVariables.length == 0) {
+		// throw new Exception("Please supply valid values");
+		// }
+		// String allVarCommaSeparatedString = "";
+		// for (String var : allVariables) {
+		// if (!allVarCommaSeparatedString.isEmpty())
+		// allVarCommaSeparatedString = allVarCommaSeparatedString + "," + "'" +
+		// var + "'";
+		// else
+		// allVarCommaSeparatedString = allVarCommaSeparatedString + "'" + var +
+		// "'";
+		// }
+		//
+		// List<Test.THistoricData> tHistoricDataList = new
+		// ArrayList<Test.THistoricData>();
+		//
+		// String sql = "SELECT * FROM t_historic_data AS thd WHERE
+		// thd.hd_timestamp IN (SELECT hd_timestamp FROM t_historic_data"
+		// + " WHERE hd_tag_name='" + filterVar + "' AND hd_tag_value" +
+		// condition + "'" + filterVal + "'"
+		// + " AND hd_timestamp>='" + startTs + "' AND hd_timestamp<='" + endTs
+		// + "')"
+		// + " AND thd.hd_tag_name IN (" + allVarCommaSeparatedString + ")";
+		// System.out.println("sql = " + sql);
+		//
+		// Class.forName("com.mysql.jdbc.Driver");
+		// Connection con =
+		// DriverManager.getConnection("jdbc:mysql://localhost:3306/fleet_db",
+		// "root", "root");
+		//
+		// PreparedStatement ps = con.prepareStatement(sql);
+		// ResultSet rs = ps.executeQuery();
+		//
+		// while (rs.next()) {
+		// Test.THistoricData tHistoricData = new
+		// Test.THistoricData(rs.getString("hd_timestamp"),
+		// rs.getString("hd_tag_name"), rs.getString("hd_tag_value"));
+		//
+		// tHistoricDataList.add(tHistoricData);
+		// }
+		//
+		// return tHistoricDataList;
 	}
 
+	public Double round(double value, int places) {
+		if (places < 0)
+			throw new IllegalArgumentException();
+
+		long factor = (long) Math.pow(10, places);
+		value = value * factor;
+		long tmp = Math.round(value);
+		return (double) tmp / factor;
+	}
+
+	// Required Model Classes To Hold Data
+	class THistoricData {
+
+		private String hdTimestamp;
+
+		private String hdTagName;
+
+		private String hdTagValue;
+
+		public THistoricData() {
+		}
+
+		public THistoricData(String hdTimestamp, String hdTagName, String hdTagValue) {
+			this.hdTimestamp = hdTimestamp;
+			this.hdTagName = hdTagName;
+			this.hdTagValue = hdTagValue;
+		}
+
+		public String getHdTimestamp() {
+			return hdTimestamp;
+		}
+
+		public void setHdTimestamp(String hdTimestamp) {
+			this.hdTimestamp = hdTimestamp;
+		}
+
+		public String getHdTagName() {
+			return hdTagName;
+		}
+
+		public void setHdTagName(String hdTagName) {
+			this.hdTagName = hdTagName;
+		}
+
+		public String getHdTagValue() {
+			return hdTagValue;
+		}
+
+		public void setHdTagValue(String hdTagValue) {
+			this.hdTagValue = hdTagValue;
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append("\n THistoricData [hdTimestamp=");
+			builder.append(hdTimestamp);
+			builder.append(", hdTagName=");
+			builder.append(hdTagName);
+			builder.append(", hdTagValue=");
+			builder.append(hdTagValue);
+			builder.append("]");
+			return builder.toString();
+		}
+
+	}
+
+	class BarChartVarValues {
+
+		private String var;
+
+		private double val;
+
+		public BarChartVarValues() {
+		}
+
+		public BarChartVarValues(String var, double val) {
+			this.var = var;
+			this.val = val;
+		}
+
+		public String getVar() {
+			return var;
+		}
+
+		public void setVar(String var) {
+			this.var = var;
+		}
+
+		public double getVal() {
+			return val;
+		}
+
+		public void setVal(double val) {
+			this.val = val;
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append("BarChartVarValues [var=");
+			builder.append(var);
+			builder.append(", val=");
+			builder.append(val);
+			builder.append("]");
+			return builder.toString();
+		};
+
+	}
 }

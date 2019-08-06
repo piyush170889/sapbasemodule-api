@@ -518,7 +518,7 @@ public class CustomersServiceImpl implements CustomersService {
 				+ "')"
 				+ " sub group by [BP Code],[BP Name],[t],[Posting date], [Due date],[Doc Date],[Ref1],Trans order by [Posting date]";
 
-		System.out.println("Final SQL = " + sqlQuery);
+//		System.out.println("Final SQL = " + sqlQuery);
 
 		PreparedStatement ps = conn.prepareStatement(sqlQuery);
 		ResultSet rs = ps.executeQuery();
@@ -891,14 +891,35 @@ public class CustomersServiceImpl implements CustomersService {
 	public BaseWrapper doGetCustomerDataForSync() throws ClassNotFoundException, SQLException, ParseException {
 
 		List<Customers> customersList = null;
+		// Prepare Summary Report Details Map For All Customers
+		Map<String, List<CutomerSummaryReportDetails>> customerSummaryReportByCardCodeMap = new HashMap<String, List<CutomerSummaryReportDetails>>();
+
+		List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsList = new ArrayList<CutomerSummaryReportDetails>();
 
 		if (commonUtility.hasRole(RoleType.ROLE_SALES.toString())) {
 			// System.out.println("Logged Users ID = " +
 			// commonUtility.getLoggedUser().getUsername());
 			String slpCode = oslpRepository.selectSlpCodeByMobil(commonUtility.getLoggedUser().getUsername());
 			customersList = customersRepository.findByCardTypeAndSlpCode("C", slpCode);
+			cutomerSummaryReportDetailsList = getCustomerSummaryReportDetails(slpCode);
 		} else if (commonUtility.hasRole(RoleType.ROLE_ADMIN.toString())) {
 			customersList = customersRepository.findByCardType("C");
+			cutomerSummaryReportDetailsList = getCustomerSummaryReportDetails(null);
+		}
+
+		for (CutomerSummaryReportDetails cutomerSummaryReportDetails : cutomerSummaryReportDetailsList) {
+
+			String cardCode = cutomerSummaryReportDetails.getCardCode();
+
+			List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsListInMap = null;
+			if (customerSummaryReportByCardCodeMap.containsKey(cardCode)) {
+				cutomerSummaryReportDetailsListInMap = customerSummaryReportByCardCodeMap.get(cardCode);
+			} else
+				cutomerSummaryReportDetailsListInMap = new ArrayList<CutomerSummaryReportDetails>();
+
+			cutomerSummaryReportDetailsListInMap.add(cutomerSummaryReportDetails);
+
+			customerSummaryReportByCardCodeMap.put(cardCode, cutomerSummaryReportDetailsListInMap);
 		}
 
 		if (customersList.isEmpty())
@@ -943,26 +964,6 @@ public class CustomersServiceImpl implements CustomersService {
 		for (CustomerPin customerPin : customerPinsList)
 			customerPinForCardCodeMap.put(customerPin.getCardCode(), customerPin.getCustomersPin());
 
-		// Prepare Summary Report Details Map For All Customers
-		Map<String, List<CutomerSummaryReportDetails>> customerSummaryReportByCardCodeMap = new HashMap<String, List<CutomerSummaryReportDetails>>();
-
-		List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsList = getCustomerSummaryReportDetails();
-
-		for (CutomerSummaryReportDetails cutomerSummaryReportDetails : cutomerSummaryReportDetailsList) {
-
-			String cardCode = cutomerSummaryReportDetails.getCardCode();
-
-			List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsListInMap = null;
-			if (customerSummaryReportByCardCodeMap.containsKey(cardCode)) {
-				cutomerSummaryReportDetailsListInMap = customerSummaryReportByCardCodeMap.get(cardCode);
-			} else
-				cutomerSummaryReportDetailsListInMap = new ArrayList<CutomerSummaryReportDetails>();
-
-			cutomerSummaryReportDetailsListInMap.add(cutomerSummaryReportDetails);
-
-			customerSummaryReportByCardCodeMap.put(cardCode, cutomerSummaryReportDetailsListInMap);
-		}
-
 		// Create Response And Send
 		List<CustomerDetailsWrapper> response = new ArrayList<CustomerDetailsWrapper>();
 
@@ -1000,7 +1001,7 @@ public class CustomersServiceImpl implements CustomersService {
 		return new BaseWrapper(response);
 	}
 
-	private List<CutomerSummaryReportDetails> getCustomerSummaryReportDetails()
+	private List<CutomerSummaryReportDetails> getCustomerSummaryReportDetails(String slpCode)
 			throws ClassNotFoundException, SQLException {
 
 		String fromDate = "20190401";
@@ -1010,15 +1011,26 @@ public class CustomersServiceImpl implements CustomersService {
 
 		String tillDate = dfYYYYMMDD.format(new Date());
 
-		String custSummaryReportQuery = "SELECT  CardCode,Name,[Sales Emp Name],Brand ,[4] as [Apr],[5] as [May],[6] as [Jun],[7] as [Jul],[8] as [Aug],[9] as [Sep],[10] as [Oct],[11] as [Nov],[12] as [Dec],[1] as [Jan],[2] as [Feb],[3] as [Mar] FROM("
-				+ " SELECT  T0.CardCode As 'CardCode',T0.CardName As'Name',(Sum(T1.Quantity))/20 as 'Qty', month(t0.docdate) as 'Month',T1.Dscription As'Brand',T4.SlpName As'Sales Emp Name' FROM OINV T0 INNER JOIN INV1 T1 ON T0.Docentry=T1.DocEntry"
-				+ " INNER JOIN OSLP T4 ON T4.SlpCode =T0.SlpCode WHERE T0.[DocDate]  >='" + fromDate
-				+ "' AND  T0.[DocDate] <='" + tillDate
-				+ "' And T1.Dscription In ('Birla Super','Ultratech PPC','Rajashree Plus Cement') And T1.TargetType <>14"
-				+ " Group By T0.CardCode,t0.docdate,T0.CardName,T1.Dscription,T4.SlpName) S"
-				+ " PIVOT  (Sum(S.Qty) FOR [month] IN ([4],[5],[6],[7],[8],[9],[10],[11],[12],[1],[2],[3])) P";
+		String custSummaryReportQuery = null;
 
-		System.out.println("custSummaryReportQuery = " + custSummaryReportQuery);
+		if (null == slpCode)
+			custSummaryReportQuery = "SELECT  CardCode,Name,[Sales Emp Name],Brand ,[4] as [Apr],[5] as [May],[6] as [Jun],[7] as [Jul],[8] as [Aug],[9] as [Sep],[10] as [Oct],[11] as [Nov],[12] as [Dec],[1] as [Jan],[2] as [Feb],[3] as [Mar] FROM("
+					+ " SELECT  T0.CardCode As 'CardCode',T0.CardName As'Name',(Sum(T1.Quantity))/20 as 'Qty', month(t0.docdate) as 'Month',T1.Dscription As'Brand',T4.SlpName As'Sales Emp Name' FROM OINV T0 INNER JOIN INV1 T1 ON T0.Docentry=T1.DocEntry"
+					+ " INNER JOIN OSLP T4 ON T4.SlpCode =T0.SlpCode WHERE T0.[DocDate]  >='" + fromDate
+					+ "' AND  T0.[DocDate] <='" + tillDate
+					+ "' And T1.Dscription In ('Birla Super','Ultratech PPC','Rajashree Plus Cement') And T1.TargetType <>14"
+					+ " Group By T0.CardCode,t0.docdate,T0.CardName,T1.Dscription,T4.SlpName) S"
+					+ " PIVOT  (Sum(S.Qty) FOR [month] IN ([4],[5],[6],[7],[8],[9],[10],[11],[12],[1],[2],[3])) P";
+		else
+			custSummaryReportQuery = "SELECT  CardCode,Name,[Sales Emp Name],Brand ,[4] as [Apr],[5] as [May],[6] as [Jun],[7] as [Jul],[8] as [Aug],[9] as [Sep],[10] as [Oct],[11] as [Nov],[12] as [Dec],[1] as [Jan],[2] as [Feb],[3] as [Mar] FROM("
+					+ " SELECT  T0.CardCode As 'CardCode',T0.CardName As'Name',(Sum(T1.Quantity))/20 as 'Qty', month(t0.docdate) as 'Month',T1.Dscription As'Brand',T4.SlpName As'Sales Emp Name' FROM OINV T0 INNER JOIN INV1 T1 ON T0.Docentry=T1.DocEntry"
+					+ " INNER JOIN OSLP T4 ON T4.SlpCode =T0.SlpCode WHERE T0.[DocDate]  >='" + fromDate
+					+ "' AND  T0.[DocDate] <='" + tillDate
+					+ "' And T1.Dscription In ('Birla Super','Ultratech PPC','Rajashree Plus Cement') And T1.TargetType <>14 AND T4.SlpCode="
+					+ slpCode + " Group By T0.CardCode,t0.docdate,T0.CardName,T1.Dscription,T4.SlpName) S"
+					+ " PIVOT  (Sum(S.Qty) FOR [month] IN ([4],[5],[6],[7],[8],[9],[10],[11],[12],[1],[2],[3])) P";
+
+//		System.out.println("custSummaryReportQuery = " + custSummaryReportQuery);
 
 		Connection con = commonUtility.getDbConnection();
 		PreparedStatement ps = con.prepareStatement(custSummaryReportQuery);
@@ -1217,14 +1229,16 @@ public class CustomersServiceImpl implements CustomersService {
 				+ "' And T1.CardCode IN (" + custCodesCommaSeparated + ")"
 				+ " And T1.CardType = 'C' order by [Posting Date],TransId";
 
-		System.out.println("Final All Invoices Query = " + custAllInvoicesQuery);
+		// System.out.println("Final All Invoices Query = " +
+		// custAllInvoicesQuery);
 
 		Connection con = commonUtility.getDbConnection();
 		PreparedStatement ps = con.prepareStatement(custAllInvoicesQuery);
 
 		ResultSet rs = ps.executeQuery();
 
-		List<InvoiceDetailsNewTo> custAllInvociesList = new ArrayList<InvoiceDetailsNewTo>();
+		List<InvoiceDetailsNewTo> custOtherInvociesList = new ArrayList<InvoiceDetailsNewTo>();
+		List<InvoiceDetailsNewTo> arInvociesList = new ArrayList<InvoiceDetailsNewTo>();
 		List<Integer> invoiceDocEntriesList = new ArrayList<Integer>();
 
 		while (rs.next()) {
@@ -1240,9 +1254,11 @@ public class CustomersServiceImpl implements CustomersService {
 
 			if (invoiceType.equalsIgnoreCase("IN") && invoiceNo != 0) {
 				invoiceDocEntriesList.add(invoiceNo);
+				arInvociesList.add(invoicesDetails);
+			} else {
+				custOtherInvociesList.add(invoicesDetails);
 			}
 
-			custAllInvociesList.add(invoicesDetails);
 		}
 
 		// System.out.println(invoiceDocEntriesList.toString());
@@ -1257,21 +1273,29 @@ public class CustomersServiceImpl implements CustomersService {
 
 			int recordCount = 0;
 			int loopLimit = 0;
+			int prevBatchIndex = 0;
 
+			// System.out.println("invoiceDocEntriesListSize = " +
+			// invoiceDocEntriesListSize);
 			while (recordCount < invoiceDocEntriesListSize) {
+
+				prevBatchIndex = recordCount;
 
 				loopLimit = loopLimit + ((invoiceDocEntriesListSize - recordCount > 2095) ? 2095
 						: (invoiceDocEntriesListSize - recordCount));
 				List<Integer> invoiceDocEntriesBatchList = new ArrayList<Integer>();
-//				System.out.println("recordCount = " + recordCount + ", loopLimit = " + loopLimit);
+				// System.out.println("recordCount = " + recordCount + ",
+				// loopLimit = " + loopLimit);
 				for (; recordCount < loopLimit; recordCount++) {
 					invoiceDocEntriesBatchList.add(invoiceDocEntriesList.get(recordCount));
 				}
-//				System.out.println("invoiceDocEntriesBatchListSize = " + invoiceDocEntriesBatchList.size());
+				// System.out.println("invoiceDocEntriesBatchListSize = " +
+				// invoiceDocEntriesBatchList.size());
 
-//				invoiceItemsList = getInvoiceItemsListForDocEntries(invoiceDocEntriesList);
+				// invoiceItemsList =
+				// getInvoiceItemsListForDocEntries(invoiceDocEntriesList);
 				invoiceItemsList = getInvoiceItemsListForDocEntries(invoiceDocEntriesBatchList);
-				
+
 				// Separate All Invoice Items As Per Invoice No (DocEntry)
 				invoiceItemsMap = new HashMap<Integer, List<InvoiceItems>>();
 
@@ -1292,8 +1316,9 @@ public class CustomersServiceImpl implements CustomersService {
 				// Get Acknowledgement Details Of All Invoices Ids and set
 				// signature
 				// of each against their invoice id
-//				invoicesAcknowledgementDetailsList = invoiceAcknowledgementDetailsRepository
-//						.selectByInvoiceNos(invoiceDocEntriesList);
+				// invoicesAcknowledgementDetailsList =
+				// invoiceAcknowledgementDetailsRepository
+				// .selectByInvoiceNos(invoiceDocEntriesList);
 				invoicesAcknowledgementDetailsList = invoiceAcknowledgementDetailsRepository
 						.selectByInvoiceNos(invoiceDocEntriesBatchList);
 
@@ -1307,8 +1332,13 @@ public class CustomersServiceImpl implements CustomersService {
 
 				String currentDate = df.format(new Date());
 				NumberToWord numberToWord = new NumberToWord();
-				for (InvoiceDetailsNewTo custInvoice : custAllInvociesList) {
+				// System.out.println("prevBatchIndex = " + prevBatchIndex + ",
+				// recordCount = " + recordCount);
+				// for (InvoiceDetailsNewTo custInvoice : custAllInvociesList) {
+				for (int i = prevBatchIndex; i < recordCount; i++) {
 
+					// int invoiceDocEntry = custInvoice.getInvoiceDocEntry();
+					InvoiceDetailsNewTo custInvoice = arInvociesList.get(i);
 					int invoiceDocEntry = custInvoice.getInvoiceDocEntry();
 					long paymentDueDays = 0L;
 					long dueDateInDays = 0L;
@@ -1356,6 +1386,30 @@ public class CustomersServiceImpl implements CustomersService {
 					invoiceDetailsList.add(invoicesDetails);
 				}
 			}
+		}
+
+		for (InvoiceDetailsNewTo custInvoice : custOtherInvociesList) {
+
+			int invoiceDocEntry = custInvoice.getInvoiceDocEntry();
+			long paymentDueDays = 0L;
+			long dueDateInDays = 0L;
+			String invoiceAmountInWords = null;
+			String taxAmountInWords = null;
+			List<InvoiceItems> invoiceItemsListFromMap = null;
+			String invoiceDate = custInvoice.getPostingDate();
+			String invoiceDueDate = custInvoice.getDueDate();
+
+			Float balanceAmt = Float.parseFloat(custInvoice.getBalance());
+
+			String custCode = custInvoice.getCustCode();
+			InvoicesDetails invoicesDetails = new InvoicesDetails(invoiceDocEntry,
+					Integer.toString(custInvoice.getInvoiceNo()), invoiceDate, invoiceDueDate, paymentDueDays,
+					custInvoice.getInvoiceStatus(), balanceAmt, custCode, "", custInvoice.getOrigin(),
+					invoiceItemsListFromMap, 0F, balanceAmt, "", dueDateInDays, invoiceAmountInWords, taxAmountInWords,
+					custInvoice.getTransId(), custInvoice.getOriginNo(), custInvoice.getDebit(),
+					custInvoice.getCredit(), custInvoice.getCumulativeBalance(), custInvoice.getRef2(), null);
+
+			invoiceDetailsList.add(invoicesDetails);
 		}
 
 		return invoiceDetailsList;
@@ -1826,8 +1880,15 @@ public class CustomersServiceImpl implements CustomersService {
 	@Override
 	public BaseWrapper doGetCustomersSummaryReport() throws ClassNotFoundException, SQLException {
 
-		List<CutomerSummaryReportDetails> customerSummaryReport = getCustomerSummaryReportDetails();
+		List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsList = new ArrayList<CutomerSummaryReportDetails>();
 
-		return new BaseWrapper(customerSummaryReport);
+		if (commonUtility.hasRole(RoleType.ROLE_SALES.toString())) {
+			String slpCode = oslpRepository.selectSlpCodeByMobil(commonUtility.getLoggedUser().getUsername());
+			cutomerSummaryReportDetailsList = getCustomerSummaryReportDetails(slpCode);
+		} else if (commonUtility.hasRole(RoleType.ROLE_ADMIN.toString())) {
+			cutomerSummaryReportDetailsList = getCustomerSummaryReportDetails(null);
+		}
+
+		return new BaseWrapper(cutomerSummaryReportDetailsList);
 	}
 }
