@@ -38,13 +38,21 @@
 					class="fa fa-home"></i> <span>Acknowledgments</span></a></li>
 			<!-- ./Acknowledgements -->
 
-			<!-- Recordings -->
-			<li class="active"><a href="sales-executive"><i class="fa fa-home"></i> <span>Recordings</span></a></li>
-			<!-- ./Recordings -->
-
 			<!-- Visits History -->
-			<li class="active"><a href="visit-history"><i class="fa fa-home"></i> <span>Visit History</span></a></li>
+			<li class="active"><a href="visit-history"><i
+					class="fa fa-home"></i> <span>Visit History</span></a></li>
 			<!-- ./Visits History -->
+
+
+			<!-- Customer Summary Reports -->
+			<li class="active"><a href="summary-report"><i
+					class="fa fa-home"></i> <span>Customer Summary Report</span></a></li>
+			<!-- ./Customer Summary Reports -->
+
+			<!-- Recordings -->
+			<li class="active"><a href="sales-executive"><i
+					class="fa fa-home"></i> <span>Recordings</span></a></li>
+			<!-- ./Recordings -->
 
 			<!-- Invoices Management -->
 			<!-- <li class="treeview"><a href="#"><i class="fa fa-copy"></i>

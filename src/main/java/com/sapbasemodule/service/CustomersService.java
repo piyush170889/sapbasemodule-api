@@ -9,6 +9,7 @@ import com.sapbasemodule.domain.CustomerPin;
 import com.sapbasemodule.domain.InvoicesAcknowledgementDetails;
 import com.sapbasemodule.exception.ServicesException;
 import com.sapbasemodule.model.BaseWrapper;
+import com.sapbasemodule.model.CutomerSummaryReportDetails;
 import com.sapbasemodule.model.InvoicesDetails;
 
 public interface CustomersService {
@@ -53,4 +54,10 @@ public interface CustomersService {
 			throws ServicesException, ClassNotFoundException, SQLException, ParseException;
 
 	BaseWrapper doGetCustomersSummaryReport() throws ClassNotFoundException, SQLException;
+
+	List<CutomerSummaryReportDetails> getCustomerSummaryReportDetails(String slpCode)
+			throws ClassNotFoundException, SQLException;
+
+	List<CutomerSummaryReportDetails> getCustomerSummaryReportDetailsByBrands(List<String> brandsList)
+			throws ClassNotFoundException, SQLException;
 }

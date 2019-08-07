@@ -518,7 +518,7 @@ public class CustomersServiceImpl implements CustomersService {
 				+ "')"
 				+ " sub group by [BP Code],[BP Name],[t],[Posting date], [Due date],[Doc Date],[Ref1],Trans order by [Posting date]";
 
-//		System.out.println("Final SQL = " + sqlQuery);
+		// System.out.println("Final SQL = " + sqlQuery);
 
 		PreparedStatement ps = conn.prepareStatement(sqlQuery);
 		ResultSet rs = ps.executeQuery();
@@ -1001,7 +1001,9 @@ public class CustomersServiceImpl implements CustomersService {
 		return new BaseWrapper(response);
 	}
 
-	private List<CutomerSummaryReportDetails> getCustomerSummaryReportDetails(String slpCode)
+	
+	@Override
+	public List<CutomerSummaryReportDetails> getCustomerSummaryReportDetails(String slpCode)
 			throws ClassNotFoundException, SQLException {
 
 		String fromDate = "20190401";
@@ -1030,7 +1032,58 @@ public class CustomersServiceImpl implements CustomersService {
 					+ slpCode + " Group By T0.CardCode,t0.docdate,T0.CardName,T1.Dscription,T4.SlpName) S"
 					+ " PIVOT  (Sum(S.Qty) FOR [month] IN ([4],[5],[6],[7],[8],[9],[10],[11],[12],[1],[2],[3])) P";
 
-//		System.out.println("custSummaryReportQuery = " + custSummaryReportQuery);
+		System.out.println("custSummaryReportQuery = " + custSummaryReportQuery);
+
+		Connection con = commonUtility.getDbConnection();
+		PreparedStatement ps = con.prepareStatement(custSummaryReportQuery);
+
+		ResultSet rs = ps.executeQuery();
+
+		List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsList = new ArrayList<CutomerSummaryReportDetails>();
+
+		while (rs.next()) {
+			CutomerSummaryReportDetails cutomerSummaryReportDetails = new CutomerSummaryReportDetails(
+					rs.getString("CardCode"), rs.getString("Name"), rs.getString("Sales Emp Name"),
+					rs.getString("Brand"), rs.getString("Apr"), rs.getString("May"), rs.getString("Jun"),
+					rs.getString("Jul"), rs.getString("Aug"), rs.getString("Sep"), rs.getString("Oct"),
+					rs.getString("Nov"), rs.getString("Dec"), rs.getString("Jan"), rs.getString("Feb"),
+					rs.getString("Mar"));
+			cutomerSummaryReportDetailsList.add(cutomerSummaryReportDetails);
+		}
+
+		return cutomerSummaryReportDetailsList;
+	}
+
+	public List<CutomerSummaryReportDetails> getCustomerSummaryReportDetailsByBrands(List<String> brandsList)
+			throws ClassNotFoundException, SQLException {
+
+		String brandsNameCommaSeparated = "";
+
+		for (String brand : brandsList) {
+			if (brandsNameCommaSeparated.isEmpty())
+				brandsNameCommaSeparated = brandsNameCommaSeparated + "'" + brand + "'";
+			else
+				brandsNameCommaSeparated = brandsNameCommaSeparated + ", '" + brand + "'";
+		}
+
+		String fromDate = "20190401";
+
+		DateFormat dfYYYYMMDD = new SimpleDateFormat("yyyyMMdd");
+		dfYYYYMMDD.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+
+		String tillDate = dfYYYYMMDD.format(new Date());
+
+		String custSummaryReportQuery = null;
+
+		custSummaryReportQuery = "SELECT  CardCode,Name,[Sales Emp Name],Brand ,[4] as [Apr],[5] as [May],[6] as [Jun],[7] as [Jul],[8] as [Aug],[9] as [Sep],[10] as [Oct],[11] as [Nov],[12] as [Dec],[1] as [Jan],[2] as [Feb],[3] as [Mar] FROM("
+				+ " SELECT  T0.CardCode As 'CardCode',T0.CardName As'Name',(Sum(T1.Quantity))/20 as 'Qty', month(t0.docdate) as 'Month',T1.Dscription As'Brand',T4.SlpName As'Sales Emp Name' FROM OINV T0 INNER JOIN INV1 T1 ON T0.Docentry=T1.DocEntry"
+				+ " INNER JOIN OSLP T4 ON T4.SlpCode =T0.SlpCode WHERE T0.[DocDate]  >='" + fromDate
+				+ "' AND  T0.[DocDate] <='" + tillDate + "'" 
+				+ " And T1.TargetType <>14 AND T1.Dscription IN (" + brandsNameCommaSeparated + ")"
+				+ " Group By T0.CardCode,t0.docdate,T0.CardName,T1.Dscription,T4.SlpName) S"
+				+ " PIVOT  (Sum(S.Qty) FOR [month] IN ([4],[5],[6],[7],[8],[9],[10],[11],[12],[1],[2],[3])) P";
+
+		System.out.println("custSummaryReportQuery = " + custSummaryReportQuery);
 
 		Connection con = commonUtility.getDbConnection();
 		PreparedStatement ps = con.prepareStatement(custSummaryReportQuery);
