@@ -1001,7 +1001,6 @@ public class CustomersServiceImpl implements CustomersService {
 		return new BaseWrapper(response);
 	}
 
-	
 	@Override
 	public List<CutomerSummaryReportDetails> getCustomerSummaryReportDetails(String slpCode)
 			throws ClassNotFoundException, SQLException {
@@ -1039,15 +1038,45 @@ public class CustomersServiceImpl implements CustomersService {
 
 		ResultSet rs = ps.executeQuery();
 
+		List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsList = extractSummaryReportOfResultset(rs);
+
+		return cutomerSummaryReportDetailsList;
+	}
+
+	private List<CutomerSummaryReportDetails> extractSummaryReportOfResultset(ResultSet rs)
+			throws NumberFormatException, SQLException {
+
 		List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsList = new ArrayList<CutomerSummaryReportDetails>();
 
 		while (rs.next()) {
+			String apr = rs.getString("Apr");
+			String may = rs.getString("May");
+			String jun = rs.getString("Jun");
+			String july = rs.getString("Jul");
+			String aug = rs.getString("Aug");
+			String sep = rs.getString("Sep");
+			String oct = rs.getString("Oct");
+			String nov = rs.getString("Nov");
+			String dec = rs.getString("Dec");
+			String jan = rs.getString("Jan");
+			String feb = rs.getString("Feb");
+			String mar = rs.getString("Mar");
+
 			CutomerSummaryReportDetails cutomerSummaryReportDetails = new CutomerSummaryReportDetails(
 					rs.getString("CardCode"), rs.getString("Name"), rs.getString("Sales Emp Name"),
-					rs.getString("Brand"), rs.getString("Apr"), rs.getString("May"), rs.getString("Jun"),
-					rs.getString("Jul"), rs.getString("Aug"), rs.getString("Sep"), rs.getString("Oct"),
-					rs.getString("Nov"), rs.getString("Dec"), rs.getString("Jan"), rs.getString("Feb"),
-					rs.getString("Mar"));
+					rs.getString("Brand"),
+					null == apr || apr.isEmpty() ? "0.00" : commonUtility.roundString(Double.parseDouble(apr), 2),
+					null == may || may.isEmpty() ? "0.00" : commonUtility.roundString(Double.parseDouble(may), 2),
+					null == jun || jun.isEmpty() ? "0.00" : commonUtility.roundString(Double.parseDouble(jun), 2),
+					null == july || july.isEmpty() ? "0.00" : commonUtility.roundString(Double.parseDouble(july), 2),
+					null == aug || aug.isEmpty() ? "0.00" : commonUtility.roundString(Double.parseDouble(aug), 2),
+					null == sep || sep.isEmpty() ? "0.00" : commonUtility.roundString(Double.parseDouble(sep), 2),
+					null == oct || oct.isEmpty() ? "0.00" : commonUtility.roundString(Double.parseDouble(oct), 2),
+					null == nov || nov.isEmpty() ? "0.00" : commonUtility.roundString(Double.parseDouble(nov), 2),
+					null == dec || dec.isEmpty() ? "0.00" : commonUtility.roundString(Double.parseDouble(dec), 2),
+					null == jan || jan.isEmpty() ? "0.00" : commonUtility.roundString(Double.parseDouble(jan), 2),
+					null == feb || feb.isEmpty() ? "0.00" : commonUtility.roundString(Double.parseDouble(feb), 2),
+					null == mar || mar.isEmpty() ? "0.00" : commonUtility.roundString(Double.parseDouble(mar), 2));
 			cutomerSummaryReportDetailsList.add(cutomerSummaryReportDetails);
 		}
 
@@ -1078,8 +1107,8 @@ public class CustomersServiceImpl implements CustomersService {
 		custSummaryReportQuery = "SELECT  CardCode,Name,[Sales Emp Name],Brand ,[4] as [Apr],[5] as [May],[6] as [Jun],[7] as [Jul],[8] as [Aug],[9] as [Sep],[10] as [Oct],[11] as [Nov],[12] as [Dec],[1] as [Jan],[2] as [Feb],[3] as [Mar] FROM("
 				+ " SELECT  T0.CardCode As 'CardCode',T0.CardName As'Name',(Sum(T1.Quantity))/20 as 'Qty', month(t0.docdate) as 'Month',T1.Dscription As'Brand',T4.SlpName As'Sales Emp Name' FROM OINV T0 INNER JOIN INV1 T1 ON T0.Docentry=T1.DocEntry"
 				+ " INNER JOIN OSLP T4 ON T4.SlpCode =T0.SlpCode WHERE T0.[DocDate]  >='" + fromDate
-				+ "' AND  T0.[DocDate] <='" + tillDate + "'" 
-				+ " And T1.TargetType <>14 AND T1.Dscription IN (" + brandsNameCommaSeparated + ")"
+				+ "' AND  T0.[DocDate] <='" + tillDate + "'" + " And T1.TargetType <>14 AND T1.Dscription IN ("
+				+ brandsNameCommaSeparated + ")"
 				+ " Group By T0.CardCode,t0.docdate,T0.CardName,T1.Dscription,T4.SlpName) S"
 				+ " PIVOT  (Sum(S.Qty) FOR [month] IN ([4],[5],[6],[7],[8],[9],[10],[11],[12],[1],[2],[3])) P";
 
@@ -1090,17 +1119,19 @@ public class CustomersServiceImpl implements CustomersService {
 
 		ResultSet rs = ps.executeQuery();
 
-		List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsList = new ArrayList<CutomerSummaryReportDetails>();
-
-		while (rs.next()) {
-			CutomerSummaryReportDetails cutomerSummaryReportDetails = new CutomerSummaryReportDetails(
-					rs.getString("CardCode"), rs.getString("Name"), rs.getString("Sales Emp Name"),
-					rs.getString("Brand"), rs.getString("Apr"), rs.getString("May"), rs.getString("Jun"),
-					rs.getString("Jul"), rs.getString("Aug"), rs.getString("Sep"), rs.getString("Oct"),
-					rs.getString("Nov"), rs.getString("Dec"), rs.getString("Jan"), rs.getString("Feb"),
-					rs.getString("Mar"));
-			cutomerSummaryReportDetailsList.add(cutomerSummaryReportDetails);
-		}
+//		List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsList = new ArrayList<CutomerSummaryReportDetails>();
+//
+//		while (rs.next()) {
+//			CutomerSummaryReportDetails cutomerSummaryReportDetails = new CutomerSummaryReportDetails(
+//					rs.getString("CardCode"), rs.getString("Name"), rs.getString("Sales Emp Name"),
+//					rs.getString("Brand"), rs.getString("Apr"), rs.getString("May"), rs.getString("Jun"),
+//					rs.getString("Jul"), rs.getString("Aug"), rs.getString("Sep"), rs.getString("Oct"),
+//					rs.getString("Nov"), rs.getString("Dec"), rs.getString("Jan"), rs.getString("Feb"),
+//					rs.getString("Mar"));
+//			cutomerSummaryReportDetailsList.add(cutomerSummaryReportDetails);
+//		}
+		
+		List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsList = extractSummaryReportOfResultset(rs);
 
 		return cutomerSummaryReportDetailsList;
 	}

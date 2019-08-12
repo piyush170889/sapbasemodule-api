@@ -85,7 +85,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
 												style="margin: 0 2%;" /> <label>Ultratech PPC</label>
 										</div>
 										<div class="col-md-3">
-											<button type="submit" class="btn btn-info pull-left">Filter Report</button>
+											<button type="submit" class="btn btn-info pull-left">Filter
+												Report</button>
 										</div>
 									</div>
 								</form>
@@ -93,7 +94,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
 								<form action="summary-report" method="get">
 									<div class="row">
 										<div class="col-md-3 col-md-offset-5">
-											<button type="submit" class="btn btn-info pull-left">Clear Filters</button>
+											<button type="submit" class="btn btn-info pull-left">Clear
+												Filters</button>
 										</div>
 									</div>
 								</form>
@@ -145,6 +147,23 @@ scratch. This page gets rid of all links and provides the needed markup only.
 										</c:forEach>
 										<!-- ./Table Details -->
 									</tbody>
+									<tfoot>
+										<tr>
+											<th colspan="3" style="text-align: right">Grand Total:</th>
+											<th></th>
+											<th></th>
+											<th></th>
+											<th></th>
+											<th></th>
+											<th></th>
+											<th></th>
+											<th></th>
+											<th></th>
+											<th></th>
+											<th></th>
+											<th></th>
+										</tr>
+									</tfoot>
 								</table>
 
 							</div>
@@ -184,10 +203,142 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
 	<script>
 		$(function() {
-			$('#example1').DataTable({
-				"pageLength" : 100,
-				"order" : []
-			});
+			$('#example1').DataTable(
+					{
+						"pageLength" : -1,
+						"order" : [],
+						"lengthMenu" : [ [ 10, 25, 50, 100, -1 ],
+								[ 10, 25, 50, 100, "All" ] ],
+
+						"footerCallback" : function(row, data, start, end,
+								display) {
+							var api = this.api(), data;
+
+							// Remove the formatting to get integer data for summation
+							var intVal = function(i) {
+								return typeof i === 'string' ? i.replace(
+										/[\$,]/g, '') * 1
+										: typeof i === 'number' ? i : 0;
+							};
+
+							// Apr Total over all pages
+							aprTotal = api.column(3, {filter:'applied'}).data().reduce(
+									function(a, b) {
+										return intVal(a) + intVal(b);
+									}, 0);
+
+							// Update footer For Apr Total
+							$(api.column(3).footer()).html(aprTotal);
+
+							// May Total over all pages
+							mayTotal = api.column(4, {filter:'applied'}).data().reduce(
+									function(a, b) {
+										return intVal(a) + intVal(b);
+									}, 0);
+
+							// Update footer For Apr Total
+							$(api.column(4).footer()).html(mayTotal);
+
+							// Jun Total over all pages
+							junTotal = api.column(5, {filter:'applied'}).data().reduce(
+									function(a, b) {
+										return intVal(a) + intVal(b);
+									}, 0);
+
+							// Update footer For Apr Total
+							$(api.column(5).footer()).html(junTotal);
+
+							// Jul Total over all pages
+							julTotal = api.column(6, {filter:'applied'}).data().reduce(
+									function(a, b) {
+										return intVal(a) + intVal(b);
+									}, 0);
+
+							// Update footer For Apr Total
+							$(api.column(6).footer()).html(julTotal);
+
+							// Aug Total over all pages
+							augTotal = api.column(7, {filter:'applied'}).data().reduce(
+									function(a, b) {
+										return intVal(a) + intVal(b);
+									}, 0);
+
+							// Update footer For Aug Total
+							$(api.column(7).footer()).html(augTotal);
+
+							// Sep Total over all pages
+							sepTotal = api.column(8, {filter:'applied'}).data().reduce(
+									function(a, b) {
+										return intVal(a) + intVal(b);
+									}, 0);
+
+							// Update footer For Sep Total
+							$(api.column(8).footer()).html(sepTotal);
+
+							// Oct Total over all pages
+							octTotal = api.column(9, {filter:'applied'}).data().reduce(
+									function(a, b) {
+										return intVal(a) + intVal(b);
+									}, 0);
+
+							// Update footer For Oct Total
+							$(api.column(9).footer()).html(octTotal);
+
+							// nov Total over all pages
+							novTotal = api.column(10, {filter:'applied'}).data().reduce(
+									function(a, b) {
+										return intVal(a) + intVal(b);
+									}, 0);
+
+							// Update footer For Nov Total
+							$(api.column(10).footer()).html(novTotal);
+
+							// Dec Total over all pages
+							decTotal = api.column(11, {filter:'applied'}).data().reduce(
+									function(a, b) {
+										return intVal(a) + intVal(b);
+									}, 0);
+
+							// Update footer For Dec Total
+							$(api.column(11).footer()).html(decTotal);
+
+							// Jan Total over all pages
+							janTotal = api.column(12, {filter:'applied'}).data().reduce(
+									function(a, b) {
+										return intVal(a) + intVal(b);
+									}, 0);
+
+							// Update footer For Jan Total
+							$(api.column(12).footer()).html(janTotal);
+
+							// Feb Total over all pages
+							febTotal = api.column(13, {filter:'applied'}).data().reduce(
+									function(a, b) {
+										return intVal(a) + intVal(b);
+									}, 0);
+
+							// Update footer For Feb Total
+							$(api.column(13).footer()).html(febTotal);
+
+							// Mar Total over all pages
+							marTotal = api.column(14, {filter:'applied'}).data().reduce(
+									function(a, b) {
+										return intVal(a) + intVal(b);
+									}, 0);
+
+							// Update footer For Mar Total
+							$(api.column(14).footer()).html(marTotal);
+
+							// Total over this page
+							/*    pageTotal = api
+							       .column( 4, { page: 'current'} )
+							       .data()
+							       .reduce( function (a, b) {
+							           return intVal(a) + intVal(b);
+							       }, 0 ); */
+						}
+
+					});
 		});
 	</script>
 
