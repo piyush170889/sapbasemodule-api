@@ -651,7 +651,7 @@ public class CommonUtility {
 
 		Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 		Connection conn = DriverManager.getConnection(
-				"jdbc:sqlserver://" + Constants.DB_SERVER_IP + ":1433;databaseName=" + Constants.DB_NAME,
+				"jdbc:sqlserver://" + Constants.DB_SERVER_IP + ":" + Constants.DB_SERVER_PORT_NO + ";databaseName=" + Constants.DB_NAME,
 				Constants.DB_USERNM, Constants.DB_PASS);
 
 		return conn;

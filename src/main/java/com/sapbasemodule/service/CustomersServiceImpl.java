@@ -571,8 +571,8 @@ public class CustomersServiceImpl implements CustomersService {
 				+ "and T14.AdresType='S' )As'Party City' , (select Distinct  T14.[GSTRegnNo] from CRD1 T14  where T14.CardCode=T0.cardcode "
 				+ "and T14.[GSTRegnNo]<>'' and T3.ShipToDef=T14.Address and T14.AdresType='S' ) as 'Party GSTIN No',  (Select Distinct Replace(T7.ChapterID,'.','')  "
 				+ "from OCHP T7 INNER JOIN OITM T5 On T5.ChapterID=T7.AbsEntry And T5.ItemCode=T1.ItemCode )as'Chap_Id', (select distinct T16.eCode from OCST T16 "
-				+ "inner join CRD1 T17 on T16.Code=T17.State where T17.CardCode=T0.CardCode and T17.AdresType='S' and T3.ShipToDef=T17.Address) as 'StateCode', "
-				+ "(select distinct T16.Name from OCST T16 inner join CRD1 T17 on T16.Code=T17.State where T17.CardCode=T0.CardCode and T17.AdresType='S' and T3.ShipToDef=T17.Address) as 'StateName', "
+				+ "inner join CRD1 T17 on T16.Code=T17.State And T16.Country=T17.Country where T17.CardCode=T0.CardCode and T17.AdresType='S' and T3.ShipToDef=T17.Address) as 'StateCode', "
+				+ "(select distinct T16.Name from OCST T16 inner join CRD1 T17 on T16.Code=T17.State And T16.Country=T17.Country where T17.CardCode=T0.CardCode and T17.AdresType='S' and T3.ShipToDef=T17.Address) as 'StateName', "
 				+ "(Select  Top 1 T22.TaxRate  from INV4 T22 Where T22.staType='-100' And T22.DocEntry=T1.DocEntry And T22.LineNum=T1.LineNum )As'CGST Rate', "
 				+ "(Select  Top 1 T22.TaxRate  from INV4 T22 Where T22.staType='-110' And T22.DocEntry=T1.DocEntry And T22.LineNum=T1.LineNum )As'SGST Rate', "
 				+ "(Select  Top 1 T22.TaxRate  from INV4 T22 Where T22.staType='-120' And T22.DocEntry=T1.DocEntry And T22.LineNum=T1.LineNum )As'IGST Rate', "
@@ -1119,18 +1119,24 @@ public class CustomersServiceImpl implements CustomersService {
 
 		ResultSet rs = ps.executeQuery();
 
-//		List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsList = new ArrayList<CutomerSummaryReportDetails>();
-//
-//		while (rs.next()) {
-//			CutomerSummaryReportDetails cutomerSummaryReportDetails = new CutomerSummaryReportDetails(
-//					rs.getString("CardCode"), rs.getString("Name"), rs.getString("Sales Emp Name"),
-//					rs.getString("Brand"), rs.getString("Apr"), rs.getString("May"), rs.getString("Jun"),
-//					rs.getString("Jul"), rs.getString("Aug"), rs.getString("Sep"), rs.getString("Oct"),
-//					rs.getString("Nov"), rs.getString("Dec"), rs.getString("Jan"), rs.getString("Feb"),
-//					rs.getString("Mar"));
-//			cutomerSummaryReportDetailsList.add(cutomerSummaryReportDetails);
-//		}
-		
+		// List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsList =
+		// new ArrayList<CutomerSummaryReportDetails>();
+		//
+		// while (rs.next()) {
+		// CutomerSummaryReportDetails cutomerSummaryReportDetails = new
+		// CutomerSummaryReportDetails(
+		// rs.getString("CardCode"), rs.getString("Name"), rs.getString("Sales
+		// Emp Name"),
+		// rs.getString("Brand"), rs.getString("Apr"), rs.getString("May"),
+		// rs.getString("Jun"),
+		// rs.getString("Jul"), rs.getString("Aug"), rs.getString("Sep"),
+		// rs.getString("Oct"),
+		// rs.getString("Nov"), rs.getString("Dec"), rs.getString("Jan"),
+		// rs.getString("Feb"),
+		// rs.getString("Mar"));
+		// cutomerSummaryReportDetailsList.add(cutomerSummaryReportDetails);
+		// }
+
 		List<CutomerSummaryReportDetails> cutomerSummaryReportDetailsList = extractSummaryReportOfResultset(rs);
 
 		return cutomerSummaryReportDetailsList;
@@ -1287,6 +1293,13 @@ public class CustomersServiceImpl implements CustomersService {
 
 		String tillDateFormatted = dfYYYYMMDD.format(tillDate);
 
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+		cal.set(Calendar.MONTH, Calendar.APRIL);
+		cal.set(Calendar.DAY_OF_MONTH, 1);
+
+		String fromDateFormatted = dfYYYYMMDD.format(cal.getTime());
+
 		String custCodesCommaSeparated = "";
 		int custCodesListSize = custCodesList.size();
 
@@ -1308,13 +1321,12 @@ public class CustomersServiceImpl implements CustomersService {
 				+ "sum(T4.debit)-sum(T4.Credit) from OJDT T3 INNER JOIN JDT1 T4 on T3.TransId=T4.TransId " + "WHERE  "
 				+ "T4.ShortName=T0.ShortName and " + "T3.TransId<=T0.TransId " + ")) 'Cumulative Balance', "
 				+ "(T0.BALDUEDEB - T0.BALDUECRED) as 'Balance Due' "
-				+ "From JDT1 T0 INNER JOIN OCRD T1 ON T1.CardCode=T0.ShortName "
-				+ "LEFT JOIN OINV T5 ON T0.Ref1=T5.DocNum  " + "WHere T0.RefDate <='" + tillDateFormatted
-				+ "' And T1.CardCode IN (" + custCodesCommaSeparated + ")"
-				+ " And T1.CardType = 'C' order by [Posting Date],TransId";
+				+ "From JDT1 T0 INNER JOIN OCRD T1 ON T1.CardCode=T0.ShortName AND ISNUMERIC(T0.Ref1 + '.0e0')=1 "
+				+ "LEFT JOIN OINV T5 ON CAST(T0.Ref1 As float)=CAST(T5.DocNum As float) " + "Where T0.RefDate >='"
+				+ fromDateFormatted + "' And T0.RefDate <='" + tillDateFormatted + "' And T1.CardCode IN ("
+				+ custCodesCommaSeparated + ")" + " And T1.CardType = 'C' order by [Posting Date],TransId";
 
-		// System.out.println("Final All Invoices Query = " +
-		// custAllInvoicesQuery);
+		System.out.println("Final All Invoices Query = " + custAllInvoicesQuery);
 
 		Connection con = commonUtility.getDbConnection();
 		PreparedStatement ps = con.prepareStatement(custAllInvoicesQuery);
@@ -1326,18 +1338,23 @@ public class CustomersServiceImpl implements CustomersService {
 		List<Integer> invoiceDocEntriesList = new ArrayList<Integer>();
 
 		while (rs.next()) {
-			String invoiceType = rs.getString("Origin");
-			int invoiceNo = rs.getInt("Invoice No.");
 
-			InvoiceDetailsNewTo invoicesDetails = new InvoiceDetailsNewTo(invoiceNo, rs.getString("Invoice Status"),
-					rs.getString("TransId"), rs.getString("Posting Date"), rs.getString("DueDate"), invoiceType,
-					rs.getString("Origin No"), Double.toString(commonUtility.round(rs.getDouble("Debit"), 2)),
+			String invoiceType = rs.getString("Origin");
+			// int invoiceNo = rs.getInt("Invoice No.");
+			int invoiceDocEntry = rs.getInt("DocEntry");
+
+			InvoiceDetailsNewTo invoicesDetails = new InvoiceDetailsNewTo(rs.getInt("Invoice No."),
+					rs.getString("Invoice Status"), rs.getString("TransId"), rs.getString("Posting Date"),
+					rs.getString("DueDate"), invoiceType, rs.getString("Origin No"),
+					Double.toString(commonUtility.round(rs.getDouble("Debit"), 2)),
 					Double.toString(commonUtility.round(rs.getDouble("Credit"), 2)),
 					Double.toString(commonUtility.round(rs.getDouble("Cumulative Balance"), 2)),
 					rs.getString("Balance Due"), rs.getInt("DocEntry"), rs.getString("Ref2"), rs.getString("CardCode"));
 
-			if (invoiceType.equalsIgnoreCase("IN") && invoiceNo != 0) {
-				invoiceDocEntriesList.add(invoiceNo);
+			// if (invoiceType.equalsIgnoreCase("IN") && invoiceNo != 0) {
+			// invoiceDocEntriesList.add(invoiceNo);
+			if (invoiceType.equalsIgnoreCase("IN") && invoiceDocEntry != 0) {
+				invoiceDocEntriesList.add(invoiceDocEntry);
 				arInvociesList.add(invoicesDetails);
 			} else {
 				custOtherInvociesList.add(invoicesDetails);

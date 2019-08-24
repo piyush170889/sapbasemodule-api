@@ -48,15 +48,20 @@ public class UserDtl implements Serializable {
 	@Column(name = "LAST_NAME")
 	private String lastName;
 
-/*	@Column(name = "CREATED_TS", insertable = false, updatable = false)
-	private Timestamp createdTs;
-*/
+	@Column(name = "CR_DRIVE_URL")
+	private String crDriveUrl;
+
+	/*
+	 * @Column(name = "CREATED_TS", insertable = false, updatable = false)
+	 * private Timestamp createdTs;
+	 */
 	@Column(name = "CREATED_BY", insertable = true, updatable = false)
 	private String createdBy;
 
-/*	@Column(name = "MODIFIED_TS", insertable = false, updatable = false)
-	private Timestamp modifiedTs;
-*/
+	/*
+	 * @Column(name = "MODIFIED_TS", insertable = false, updatable = false)
+	 * private Timestamp modifiedTs;
+	 */
 	@Column(name = "MODIFIED_BY", insertable = true, updatable = true)
 	private String modifiedBy;
 
@@ -84,8 +89,9 @@ public class UserDtl implements Serializable {
 		this.lastName = lastName;
 		this.emailId = emailId;
 	}
-	
-	public UserDtl(String userDtlsId, String firstName, String lastName, String emailId, byte isActive, String createdBy, String modifiedBy) {
+
+	public UserDtl(String userDtlsId, String firstName, String lastName, String emailId, byte isActive,
+			String createdBy, String modifiedBy) {
 		this.userDtlsId = userDtlsId;
 		this.firstName = firstName;
 		this.lastName = lastName;
@@ -93,6 +99,14 @@ public class UserDtl implements Serializable {
 		this.isActive = isActive;
 		this.createdBy = createdBy;
 		this.modifiedBy = modifiedBy;
+	}
+
+	public String getCrDriveUrl() {
+		return crDriveUrl;
+	}
+
+	public void setCrDriveUrl(String crDriveUrl) {
+		this.crDriveUrl = crDriveUrl;
 	}
 
 	public String getUserDtlsId() {
@@ -159,13 +173,12 @@ public class UserDtl implements Serializable {
 		this.lastName = lastName;
 	}
 
-/*	public Timestamp getCreatedTs() {
-		return createdTs;
-	}
-
-	public void setCreatedTs(Timestamp createdTs) {
-		this.createdTs = createdTs;
-	}*/
+	/*
+	 * public Timestamp getCreatedTs() { return createdTs; }
+	 * 
+	 * public void setCreatedTs(Timestamp createdTs) { this.createdTs =
+	 * createdTs; }
+	 */
 
 	public String getCreatedBy() {
 		return createdBy;
@@ -174,15 +187,13 @@ public class UserDtl implements Serializable {
 	public void setCreatedBy(String createdBy) {
 		this.createdBy = createdBy;
 	}
-/*
-	public Timestamp getModifiedTs() {
-		return modifiedTs;
-	}
 
-	public void setModifiedTs(Timestamp modifiedTs) {
-		this.modifiedTs = modifiedTs;
-	}
-*/
+	/*
+	 * public Timestamp getModifiedTs() { return modifiedTs; }
+	 * 
+	 * public void setModifiedTs(Timestamp modifiedTs) { this.modifiedTs =
+	 * modifiedTs; }
+	 */
 	public String getModifiedBy() {
 		return modifiedBy;
 	}
@@ -211,11 +222,11 @@ public class UserDtl implements Serializable {
 		builder.append(", lastName=");
 		builder.append(lastName);
 		builder.append(", createdTs=");
-//		builder.append(createdTs);
+		// builder.append(createdTs);
 		builder.append(", createdBy=");
 		builder.append(createdBy);
 		builder.append(", modifiedTs=");
-//		builder.append(modifiedTs);
+		// builder.append(modifiedTs);
 		builder.append(", modifiedBy=");
 		builder.append(modifiedBy);
 		builder.append("]");

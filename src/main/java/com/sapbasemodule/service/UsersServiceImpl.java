@@ -14,7 +14,6 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -431,5 +430,11 @@ public class UsersServiceImpl implements UsersService {
 	public List<SiteDtls> doGetLocationsListToPopulateDD() {
 
 		return siteDtlsRepository.selectLocationsForPopulatingDD();
+	}
+
+	@Override
+	public int updateCrDriveUrl(String crDriveUrl, String userDtlsId) {
+		
+		return userDtlRepository.updateCrDriveUrlById(userDtlsId, crDriveUrl);
 	}
 }

@@ -59,6 +59,10 @@ public class PersistenceConfigProduction {
 		dataSource.setUrl("jdbc:sqlserver://116.75.129.27:1433;databaseName=Jagtap");
 		dataSource.setUsername("sa");
 		dataSource.setPassword("jbsadmin@123");
+		
+//		dataSource.setUrl("jdbc:sqlserver://mssql-dev.millenniumsemi.com:51433;databaseName=MLNM_Live");
+//		dataSource.setUsername("sa");
+//		dataSource.setPassword("tZ#0i8jN$5*2hp");
 
 		return dataSource;
 	}

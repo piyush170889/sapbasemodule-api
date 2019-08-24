@@ -3,18 +3,25 @@ package com.sapbasemodule.controllers;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.sapbasemodule.constants.Constants;
 import com.sapbasemodule.domain.UserDtl;
 import com.sapbasemodule.domain.UserLoginDtl;
+import com.sapbasemodule.exception.ServicesException;
 import com.sapbasemodule.persitence.UserDtlRepository;
 import com.sapbasemodule.persitence.UserLoginDtlRepository;
 import com.sapbasemodule.persitence.UserRoleDtlRepository;
+import com.sapbasemodule.service.UsersService;
 import com.sapbasemodule.utils.RoleType;
 
 @Controller
@@ -72,6 +79,33 @@ public class UserMgmtController {
 		}
 
 		return modelAndView;
+	}
+
+	@Autowired
+	private UsersService usersService;
+	
+	@PostMapping("sales-executive")
+	public ModelAndView updateSalesExecutiveCrDriveUrl(HttpServletRequest servletRequest, ModelAndView modelAndView)
+			throws ServicesException {
+
+		try {
+			String crDriveUrl = servletRequest.getParameter("crDriveUrl");
+			String userDtlsId = servletRequest.getParameter("userDtlsId");
+
+			if (null != crDriveUrl && !crDriveUrl.isEmpty() && null != userDtlsId && !userDtlsId.isEmpty()) {
+				usersService.updateCrDriveUrl(crDriveUrl, userDtlsId);
+				modelAndView = getSalesExecutiveListing(modelAndView);
+				modelAndView.addObject(Constants.SUCCESS_MSSG_LABEL, "Successfully Updated Drive Url Details");
+			} else
+				throw new ServicesException("630");
+		} catch (Exception e) {
+			e.printStackTrace();
+			modelAndView.addObject("errorMssg", "Unable to Update Drive Url Details");
+			modelAndView.setViewName("user-mgmt/SaleEmpListing");
+		}
+
+		return modelAndView;
+
 	}
 
 }

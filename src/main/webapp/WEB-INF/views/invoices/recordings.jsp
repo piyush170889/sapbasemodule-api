@@ -54,9 +54,13 @@
 					</div>
 				</div>
 			</div>
-			<!-- ./User Info --> <!-- Drive Folder Embedded --> <iframe
+			<!-- ./User Info --> <!-- Drive Folder Embedded --> 
+			<!-- <iframe
 				src="https://drive.google.com/embeddedfolderview?id=1D49BwAj6XgF_5vt_MhNGOTNTW1WvbjZf#list"
-				style="width: 100%; height: 600px; border: 0;"></iframe> <!-- ./ Drive Folder Embedded -->
+				style="width: 100%; height: 600px; border: 0;"></iframe> --> 
+			<iframe
+				src="${ userDtl.crDriveUrl }" style="width: 100%; height: 600px; border: 0;"></iframe>
+				<!-- ./ Drive Folder Embedded -->
 
 			</section>
 

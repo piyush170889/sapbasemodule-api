@@ -49,4 +49,6 @@ public interface UsersService {
 	List<Customers> doGetCustomersListToPopulateDD();
 
 	List<SiteDtls> doGetLocationsListToPopulateDD();
+
+	int updateCrDriveUrl(String crDriveUrl, String userDtlsId);
 }

@@ -26,7 +26,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
 <link rel="stylesheet" href="bootstrap/css/style.css">
 
 <!-- Custom JS -->
+<script>
+	function updateUserDtlsId(userDtlsId) {
+		console.log('userDtlsId = ' + userDtlsId);
 
+		$('#userDtlsId1').val(userDtlsId);
+		console.log('userDtlsId Set = ' + $('#userDtlsId1').val());
+	}
+</script>
 </head>
 
 <body class="hold-transition skin-blue sidebar-mini">
@@ -85,9 +92,20 @@ scratch. This page gets rid of all links and provides the needed markup only.
 												</td>
 												<td>${salesEmpDetails.contactNum }</td>
 												<td>${salesEmpDetails.userDtl.emailId }</td>
-												<td><a
-													href="recordings?seid=${salesEmpDetails.userDtl.userDtlsId}"
-													target="_blank">View Recordings</a></td>
+												<td><c:choose>
+														<c:when
+															test="${ salesEmpDetails.userDtl.crDriveUrl == null || salesEmpDetails.userDtl.crDriveUrl == '' }">
+															<a style="color:#5d5d5d;font-style: italic;" href="javascript:void(0);" data-toggle="modal"
+																data-target="#myModal"
+																onclick="updateUserDtlsId('${ salesEmpDetails.userDtl.userDtlsId }')">Add
+																Drive URL?</a>
+														</c:when>
+														<c:otherwise>
+															<a
+																href="recordings?seid=${salesEmpDetails.userDtl.userDtlsId}"
+																target="_blank">View Recordings</a>
+														</c:otherwise>
+													</c:choose></td>
 											</tr>
 										</c:forEach>
 										<!-- ./Table Details -->
@@ -114,6 +132,45 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
 	</div>
 	<!-- ./Wrapper -->
+
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog"
+		aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="max-width: 95%;">
+			<div class="modal-content" style="font-size: 14px;">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<!-- <h4 class="modal-title" id="myModalLabel">Modal title</h4> -->
+				</div>
+				<div class="modal-body">
+
+					<form action="sales-executive" method="post">
+						<div class="row">
+							<div class="col-md-2">
+								<label>Drive Url*</label>
+							</div>
+							<div class="col-md-10">
+								<input type="text" class="form-control" autocomplete="off" name="crDriveUrl"
+									required /> <input type="hidden" name="userDtlsId"
+									id="userDtlsId1" />
+							</div>
+						</div>
+
+						<div class="box-footer">
+							<div class="row">
+								<div class="col-md-6 col-md-offset-1">
+									<button type="submit" class="btn btn-info pull-right">Update</button>
+								</div>
+							</div>
+						</div>
+					</form>
+
+				</div>
+			</div>
+		</div>
+	</div>
 
 	<!-- REQUIRED JS SCRIPTS -->
 	<jsp:include page="../includes/requiredbodyjs.jsp" />

@@ -44,19 +44,28 @@ public class Constants {
 	public static final String UTC_TIMEZONE = "UTC";
 
 	// Production
-	public static final String DB_SERVER_IP = "116.75.129.27";
-	public static final String DB_NAME = "Jagtap";
-	public static final String DB_USERNM = "sa";
-	public static final String DB_PASS = "jbsadmin@123";
-
-	// Other
-	// public static final String DB_SERVER_IP = "localhost";
+	// public static final String DB_SERVER_IP = "116.75.129.27";
 	// public static final String DB_NAME = "Jagtap";
 	// public static final String DB_USERNM = "sa";
-	// public static final String DB_PASS = "replete@123";
+	// public static final String DB_PASS = "jbsadmin@123";
+	// public static final String DB_SERVER_PORT_NO = "1433";
+
+//	public static final String DB_SERVER_IP = "mssql-dev.millenniumsemi.com";
+//	public static final String DB_NAME = "MLNM_Live";
+//	public static final String DB_USERNM = "sa";
+//	public static final String DB_PASS = "tZ#0i8jN$5*2hp";
+//	public static final String DB_SERVER_PORT_NO = "51433";
+
+	// Other
+	public static final String DB_SERVER_IP = "localhost";
+	public static final String DB_NAME = "Jagtap";
+	public static final String DB_USERNM = "sa";
+	public static final String DB_PASS = "replete@123";
+	public static final String DB_SERVER_PORT_NO = "1433";
 
 	// public static final String DB_SERVER_IP = "localhost";
 	// public static final String DB_NAME = "Adit_Infra_Final";
 	// public static final String DB_USERNM = "sa";
 	// public static final String DB_PASS = "replete@123";
+	// public static final String DB_SERVER_PORT_NO = "1433";
 }
