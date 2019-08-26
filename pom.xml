@@ -114,8 +114,11 @@
 			<version>${springframework.version}</version> <type>jar</type> </dependency> -->
 
 
-		<!-- <dependency> <groupId>mysql</groupId> <artifactId>mysql-connector-java</artifactId> 
-			<version>${mysqlconnector.version}</version> </dependency> -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>${mysqlconnector.version}</version>
+		</dependency>
 		<!-- <dependency> <groupId>org.hibernate</groupId> <artifactId>hibernate-core</artifactId> 
 			<version>${hibernate.version}</version> </dependency> <dependency> <groupId>org.aspectj</groupId> 
 			<artifactId>aspectjrt</artifactId> <version>${aspectj.version}</version> 
