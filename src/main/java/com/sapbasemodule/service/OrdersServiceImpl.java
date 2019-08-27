@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
 
+import org.aspectj.bridge.MessageUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sapbasemodule.constants.Constants;
 import com.sapbasemodule.domain.AppOrderItem;
 import com.sapbasemodule.domain.AppOrders;
+import com.sapbasemodule.domain.OrderDeliveryDetails;
 import com.sapbasemodule.domain.OrderItems;
 import com.sapbasemodule.domain.Orders;
 import com.sapbasemodule.model.BaseWrapper;
@@ -29,9 +31,11 @@ import com.sapbasemodule.model.OrderDetailsWrapper;
 import com.sapbasemodule.model.OrderMgmtWrapper;
 import com.sapbasemodule.persitence.AppOrderItemRepository;
 import com.sapbasemodule.persitence.AppOrdersRepository;
+import com.sapbasemodule.persitence.OrderDeliveryDetailsRepository;
 import com.sapbasemodule.persitence.OrderItemsRepository;
 import com.sapbasemodule.persitence.OrdersRepository;
 import com.sapbasemodule.utils.CommonUtility;
+import com.sapbasemodule.utils.MessageUtility;
 
 @Service
 @Transactional(rollbackFor = Throwable.class)
@@ -80,7 +84,7 @@ public class OrdersServiceImpl implements OrdersService {
 				orderIdsList.add(orders.getDocNum());
 
 			System.out.println("orderIdsList = " + orderIdsList.toString());
-			
+
 			// Get All Order Items Associated with Orders
 			List<OrderItems> orderItemsList = orderItemsRepository.findByDocEntryIn(orderIdsList);
 
@@ -147,6 +151,8 @@ public class OrdersServiceImpl implements OrdersService {
 		OrderDetailsWrapper response = new OrderDetailsWrapper();
 		BeanUtils.copyProperties(ordersDetails, response);
 		response.setOrderItemsList(orderItemsList);
+
+		response.setDeliveryDetailsList(orderDeliveryDetailsRepository.findByAppOrdrId(ordersDetails.getDocNum()));
 
 		return new BaseWrapper(response);
 	}
@@ -319,5 +325,38 @@ public class OrdersServiceImpl implements OrdersService {
 		}
 
 		return new BaseWrapper(finalAppOrdersList);
+	}
+
+	@Autowired
+	private OrderDeliveryDetailsRepository orderDeliveryDetailsRepository;
+
+	@Autowired
+	private MessageUtility messageUtility;
+
+	@Override
+	public BaseWrapper doGetOrdersDeliveryDetails(int orderDlsId) {
+
+		List<OrderDeliveryDetails> orderDeliveryDetailsList = orderDeliveryDetailsRepository
+				.findByAppOrdrId(orderDlsId);
+
+		return new BaseWrapper(orderDeliveryDetailsList);
+	}
+
+	@Override
+	public BaseWrapper doSaveOrdersDeliveryDetails(int orderDtlsId, OrderDeliveryDetails request) {
+
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		df.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+
+		String createdTs = df.format(new Date());
+		request.setCreatedTs(createdTs);
+
+		request = orderDeliveryDetailsRepository.save(request);
+
+		messageUtility.sendOTP(
+				"Link to track: http://116.75.129.27:8089/sapbaseapi/v1/ext/map/" + request.getAppOrdrDlvryId(),
+				"919096409749");
+		
+		return new BaseWrapper(request.getAppOrdrDlvryId());
 	}
 }

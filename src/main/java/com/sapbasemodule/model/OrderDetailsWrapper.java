@@ -2,6 +2,7 @@ package com.sapbasemodule.model;
 
 import java.util.List;
 
+import com.sapbasemodule.domain.OrderDeliveryDetails;
 import com.sapbasemodule.domain.OrderItems;
 
 public class OrderDetailsWrapper {
@@ -28,6 +29,8 @@ public class OrderDetailsWrapper {
 
 	private List<OrderItems> orderItemsList;
 
+	private List<OrderDeliveryDetails> deliveryDetailsList;
+
 	public OrderDetailsWrapper() {
 	}
 
@@ -40,6 +43,14 @@ public class OrderDetailsWrapper {
 		this.cardName = cardName;
 		this.shipToCode = shipToCode;
 		this.orderItemsList = orderItemsList;
+	}
+
+	public List<OrderDeliveryDetails> getDeliveryDetailsList() {
+		return deliveryDetailsList;
+	}
+
+	public void setDeliveryDetailsList(List<OrderDeliveryDetails> deliveryDetailsList) {
+		this.deliveryDetailsList = deliveryDetailsList;
 	}
 
 	public float getOpenQuantity() {
