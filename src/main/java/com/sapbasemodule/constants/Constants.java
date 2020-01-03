@@ -44,7 +44,7 @@ public class Constants {
 	public static final String UTC_TIMEZONE = "UTC";
 
 	// Production
-	public static final String DB_SERVER_IP = "116.75.129.27";
+	public static final String DB_SERVER_IP = "116.74.206.28";
 	public static final String DB_NAME = "Jagtap";
 	public static final String DB_USERNM = "sa";
 	public static final String DB_PASS = "jbsadmin@123";

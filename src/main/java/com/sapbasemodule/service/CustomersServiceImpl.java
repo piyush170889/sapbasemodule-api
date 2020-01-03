@@ -581,7 +581,7 @@ public class CustomersServiceImpl implements CustomersService {
 				+ "isnull((Select  Sum(T22.TaxSum)  from INV4 T22 Where T22.staType='-120' And T22.DocEntry=T1.DocEntry And T22.LineNum=T1.LineNum ),0)As'IGST TAX', "
 				+ "isnull((SELECT distinct Top 1  T1.[ExpnsName] FROM INV3 T10  INNER JOIN OEXD T1 ON T10.[ExpnsCode] = T1.[ExpnsCode] WHERE T10.[DocEntry] =T0.DocEntry),'')'Frieght Name', "
 				+ "isnull((SELECT distinct Top 1 T10.[LineTotal] FROM INV3 T10  INNER JOIN OEXD T1 ON T10.[ExpnsCode] = T1.[ExpnsCode] WHERE T10.[DocEntry] =T0.DocEntry),0)'Frieght Amt', "
-				+ "(SELECT distinct  T1.SacCode  FROM INV3 T10  INNER JOIN OEXD T1 ON T10.[ExpnsCode] = T1.[ExpnsCode] WHERE T10.[DocEntry] =T0.DocEntry)'Sac_Code' "
+				+ "(SELECT distinct  Top 1 T1.SacCode  FROM INV3 T10  INNER JOIN OEXD T1 ON T10.[ExpnsCode] = T1.[ExpnsCode] WHERE T10.[DocEntry] =T0.DocEntry)'Sac_Code' "
 				+ "FROM OINV T0 INNER JOIN INV1  T1 on T0.DocEntry=T1.DocEntry INNER JOIN OCRD T3 ON T3.CardCode=T0.CardCode "
 				+ "Where T0.DocEntry IN (" + invoiceIdsInString + ")";
 
@@ -1294,6 +1294,10 @@ public class CustomersServiceImpl implements CustomersService {
 		String tillDateFormatted = dfYYYYMMDD.format(tillDate);
 
 		Calendar cal = Calendar.getInstance();
+
+		int currentMonth = cal.get(Calendar.MONTH);
+		if (currentMonth < 3)
+			cal.add(Calendar.YEAR, -1);
 		cal.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
 		cal.set(Calendar.MONTH, Calendar.APRIL);
 		cal.set(Calendar.DAY_OF_MONTH, 1);
