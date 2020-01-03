@@ -25,7 +25,7 @@
 		<aspectj.version>1.8.8</aspectj.version>
 		<aspectjtools.version>1.0.6</aspectjtools.version>
 		<validation.version>1.1.0.Final</validation.version>
-		<springsecurityoauth2.version>2.0.10.RELEASE</springsecurityoauth2.version>
+		<springsecurityoauth2.version>2.0.18.RELEASE</springsecurityoauth2.version>
 	</properties>
 
 	<dependencies>
