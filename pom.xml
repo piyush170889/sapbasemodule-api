@@ -17,7 +17,7 @@
 		<jsp.version>2.3.1</jsp.version>
 		<jstl.version>1.2</jstl.version>
 		<mavenwarplugin.version>2.4</mavenwarplugin.version>
-		<mysqlconnector.version>5.0.5</mysqlconnector.version>
+		<mysqlconnector.version>8.0.16</mysqlconnector.version>
 		<java.version>1.8</java.version>
 		<maven.compiler.plugin>3.1</maven.compiler.plugin>
 		<jackson.version>2.7.2</jackson.version>
