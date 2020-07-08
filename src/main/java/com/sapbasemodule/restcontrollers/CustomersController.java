@@ -41,7 +41,7 @@ public class CustomersController {
 	@GetMapping(value = "/{cust-code}/aging-report")
 	public Object getCustomersAgingReport(@PathVariable("cust-code") String custCode,
 			@RequestParam(value = "from-date", required = true) String fromDate)
-					throws ClassNotFoundException, SQLException, ParseException {
+			throws ClassNotFoundException, SQLException, ParseException {
 
 		System.out.println("Cust Code = " + custCode + ", fromDate = " + fromDate);
 		return customersService.doGetCustomerAgingReport(custCode, fromDate);
@@ -51,7 +51,7 @@ public class CustomersController {
 	public Object getCustomersInvoices(@PathVariable("cust-code") String custCode,
 			@RequestParam(value = "due-date", required = true) String dueDate,
 			@RequestParam(value = "no-of-days", required = true) int noOfDays)
-					throws ClassNotFoundException, ParseException, SQLException {
+			throws ClassNotFoundException, ParseException, SQLException {
 
 		System.out.println("Cust Code = " + custCode + ", noOfDays = " + noOfDays + ", dueDate = " + dueDate);
 		return customersService.doGetCustomerInvoices(custCode, noOfDays, dueDate);
@@ -85,7 +85,7 @@ public class CustomersController {
 	@GetMapping(value = "/{cust-code}/all-invoices")
 	public Object getCustomersLedgerReportNew(@PathVariable("cust-code") String custCode,
 			@RequestParam(value = "till-date") String tillDate)
-					throws ClassNotFoundException, SQLException, ParseException {
+			throws ClassNotFoundException, SQLException, ParseException {
 
 		System.out.println("Cust Code = " + custCode);
 		return customersService.doGetCustomersAllInvoices(custCode, tillDate);
@@ -95,16 +95,18 @@ public class CustomersController {
 	public Object getCustomersPendingInvoices(@PathVariable("cust-code") String custCode,
 			@RequestParam(value = "from-date", required = true) String fromDate,
 			@RequestParam(value = "to-date", required = true) String toDate)
-					throws ClassNotFoundException, SQLException, ParseException {
+			throws ClassNotFoundException, SQLException, ParseException {
 
 		System.out.println("custCode: " + custCode + ", fromDate: " + fromDate + ", toDate: " + toDate);
 		return customersService.doGetCustomersPendingInvoices(custCode, fromDate, toDate);
 	}
 
 	@GetMapping(value = "/sync")
-	public Object getCustomersDataForSync() throws ClassNotFoundException, SQLException, ParseException {
+	public Object getCustomersDataForSync(@RequestParam(value = "startDate", required = false) String startDate,
+			@RequestParam(value = "endDate", required = false) String endDate)
+			throws ClassNotFoundException, SQLException, ParseException {
 
-		return customersService.doGetCustomerDataForSync();
+		return customersService.doGetCustomerDataForSync(startDate, endDate);
 	}
 
 	@PostMapping(value = "/{invoice-no}/invoice-acknowledgement")

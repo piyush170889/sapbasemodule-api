@@ -888,7 +888,8 @@ public class CustomersServiceImpl implements CustomersService {
 	private OSLPRepository oslpRepository;
 
 	@Override
-	public BaseWrapper doGetCustomerDataForSync() throws ClassNotFoundException, SQLException, ParseException {
+	public BaseWrapper doGetCustomerDataForSync(String startDate, String endDate)
+			throws ClassNotFoundException, SQLException, ParseException {
 
 		List<Customers> customersList = null;
 		// Prepare Summary Report Details Map For All Customers
@@ -931,13 +932,23 @@ public class CustomersServiceImpl implements CustomersService {
 		for (Customers customers : customersList)
 			custIds.add(customers.getCardCode());
 
-		Date tillDate = new Date();
+		DateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+
+		Date tillDate = null;
+		if (endDate == null)
+			tillDate = new Date();
+		else
+			tillDate = df.parse(endDate);
+
+		Date fromDate = null;
+		if (startDate != null)
+			fromDate = df.parse(startDate);
 
 		List<InvoicesDetails> allCustomersInvoiceDetailsList = null;
 
 		// All Invoices Query
 		if (custIds.size() > 0)
-			allCustomersInvoiceDetailsList = getAllInvoicesForCustIds(custIds, tillDate);
+			allCustomersInvoiceDetailsList = getAllInvoicesForCustIds(custIds, fromDate, tillDate);
 		else
 			allCustomersInvoiceDetailsList = new ArrayList<InvoicesDetails>();
 
@@ -1285,7 +1296,7 @@ public class CustomersServiceImpl implements CustomersService {
 		return invoiceDetailsList;
 	}
 
-	private List<InvoicesDetails> getAllInvoicesForCustIds(List<String> custCodesList, Date tillDate)
+	private List<InvoicesDetails> getAllInvoicesForCustIds(List<String> custCodesList, Date fromDate, Date tillDate)
 			throws ClassNotFoundException, SQLException, ParseException {
 
 		DateFormat dfYYYYMMDD = new SimpleDateFormat("yyyyMMdd");
@@ -1293,16 +1304,23 @@ public class CustomersServiceImpl implements CustomersService {
 
 		String tillDateFormatted = dfYYYYMMDD.format(tillDate);
 
-		Calendar cal = Calendar.getInstance();
+		String fromDateFormatted = "";
+		if (fromDate == null) {
+			Calendar cal = Calendar.getInstance();
 
-		int currentMonth = cal.get(Calendar.MONTH);
-		if (currentMonth < 3)
-			cal.add(Calendar.YEAR, -1);
-		cal.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
-		cal.set(Calendar.MONTH, Calendar.APRIL);
-		cal.set(Calendar.DAY_OF_MONTH, 1);
+			// TODO: Set To And Till Date from UI absed on the Financial Year Selection
+//		int currentMonth = cal.get(Calendar.MONTH);
+//		if (currentMonth < 3)
+//			cal.add(Calendar.YEAR, -1);
+			cal.setTimeZone(TimeZone.getTimeZone(Constants.IST_TIMEZONE));
+			cal.set(Calendar.DAY_OF_MONTH, 1);
+			cal.set(Calendar.MONTH, Calendar.APRIL);
+			cal.set(Calendar.YEAR, 2019);
 
-		String fromDateFormatted = dfYYYYMMDD.format(cal.getTime());
+			fromDateFormatted = dfYYYYMMDD.format(cal.getTime());
+		} else {
+			fromDateFormatted = dfYYYYMMDD.format(fromDate);
+		}
 
 		String custCodesCommaSeparated = "";
 		int custCodesListSize = custCodesList.size();

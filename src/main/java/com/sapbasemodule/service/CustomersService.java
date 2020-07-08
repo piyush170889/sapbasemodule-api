@@ -36,7 +36,8 @@ public interface CustomersService {
 	BaseWrapper doGetCustomersAllInvoices(String custCode, String tillDate)
 			throws ClassNotFoundException, SQLException, ParseException;
 
-	BaseWrapper doGetCustomerDataForSync() throws ClassNotFoundException, SQLException, ParseException;
+	BaseWrapper doGetCustomerDataForSync(String startDate, String endDate)
+			throws ClassNotFoundException, SQLException, ParseException;
 
 	BaseWrapper doSaveInvoiceAcknowledgement(int invoiceNo,
 			InvoicesAcknowledgementDetails invoiceAcknowledgementDetails);
