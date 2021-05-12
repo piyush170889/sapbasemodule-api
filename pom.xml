@@ -12,7 +12,7 @@
 
 	<properties>
 		<springframework.version>4.3.1.RELEASE</springframework.version>
-		<springsecurity.version>4.1.1.RELEASE</springsecurity.version>
+		<springsecurity.version>5.2.10.RELEASE</springsecurity.version>
 		<servlet.version>3.1.0</servlet.version>
 		<jsp.version>2.3.1</jsp.version>
 		<jstl.version>1.2</jstl.version>
